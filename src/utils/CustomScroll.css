@@ -1,0 +1,55 @@
+/* Thin scrollbar for WebKit browsers (Chrome, Safari, Edge) */
+.chat-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-scroll::-webkit-scrollbar-thumb {
+  background-color: #a0aec0;
+  border-radius: 10px;
+  transition: background 0.3s;
+  opacity: 0; /* hide by default */
+}
+
+/* Show thumb only on hover/scroll */
+.chat-scroll:hover::-webkit-scrollbar-thumb {
+  opacity: 1;
+}
+
+/* Firefox */
+.chat-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #a0aec0 transparent;
+}
+
+.custom-scroll {
+  overflow-y: auto;
+  padding-right: 0.01rem; /* pr-1 equivalent */
+  scrollbar-gutter: stable; /* Prevent layout shift when scrollbar appears */
+}
+
+/* Hide scrollbar by default (for WebKit browsers like Chrome, Safari) */
+.custom-scroll::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+/* Show scrollbar on hover or while scrolling */
+.custom-scroll:hover::-webkit-scrollbar,
+.custom-scroll:active::-webkit-scrollbar {
+  width: 3px;
+}
+
+/* Scrollbar thumb (the handle) */
+.custom-scroll::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 10px;
+}
+
+/* Scrollbar track (the background) */
+.custom-scroll::-webkit-scrollbar-track {
+  background-color: #f0f0f0;
+}
