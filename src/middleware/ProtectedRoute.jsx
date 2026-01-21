@@ -4,9 +4,12 @@ import { Navigate } from "react-router-dom";
 
 const ProtectedRoute = ({ children, role }) => {
   const asCompany = localStorage.getItem("asCompany");
-  const asManager = localStorage.getItem("asManager");
+  const asOEMSupervisor = localStorage.getItem("asOEMSupervisor");
+  const asTechnician = localStorage.getItem("asTechnician");
+  const asPlantSupervisor = localStorage.getItem("asPlantSupervisor");
+
   // Redirect if no user logged in
-  if (!asCompany && !asManager) {
+  if (!asCompany && !asOEMSupervisor && !asTechnician && !asPlantSupervisor) {
     return <Navigate to="/" replace />;
   }
 
@@ -15,7 +18,15 @@ const ProtectedRoute = ({ children, role }) => {
     return <Navigate to="/" replace />;
   }
 
-  if (role === "manager" && !asManager) {
+  if (role === "oemsupervisor" && !asOEMSupervisor) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (role === "technician" && !asTechnician) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (role === "plantSupervisor" && !asPlantSupervisor) {
     return <Navigate to="/" replace />;
   }
 

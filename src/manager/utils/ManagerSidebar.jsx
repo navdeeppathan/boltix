@@ -8,6 +8,8 @@ import {
   FaBell,
   FaUserCog,
   FaSignOutAlt,
+  FaBoxes,
+  FaUsers,
 } from "react-icons/fa";
 const ManagerSidebar = ({ isOpen, setIsOpen }) => {
   const linkClasses =
@@ -51,9 +53,9 @@ const ManagerSidebar = ({ isOpen, setIsOpen }) => {
             }
             onClick={() => setIsOpen(false)}
           >
-            <FaTicketAlt /> My Inquiries
+            <FaTicketAlt /> My Tickets
           </NavLink>
-          <NavLink
+          {/* <NavLink
             to="/manager/dashboard/communication"
             className={({ isActive }) =>
               isActive ? `${linkClasses} ${activeClasses}` : linkClasses
@@ -61,7 +63,7 @@ const ManagerSidebar = ({ isOpen, setIsOpen }) => {
             onClick={() => setIsOpen(false)}
           >
             <FaComments /> Communication
-          </NavLink>
+          </NavLink> */}
           <NavLink
             to="/manager/dashboard/notifications"
             className={({ isActive }) =>
@@ -73,13 +75,24 @@ const ManagerSidebar = ({ isOpen, setIsOpen }) => {
           </NavLink>
 
           <NavLink
-            to="/manager/dashboard/ticket-stages"
+            to="/manager/dashboard/manage-products"
             className={({ isActive }) =>
               isActive ? `${linkClasses} ${activeClasses}` : linkClasses
             }
             onClick={() => setIsOpen(false)}
           >
-            <FaUserCog /> Ticket Stages
+            <FaBoxes />
+            Manage Products
+          </NavLink>
+
+          <NavLink
+            to="/manager/dashboard/users-list"
+            className={({ isActive }) =>
+              isActive ? `${linkClasses} ${activeClasses}` : linkClasses
+            }
+            onClick={() => setIsOpen(false)}
+          >
+            <FaUsers /> Users
           </NavLink>
 
           <NavLink

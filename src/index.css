@@ -1,4 +1,5 @@
 @import "tailwindcss";
+/* Apply Poppins to entire project */
 body {
-  font-family: "Mulish", sans-serif;
+  font-family: "Poppins", sans-serif;
 }

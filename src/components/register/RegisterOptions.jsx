@@ -176,7 +176,7 @@ const RegisterOptions = () => {
                 className="w-[64px] h-[64px]"
               />
               <h2 className="text-lg sm:text-xl md:text-[24px] font-bold">
-                Register as a OEMs, Supplier
+                Register as a OEM/Service Provider
               </h2>
             </div>
             <ol className="space-y-4 text-sm sm:text-base leading-relaxed">
@@ -205,12 +205,6 @@ const RegisterOptions = () => {
         </div>
       </section>
 
-      {/* Conditionally render the selected form */}
-      {/* {selectedForm === "plant" ? (
-        <PlantRegistrationForm />
-      ) : (
-        <SupplierRegistrationForm />
-      )} */}
       {loading ? (
         <div className="flex justify-center items-center py-12">
           <RotatingLines
@@ -238,13 +232,16 @@ const PlantRegistrationForm = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     company_name: "",
-    role_id: 1,
+    role_id: 6,
     plant_name: "",
     location_country: "",
     contact_name: "",
     mobile_number: "",
     email: "",
     designation: "",
+    approval_level: "",
+    parent_id: null,
+    plant_location: "",
   });
 
   const [countries, setCountries] = useState([]);
@@ -271,6 +268,25 @@ const PlantRegistrationForm = () => {
     fetchCountries();
   }, []);
 
+  const [app_level, setApp_level] = useState([]);
+
+  useEffect(() => {
+    const fetchPriorities = async () => {
+      try {
+        const response = await http.get("/approval-levels");
+        const options = response.data?.data.map((item) => ({
+          label: item.name,
+          value: item.id, //  use name as the value
+        }));
+        setApp_level(options);
+      } catch (error) {
+        console.error("Error fetching priorities:", error);
+      }
+    };
+
+    fetchPriorities();
+  }, []);
+
   //  Input change
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -286,10 +302,26 @@ const PlantRegistrationForm = () => {
     setErrors((prev) => ({ ...prev, location_country: "" }));
   };
 
+  const handlePlantCountryChange = (selectedOption) => {
+    setFormData((prev) => ({
+      ...prev,
+      plant_location: selectedOption ? selectedOption.value : "",
+    }));
+    setErrors((prev) => ({ ...prev, plant_location: "" }));
+  };
+
+  const handleApprovalChange = (selectedOption) => {
+    setFormData({
+      ...formData,
+      approval_level: selectedOption ? selectedOption.value : "",
+    });
+    setErrors((prev) => ({ ...prev, approval_level: "" }));
+  };
   //  Validation before submit
   const validateForm = () => {
     const newErrors = {};
     Object.keys(formData).forEach((key) => {
+      if (key === "parent_id") return;
       if (!formData[key]) {
         newErrors[key] = "This field is required";
       }
@@ -406,7 +438,7 @@ const PlantRegistrationForm = () => {
             {/* Location Country */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Location Country
+                Company location country
               </label>
               <Select
                 options={countries}
@@ -432,6 +464,47 @@ const PlantRegistrationForm = () => {
                     boxShadow: "none",
                     "&:hover": {
                       borderColor: errors.location_country ? "red" : "#207EB1",
+                    },
+                  }),
+                }}
+                components={{
+                  IndicatorSeparator: () => null,
+                }}
+              />
+              {errors.location_country && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.location_country}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Plant location country(if diff from company)
+              </label>
+              <Select
+                options={countries}
+                isLoading={loadingCountries}
+                value={
+                  formData.plant_location
+                    ? {
+                        value: formData.plant_location,
+                        label: formData.plant_location,
+                      }
+                    : null
+                }
+                onChange={handlePlantCountryChange}
+                placeholder="Select country"
+                isClearable
+                isSearchable
+                classNamePrefix="react-select"
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    borderRadius: "10px",
+                    borderColor: errors.plant_location ? "red" : "#D9D4C6",
+                    boxShadow: "none",
+                    "&:hover": {
+                      borderColor: errors.plant_location ? "red" : "#207EB1",
                     },
                   }),
                 }}
@@ -482,6 +555,46 @@ const PlantRegistrationForm = () => {
               onChange={handleChange}
               error={errors.designation}
             />
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Approval Level
+              </label>
+              <Select
+                options={app_level}
+                isLoading={app_level.length === 0}
+                value={
+                  app_level.find(
+                    (opt) => opt.value === formData.approval_level,
+                  ) || null
+                }
+                onChange={handleApprovalChange}
+                placeholder="Select level of approval"
+                isClearable
+                isSearchable
+                classNamePrefix="react-select"
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    borderRadius: "10px",
+                    borderColor: errors.approval_level ? "red" : "#D9D4C6",
+                    boxShadow: "none",
+                    "&:hover": {
+                      borderColor: errors.approval_level ? "red" : "#207EB1",
+                    },
+                  }),
+                }}
+                components={{
+                  IndicatorSeparator: () => null,
+                }}
+              />
+
+              {errors.approval_level && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.approval_level}
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="flex justify-start mt-8">
@@ -511,7 +624,7 @@ const PlantRegistrationForm = () => {
   );
 };
 
-// ✅ Reusable Input Component
+// Reusable Input Component
 const InputField = ({ label, name, type = "text", value, onChange, error }) => (
   <div>
     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -548,6 +661,9 @@ const SupplierRegistrationForm = () => {
     mobile_number: "",
     product_category: "",
     website_link: "",
+    parent_id: null,
+    regional_off_add: "",
+    office_number: "",
   });
 
   const [countries, setCountries] = useState([]);
@@ -555,7 +671,7 @@ const SupplierRegistrationForm = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
-  // ✅ Fetch countries
+  // Fetch countries
   useEffect(() => {
     const fetchCountries = async () => {
       try {
@@ -578,11 +694,11 @@ const SupplierRegistrationForm = () => {
     { value: "Manufacturer", label: "Manufacturer" },
     { value: "Service Provider", label: "Service Provider" },
   ];
-  // ✅ Input change handler
+  //  Input change handler
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  // ✅ Country select handler
+  //  Country select handler
   const handleCountryChange = (selectedOption) => {
     setFormData({
       ...formData,
@@ -599,7 +715,7 @@ const SupplierRegistrationForm = () => {
     setErrors((prev) => ({ ...prev, business_type: "" }));
   };
 
-  // ✅ Validation logic
+  //  Validation logic
   const validateForm = () => {
     const newErrors = {};
 
@@ -630,7 +746,7 @@ const SupplierRegistrationForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // ✅ Submit form
+  //  Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -700,7 +816,7 @@ const SupplierRegistrationForm = () => {
       {/* Content */}
       <div className="relative z-10 w-full flex flex-col items-center p-6 sm:p-10">
         <h2 className="text-2xl sm:text-3xl md:text-[48px] font-bold text-[#212529] text-center">
-          OEMs, Supplier Registration Form
+          OEM/Service Provider Registration Form
         </h2>
         <p className="mt-2 text-sm sm:text-base md:text-[24px] font-normal text-[#212529] text-center">
           Once registered, a link will be sent to access your profile dashboard.
@@ -712,7 +828,7 @@ const SupplierRegistrationForm = () => {
         >
           {/* Company Information Section */}
           <h2 className="text-lg font-semibold text-[#212529] mb-4">
-            Company Information
+            OEM/Company Information
           </h2>
 
           <div className="grid md:grid-cols-2 gap-4">
@@ -772,6 +888,14 @@ const SupplierRegistrationForm = () => {
               value={formData.head_office_address}
               onChange={handleChange}
               error={errors.head_office_address}
+            />
+
+            <InputFieldSupplier
+              label="Regional office address(if any) "
+              name="regional_off_add"
+              value={formData.regional_off_add}
+              onChange={handleChange}
+              error={errors.regional_off_add}
             />
 
             {/* Country Select */}
@@ -863,9 +987,20 @@ const SupplierRegistrationForm = () => {
               }}
               error={errors.mobile_number}
             />
+            <InputFieldSupplier
+              label="Office Telephone Number"
+              name="office_number"
+              type="tel"
+              value={formData.office_number}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, "");
+                setFormData({ ...formData, office_number: value });
+              }}
+              error={errors.office_number}
+            />
 
             <InputFieldSupplier
-              label="Product Category"
+              label="Company products and services"
               name="product_category"
               value={formData.product_category}
               onChange={handleChange}
@@ -881,7 +1016,6 @@ const SupplierRegistrationForm = () => {
             />
           </div>
 
-          {/* Submit Button */}
           <div className="flex justify-start mt-8">
             <button
               type="submit"
@@ -896,6 +1030,7 @@ const SupplierRegistrationForm = () => {
                   strokeWidth="5"
                   animationDuration="0.75"
                   width="20"
+                  height={20}
                   visible={true}
                 />
               )}
@@ -908,7 +1043,7 @@ const SupplierRegistrationForm = () => {
   );
 };
 
-// ✅ Reusable Input Component
+// Reusable Input Component
 const InputFieldSupplier = ({
   label,
   name,

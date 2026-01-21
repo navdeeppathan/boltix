@@ -1,7 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
-import { Route, Routes, Navigate, useLocation } from "react-router-dom";
+import {
+  Route,
+  Routes,
+  Navigate,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import DashboardPage from "./DashboardPage";
 import CommunicationPage from "./CommunicationPage";
 import NotificationsPage from "./NotificationsPage";
@@ -14,9 +20,20 @@ import TicketDetails from "./TicketDetails";
 import http from "../service/http";
 import { CircularProgress } from "@mui/material";
 import { RotatingLines } from "react-loader-spinner";
+import { Pending } from "@mui/icons-material";
+import PendingApproval from "./PendingApproval";
+import PendingTicketTable from "./PendingTicketTable";
+import ClosedTicketTable from "./ClosedTicketTable";
+import ReturnedTicketTable from "./ReturnedTicketTable";
+import RejectedTicketTable from "./RejectedTicketTable";
+import EditTicket from "./EditTicket";
+import ApprovedTicketTable from "./ApprovedTicketTable";
 
 const UserCard = () => {
   const [userData, setUserData] = useState(null);
+
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedData = localStorage.getItem("userData");
@@ -49,12 +66,36 @@ const UserCard = () => {
 
       <button
         onClick={() => {
+          setLoading(true);
           localStorage.clear();
-          window.location.reload();
+          setTimeout(() => {
+            navigate("/");
+          }, 2000);
         }}
-        className="mt-10 px-4 py-2 bg-[#D9D9D9]/20 rounded-[30px] flex items-center text-[16px] font-semibold justify-center gap-2 text-[#212529] hover:bg-gray-200 transition text-sm"
+        disabled={loading}
+        className="mt-10 px-4 py-2 bg-[#D9D9D9]/20 rounded-[30px] flex items-center justify-center gap-2 text-[16px] font-semibold text-[#212529] hover:bg-gray-200 transition text-sm h-[44px]" // 👈 fixed height added
       >
-        <FaSignOutAlt className="text-gray-600" /> Logout
+        <div className="flex items-center justify-center gap-2">
+          {loading ? (
+            <>
+              <div className="flex items-center justify-center w-[20px] h-[20px]">
+                <RotatingLines
+                  strokeColor="#1E1E1E"
+                  strokeWidth="5"
+                  animationDuration="0.75"
+                  width="20"
+                  visible={true}
+                />
+              </div>
+              <span>Logging out...</span>
+            </>
+          ) : (
+            <>
+              <FaSignOutAlt className="text-gray-600" />
+              <span>Logout</span>
+            </>
+          )}
+        </div>
       </button>
     </div>
   );
@@ -74,6 +115,7 @@ const Dashboard = () => {
     else if (path.includes("notifications")) setTitle("Notifications");
     else if (path.includes("profile")) setTitle("Profile");
     else if (path.includes("ticket-details")) setTitle("Ticket Details");
+    else if (path.includes("pending-approval")) setTitle("Pending Approval");
     else setTitle("Dashboard");
   }, [location]);
 
@@ -151,10 +193,31 @@ const Dashboard = () => {
                 <Route path="tickets" element={<TicketTable />} />
                 <Route path="communication" element={<CommunicationPage />} />
                 <Route path="notifications" element={<NotificationsPage />} />
+                <Route path="edit/:id" element={<EditTicket />} />
 
                 <Route path="create-ticket" element={<TicketCreation />} />
                 <Route path="plant-profile" element={<PlantProfile />} />
                 <Route path="ticket-details/:id" element={<TicketDetails />} />
+                <Route path="pending-approval" element={<PendingApproval />} />
+                <Route path="closed-tickets" element={<ClosedTicketTable />} />
+                <Route
+                  path="approved-tickets"
+                  element={<ApprovedTicketTable />}
+                />
+
+                <Route
+                  path="returned-tickets"
+                  element={<ReturnedTicketTable />}
+                />
+                <Route
+                  path="rejected-tickets"
+                  element={<RejectedTicketTable />}
+                />
+
+                <Route
+                  path="pending-tickets"
+                  element={<PendingTicketTable />}
+                />
 
                 <Route path="*" element={<Navigate to="home" replace />} />
               </Routes>
@@ -163,14 +226,14 @@ const Dashboard = () => {
             {/* Right: User Info & Messages (20%) */}
             <div className="w-full lg:w-[20%] space-y-6">
               <UserCard />
-              <div className="bg-[#F9F9F9] rounded-xl shadow-sm p-4">
+              {/* <div className="bg-[#F9F9F9] rounded-xl shadow-sm p-4">
                 <h4 className="font-semibold text-[#212529] mb-3">
                   Recent Messages
                 </h4>
                 <div className="space-y-3">
                   {loading ? (
                     <div className="flex justify-center py-4">
-                      {/* <CircularProgress size={20} color="inherit" /> */}
+                     
                       <RotatingLines
                         strokeColor="#1E1E1E"
                         strokeWidth="5"
@@ -200,15 +263,13 @@ const Dashboard = () => {
                           <span>
                             {new Date(msg.date_time).toLocaleTimeString()}
                           </span>
-                          {/* <button className="text-[#007BFF] hover:underline">
-                            Reply
-                          </button> */}
+                         
                         </div>
                       </div>
                     ))
                   )}
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         </main>

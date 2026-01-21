@@ -1,9 +1,29 @@
 // PricingSection.jsx
 import React, { useState } from "react";
 import { FaCheck } from "react-icons/fa";
+import { motion } from "framer-motion";
+
+const containerVariant = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.25 },
+  },
+};
+
+const cardVariant = {
+  hidden: { opacity: 0, y: 60, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.7, ease: "easeOut" },
+  },
+};
 
 const PricingSection = () => {
   const [activeIndex, setActiveIndex] = useState(0);
+
   const plans = [
     {
       title: "BASIC",
@@ -35,39 +55,63 @@ const PricingSection = () => {
           value: "Unlimited",
         },
       ],
-      buttonColor: "bg-[#FFFFFF] text-gray-800 hover:bg-gray-300",
+      buttonColor: "bg-white text-gray-800 hover:bg-gray-300",
       popular: false,
     },
   ];
 
   return (
-    <section className="bg-[#FAF9F6] py-16 px-4 sm:px-6 lg:px-32">
+    <section className="bg-[#FAF9F6] py-16 px-4 sm:px-6 lg:px-32 overflow-hidden">
       {/* Heading */}
-      <div className="text-center mb-12">
+      <motion.div
+        initial={{ opacity: 0, y: -40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, ease: "easeOut" }}
+        viewport={{ once: true }}
+        className="text-center mb-12"
+      >
         <h2 className="text-2xl sm:text-3xl md:text-[48.65px] font-bold text-[#212529]">
           Simple Pricing
         </h2>
         <p className="mt-2 text-sm sm:text-base md:text-[24px] font-normal text-[#212529]">
           Choose the plan that fits your needs
         </p>
-      </div>
+      </motion.div>
 
       {/* Pricing Cards */}
-      <div className="grid gap-6 md:grid-cols-2  mx-auto">
+      <motion.div
+        variants={containerVariant}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        className="grid gap-6 md:grid-cols-2 mx-auto"
+      >
         {plans.map((plan, idx) => (
-          <div
+          <motion.div
             key={idx}
+            variants={cardVariant}
             onClick={() => setActiveIndex(idx)}
-            className={`${
-              activeIndex === idx ? "bg-[#FFFFFF]" : "bg-[#F4F2ED]"
-            } rounded-xl shadow-md p-6 relative flex flex-col`}
+            whileHover={{
+              y: -12,
+              boxShadow: "0px 25px 60px rgba(0,0,0,0.15)",
+            }}
+            animate={activeIndex === idx ? { scale: 1.03 } : { scale: 1 }}
+            transition={{ duration: 0.4 }}
+            className={`relative rounded-xl p-6 flex flex-col cursor-pointer ${
+              activeIndex === idx ? "bg-white" : "bg-[#F4F2ED]"
+            }`}
           >
-            {/* Most Popular Tag */}
+            {/* Popular Badge */}
             {plan.popular && (
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#212529] text-[#FAF9F6] text-xs md:text-[16px] font-bold px-4 py-2 rounded-full flex items-center gap-3">
-                <img src="/king.png" alt="" className="w-[27px] h-[27px]" />{" "}
+              <motion.div
+                initial={{ scale: 0, y: -20 }}
+                animate={{ scale: 1, y: 0 }}
+                transition={{ type: "spring", stiffness: 200 }}
+                className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#212529] text-[#FAF9F6] text-xs md:text-[16px] font-bold px-4 py-2 rounded-full flex items-center gap-3"
+              >
+                <img src="/king.png" alt="" className="w-[27px] h-[27px]" />
                 MOST POPULAR
-              </div>
+              </motion.div>
             )}
 
             {/* Title */}
@@ -79,34 +123,39 @@ const PricingSection = () => {
             <div className="text-center mt-4">
               <p className="text-3xl md:text-[48px] font-bold text-[#212529]">
                 {plan.price}
-                <span className="text-base md:text-[32px] font-bold text-[#666E75]">
+                <span className="text-base md:text-[32px] text-[#666E75]">
                   {" "}
                   /mo
                 </span>
               </p>
-              <div className="flex items-center justify-center gap-2 mt-2">
-                <span className="line-through text-[#212529] md:text-[24px] font-normal text-sm">
+              <div className="flex justify-center gap-2 mt-2">
+                <span className="line-through md:text-[24px] text-sm">
                   {plan.oldPrice}
                 </span>
-                <span className="text-[#F75200] md:text-[15px] bg-[#FAF9F6] px-2 py-1 flex items-center justify-center rounded-[8px] font-bold text-sm">
+                <span className="text-[#F75200] bg-[#FAF9F6] px-2 py-1 rounded-[8px] font-bold text-sm">
                   {plan.save}
                 </span>
               </div>
             </div>
 
             {/* CTA */}
-            <button
-              className={`${plan.buttonColor} mt-6 py-2 px-6 rounded-[10px] md:text-[24px] font-bold text-[#FFFFFF]`}
+            <motion.button
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.95 }}
+              className={`${plan.buttonColor} mt-6 py-2 px-6 rounded-[10px] md:text-[24px] font-bold text-white`}
             >
               START NOW
-            </button>
+            </motion.button>
 
             {/* Features */}
             <ul className="mt-6 space-y-3 flex-1">
               {plan.features.map((feature, i) => (
-                <li
+                <motion.li
                   key={i}
-                  className="flex justify-between items-center text-[#212529] text-sm md:text-[20px] font-bold border-b border-dotted border-gray-300 pb-1"
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="flex justify-between items-center text-sm md:text-[20px] font-bold border-b border-dotted pb-1"
                 >
                   <div className="flex items-center gap-2">
                     <div className="bg-[#FAF9F6] w-[27px] h-[27px] flex items-center justify-center">
@@ -114,28 +163,26 @@ const PricingSection = () => {
                     </div>
                     {feature.label}
                   </div>
-                  <span className="">{feature.value}</span>
-                </li>
+                  <span>{feature.value}</span>
+                </motion.li>
               ))}
             </ul>
 
-            <div className="flex items-center mt-8 justify-center">
-              <div className="bg-[#C2C2C2] w-[248px]   h-[1px] rounded animate-pulse" />
+            {/* Divider */}
+            <div className="flex justify-center mt-8">
+              <div className="bg-[#C2C2C2] w-[248px] h-[1px] animate-pulse" />
             </div>
 
-            {/* 3-step process */}
+            {/* Steps */}
             <div className="mt-6 text-center">
-              <p className="text-sm text-[#212529] md:text-[20px] font-bold mb-2">
-                3-Step Process
-              </p>
-              <p className="text-xs text-[#212529] md:text-[20px] font-medium flex justify-center gap-2">
-                <span>Purchase</span> → <span>Register</span> →{" "}
-                <span>Start</span>
+              <p className="md:text-[20px] font-bold">3-Step Process</p>
+              <p className="md:text-[20px] font-medium">
+                Purchase → Register → Start
               </p>
             </div>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </section>
   );
 };

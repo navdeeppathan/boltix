@@ -7,7 +7,7 @@ import http from "../../service/http";
 import { RotatingLines } from "react-loader-spinner";
 
 const statusOptions = [
-  { value: "new", label: "New" },
+  { value: "New", label: "New" },
   { value: "inProgress", label: "In Progress" },
   { value: "completed", label: "Completed" },
 ];
@@ -142,7 +142,11 @@ const ManagerTicketListUpStages = () => {
               {ticket?.ticket_title || "Untitled Ticket"}
             </h3>
             <p className="text-gray-600 mb-3">
-              {ticket?.description || "No description provided."}
+              {ticket.description
+                ?.replace(/<[^>]+>/g, "") // remove HTML tags
+                .split(" ")
+                .slice(0, 10)
+                .join(" ") + "..." || "No description provided."}
             </p>
 
             <div>

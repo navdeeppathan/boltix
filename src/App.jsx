@@ -16,6 +16,12 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Terms from "./utils/Terms";
 import Contact from "./utils/Contact";
+import TechnicianDashboard from "./Technician/TechnicianDashboard";
+import PlantDashboard from "./PlantSupervisor/pages/PlantDashboard";
+import VideoCallUser from "../videocall/VideoCallUser";
+import VideoCallSupplier from "../videocall/VideoCallSupplier";
+import VoiceCallUser from "../videocall/VoiceCallUser";
+
 const App = () => {
   return (
     <BrowserRouter>
@@ -49,6 +55,17 @@ const App = () => {
           }
         />
         <Route
+          path="/video-user/:name/:ticketId/:userId"
+          element={<VideoCallUser />}
+        />
+
+        <Route path="/voice-call" element={<VoiceCallUser />} />
+        <Route
+          path="/video-supplier/:name/:ticketId/:userId"
+          element={<VideoCallSupplier />}
+        />
+
+        <Route
           path="/dashboard/*"
           element={
             <ProtectedRoute role="company">
@@ -59,12 +76,29 @@ const App = () => {
         <Route
           path="/manager/dashboard/*"
           element={
-            <ProtectedRoute role="manager">
+            <ProtectedRoute role="oemsupervisor">
               <ManagerDashboard />
             </ProtectedRoute>
           }
         />
-        <Route path="/about-us" element={<AboutUs />} />
+        <Route
+          path="/plant-supervisor/dashboard/*"
+          element={
+            <ProtectedRoute role="plantSupervisor">
+              <PlantDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/technician/dashboard/*"
+          element={
+            <ProtectedRoute role="technician">
+              <TechnicianDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/about" element={<AboutUs />} />
         <Route path="/process" element={<ServiceProcess />} />
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/contact" element={<ContactForm />} />

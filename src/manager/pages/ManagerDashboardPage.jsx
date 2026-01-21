@@ -18,6 +18,7 @@ import { baseURL } from "../../service/api";
 import TicketTable from "../../pages/TicketTable";
 import Select from "react-select";
 import ManagerTicketTable from "./ManagerTicketTable";
+import { useNavigate } from "react-router-dom";
 const ManagerDashboardPage = () => {
   return (
     <div className="bg-[#FFFFFF] space-y-6">
@@ -30,6 +31,7 @@ const ManagerDashboardPage = () => {
 export default ManagerDashboardPage;
 
 const DashboardStatus = () => {
+  const navigate = useNavigate();
   // const stats = [
   //   {
   //     label: "New Inquiries",
@@ -65,6 +67,8 @@ const DashboardStatus = () => {
   //   },
   // ];
 
+  const user = JSON.parse(localStorage.getItem("userData"));
+
   const options = [
     { value: "daily", label: "Daily" },
     { value: "weekly", label: "Weekly" },
@@ -76,42 +80,54 @@ const DashboardStatus = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await http.get("/tickets/summary"); // Laravel endpoint
+        const res = await http.get(`/oem/tickets/summary/${user.id}`); // Laravel endpoint
         if (res.data.status) {
           const d = res.data.data;
+          const user = JSON.parse(localStorage.getItem("userData")); // example
+          const isManager = user?.role_id === 2;
 
           setStats([
             {
-              label: "New Inquiries",
-              value: d.new_inquiries,
+              label: "New Tickets",
+              value: d.new,
               icon: "/message.png",
               color: "bg-[#DC2776]",
+              link: "/manager/dashboard/tickets?query=new",
             },
             {
-              label: "In Progress Inquiries",
-              value: d.in_progress_inquiries,
+              label: "Open Tickets",
+              value: d.open,
               icon: "/h2.png",
               color: "bg-[#9532E9]",
             },
             {
-              label: "Priority Inquiries",
-              value: d.priority_inquiries,
-              icon: "/h3.png",
-              color: "bg-[#EA2179]",
+              label: "Not Acknowledged Tickets",
+              value: d.not_acknowledged,
+              icon: "/h2.png",
+              color: "bg-[#9532E9]",
             },
             {
-              label: "Completed Inquiries",
-              value: d.completed_inquiries,
+              label: "Total Tickets",
+              value: d.total,
+              icon: "/h3.png",
+              color: "bg-[#EA2179]",
+              link: "/manager/dashboard/tickets",
+            },
+            {
+              label: "Closed Tickets",
+              value: d.closed,
               icon: "/file.png",
               color: "bg-[#2466EB]",
+              link: "/manager/dashboard/tickets?query=completed",
             },
             {
               label: "Products & Categories",
               value: d.products_categories,
               icon: "/setting.png",
               color: "bg-[#E11279]",
-              button: "Manage Products",
+              button: isManager ? "Manage Products" : "View Products",
               wide: true,
+              link: "/manager/dashboard/manage-products",
             },
           ]);
         }
@@ -131,7 +147,7 @@ const DashboardStatus = () => {
           <h2 className="text-base sm:text-lg md:text-xl lg:text-[16px] text-[#212529] font-bold">
             Current Status
           </h2>
-          <Select
+          {/* <Select
             options={options}
             defaultValue={options[0]}
             className="w-[100px] sm:w-[120px] text-sm font-medium"
@@ -180,14 +196,15 @@ const DashboardStatus = () => {
             components={{
               IndicatorSeparator: () => null, // remove divider line
             }}
-          />
+          /> */}
         </div>
 
         {/* Responsive Grid of Status Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-3 sm:gap-4">
           {stats.map((item, i) => (
             <div
               key={i}
+              onClick={() => navigate(item.link)}
               className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-3 sm:p-4 flex flex-col items-start justify-between text-start min-h-[120px] sm:min-h-[150px] ${
                 item.button ? "lg:col-span-2" : ""
               }`}
@@ -204,7 +221,12 @@ const DashboardStatus = () => {
                   />
                 </div>
                 {item.button && (
-                  <button className="text-[11px] sm:text-[12px] font-medium text-[#207EB1] border border-[#D5E5EF] bg-[#F8FBFC] px-3 py-2 rounded-lg hover:bg-[#E8F4FA] transition">
+                  <button
+                    onClick={() =>
+                      navigate("/manager/dashboard/manage-products")
+                    }
+                    className="text-[11px] sm:text-[12px] font-medium text-[#207EB1] border border-[#D5E5EF] bg-[#F8FBFC] px-3 py-2 rounded-lg hover:bg-[#E8F4FA] transition"
+                  >
                     {item.button}
                   </button>
                 )}

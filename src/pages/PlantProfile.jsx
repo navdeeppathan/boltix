@@ -10,6 +10,7 @@ import {
   Avatar,
   IconButton,
   CircularProgress,
+  Autocomplete,
 } from "@mui/material";
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import Swal from "sweetalert2";
@@ -37,22 +38,44 @@ export default function PlantProfile() {
   const [loading, setLoading] = useState(true);
   const progress = 70;
   // Keep it as is or calculate based on your logic
+  const fetchUser = async () => {
+    try {
+      setLoading(true);
+      const response = await http.get(`/users/profile/${userdata?.id}`); // your API route
+      if (response.data.status) {
+        console.log(response.data.data);
+        setUser(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching user:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const [countries, setCountries] = useState([]);
+  const [loadingCountries, setLoadingCountries] = useState(true);
+
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchCountries = async () => {
       try {
-        setLoading(true);
-        const response = await http.get(`/users/profile/${userdata?.id}`); // your API route
-        if (response.data.status) {
-          console.log(response.data.data);
-          setUser(response.data.data);
-        }
+        const res = await http.get("/countries");
+        const options = res.data?.data.map((c) => ({
+          label: c.name,
+          value: c.name,
+        }));
+        setCountries(options);
       } catch (error) {
-        console.error("Error fetching user:", error);
+        console.error("Error fetching countries:", error);
       } finally {
-        setLoading(false);
+        setLoadingCountries(false);
       }
     };
 
+    fetchCountries();
+  }, []);
+
+  useEffect(() => {
     fetchUser();
   }, [userdata?.id]);
   const [formData, setFormData] = useState({
@@ -71,6 +94,7 @@ export default function PlantProfile() {
     pref_oem_service: "",
     manufacturer_service: "",
     reporting_approver: "",
+    progress: 100,
   });
   const [open, setOpen] = useState(false);
 
@@ -92,6 +116,7 @@ export default function PlantProfile() {
         pref_oem_service: user.company?.pref_oem_service || "",
         manufacturer_service: user.company?.manufacturer_service || "",
         reporting_approver: user.company?.reporting_approver || "",
+        progress: 100,
       });
     }
     setOpen(true);
@@ -105,7 +130,8 @@ export default function PlantProfile() {
   };
 
   const [loadingUpdate, setLoadingUpdate] = useState(false);
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setLoadingUpdate(true);
     try {
       const data = new FormData();
@@ -136,6 +162,8 @@ export default function PlantProfile() {
           timer: 2000,
           showConfirmButton: false,
         });
+        fetchUser();
+
         handleClose();
       } else {
         Swal.fire({
@@ -220,11 +248,11 @@ export default function PlantProfile() {
                 <div className="relative w-full bg-gray-100 rounded-full h-[3px] mt-2">
                   <div
                     className="bg-blue-500 h-[3px] rounded-full relative transition-all duration-500"
-                    style={{ width: `${progress}%` }}
+                    style={{ width: `${user?.company?.progress}%` }}
                   >
                     <div className="absolute -top-6 right-0 translate-x-1/2">
                       <div className="relative bg-white text-[#000000] text-[10px] sm:text-[11px] font-medium px-2 py-[1px] rounded-full shadow-sm border border-gray-200 whitespace-nowrap">
-                        {progress}% Completed
+                        {user?.company?.progress}% Completed
                         <div className="absolute left-1/2 -bottom-[4px] -translate-x-1/2 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[4px] border-t-white" />
                       </div>
                     </div>
@@ -240,13 +268,13 @@ export default function PlantProfile() {
             <div className="relative">
               <button className="absolute top-1 right-0 text-gray-500 hover:text-gray-700">
                 <img
-                  src="../../public/elements.png"
+                  src="/elements.png"
                   alt=""
                   className="w-[20px] h-[20px] object-contain"
                 />
               </button>
               <h2 className="text-lg font-semibold text-[#212529] mb-3">
-                Company Overview
+                Plant Overview
               </h2>
               <div className="grid sm:grid-cols-2 gap-y-2 text-[13px] text-[#212529]">
                 <p>
@@ -261,18 +289,18 @@ export default function PlantProfile() {
                   <span className="font-semibold">Employee Strength:</span>{" "}
                   {user?.company?.no_of_clients || "N/A"}
                 </p>
-                <p>
+                {/* <p>
                   <span className="font-semibold">Contact Email:</span>{" "}
                   {user?.email || "N/A"}
-                </p>
+                </p> */}
                 <p>
                   <span className="font-semibold">Primary Contact:</span>{" "}
                   {user?.full_name || "N/A"}
                 </p>
-                <p>
+                {/* <p>
                   <span className="font-semibold">Phone:</span>{" "}
                   {user?.mobile_number || "N/A"}
-                </p>
+                </p> */}
               </div>
             </div>
 
@@ -283,7 +311,7 @@ export default function PlantProfile() {
             <div className="relative">
               <button className="absolute top-1 right-0 text-gray-500 hover:text-gray-700">
                 <img
-                  src="../../public/elements.png"
+                  src="/elements.png"
                   alt=""
                   className="w-[20px] h-[20px] object-contain"
                 />
@@ -322,7 +350,7 @@ export default function PlantProfile() {
             <div className="relative">
               <button className="absolute top-1 right-0 text-gray-500 hover:text-gray-700">
                 <img
-                  src="../../public/elements.png"
+                  src="/elements.png"
                   alt=""
                   className="w-[20px] h-[20px] object-contain"
                 />
@@ -366,151 +394,197 @@ export default function PlantProfile() {
             Edit Profile
           </Typography>
           <Divider sx={{ mb: 3 }} />
-
-          {/* Top Fields */}
-          <Box
-            display="grid"
-            gridTemplateColumns={{ sm: "1fr 1fr" }}
-            gap={2}
-            mb={2}
-          >
-            <TextField
-              label="Full Name"
-              name="full_name"
-              value={formData.full_name}
-              onChange={handleChange}
-              fullWidth
-            />
-            <TextField
-              label="Contact Number"
-              name="mobile_number"
-              value={formData.mobile_number}
-              onChange={handleChange}
-              fullWidth
-            />
-          </Box>
-
-          {/* Company / Plant Fields */}
-          <Box
-            display="grid"
-            gridTemplateColumns={{ sm: "1fr 1fr" }}
-            gap={2}
-            mb={2}
-          >
-            <TextField
-              label="Email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              fullWidth
-            />
-            <TextField
-              label="Company Name"
-              name="company_name"
-              value={formData.company_name}
-              onChange={handleChange}
-              fullWidth
-            />
-            <TextField
-              label="Designation"
-              name="designation"
-              value={formData.designation}
-              onChange={handleChange}
-              fullWidth
-            />
-            <TextField
-              label="Industry Type"
-              name="business_type"
-              value={formData.business_type}
-              onChange={handleChange}
-              fullWidth
-            />
-            <TextField
-              label="Location Country"
-              name="location_country"
-              value={formData.location_country}
-              onChange={handleChange}
-              fullWidth
-            />
-            <TextField
-              label="No of Offices"
-              name="no_of_offices"
-              value={formData.no_of_offices}
-              onChange={handleChange}
-              fullWidth
-            />
-            <TextField
-              label="No of Clients"
-              name="no_of_clients"
-              value={formData.no_of_clients}
-              onChange={handleChange}
-              fullWidth
-            />
-            <TextField
-              label="No of Machinery"
-              name="no_of_machinery"
-              value={formData.no_of_machinery}
-              onChange={handleChange}
-              fullWidth
-            />
-            <TextField
-              label="Product Category"
-              name="product_category"
-              value={formData.product_category}
-              onChange={handleChange}
-              fullWidth
-            />
-            <TextField
-              label="Maintenance Frequency"
-              name="maintainance_freq"
-              value={formData.maintainance_freq}
-              onChange={handleChange}
-              fullWidth
-            />
-            <TextField
-              label="Preferred OEM Service"
-              name="pref_oem_service"
-              value={formData.pref_oem_service}
-              onChange={handleChange}
-              fullWidth
-            />
-            <TextField
-              label="Manufacturers Providing Service"
-              name="manufacturer_service"
-              value={formData.manufacturer_service}
-              onChange={handleChange}
-              fullWidth
-            />
-            <TextField
-              label="Reporting Approver"
-              name="reporting_approver"
-              value={formData.reporting_approver}
-              onChange={handleChange}
-              fullWidth
-            />
-          </Box>
-
-          {/* Actions */}
-          <Box display="flex" justifyContent="flex-end" gap={2}>
-            <Button onClick={handleClose} color="secondary" variant="outlined">
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              variant="contained"
-              color="primary"
-              disabled={loadingUpdate}
+          <form onSubmit={handleSubmit}>
+            {/* Top Fields */}
+            <Box
+              display="grid"
+              gridTemplateColumns={{ sm: "1fr 1fr" }}
+              gap={2}
+              mb={2}
             >
-              {loadingUpdate ? (
-                <>
-                  <CircularProgress size={24} color="inherit" />
-                  "Saving..."
-                </>
-              ) : (
-                "Save Changes"
-              )}
-            </Button>
-          </Box>
+              <TextField
+                label="Full Name"
+                name="full_name"
+                value={formData.full_name}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+              <TextField
+                label="Contact Number"
+                name="mobile_number"
+                value={formData.mobile_number}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+            </Box>
+
+            {/* Company / Plant Fields */}
+            <Box
+              display="grid"
+              gridTemplateColumns={{ sm: "1fr 1fr" }}
+              gap={2}
+              mb={2}
+            >
+              <TextField
+                label="Email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                fullWidth
+                disabled
+                required
+              />
+              <TextField
+                label="Company Name"
+                name="company_name"
+                value={formData.company_name}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+              <TextField
+                label="Designation"
+                name="designation"
+                value={formData.designation}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+              <TextField
+                label="Industry Type"
+                name="business_type"
+                value={formData.business_type}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+              {/* <TextField
+                label="Location Country"
+                name="location_country"
+                value={formData.location_country}
+                onChange={handleChange}
+                fullWidth
+                required
+              /> */}
+              <Autocomplete
+                options={countries}
+                loading={loadingCountries}
+                value={
+                  countries.find(
+                    (c) => c.value === formData.location_country
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    location_country: newValue ? newValue.value : "",
+                  }));
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Location Country"
+                    fullWidth
+                    required
+                  />
+                )}
+              />
+
+              <TextField
+                label="No of Offices"
+                name="no_of_offices"
+                value={formData.no_of_offices}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+              <TextField
+                label="No of Clients"
+                name="no_of_clients"
+                value={formData.no_of_clients}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+              <TextField
+                label="No of Machinery"
+                name="no_of_machinery"
+                value={formData.no_of_machinery}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+              <TextField
+                label="Product Category"
+                name="product_category"
+                value={formData.product_category}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+              <TextField
+                label="Maintenance Frequency"
+                name="maintainance_freq"
+                value={formData.maintainance_freq}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+              <TextField
+                label="Preferred OEM Service"
+                name="pref_oem_service"
+                value={formData.pref_oem_service}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+              <TextField
+                label="Manufacturers Providing Service"
+                name="manufacturer_service"
+                value={formData.manufacturer_service}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+              <TextField
+                label="Reporting Approver"
+                name="reporting_approver"
+                value={formData.reporting_approver}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+            </Box>
+
+            {/* Actions */}
+            <Box display="flex" justifyContent="flex-end" gap={2}>
+              <Button
+                onClick={handleClose}
+                color="secondary"
+                variant="outlined"
+              >
+                Cancel
+              </Button>
+              <Button
+                // onClick={handleSubmit}
+                type="submit"
+                variant="contained"
+                color="primary"
+                disabled={loadingUpdate}
+              >
+                {loadingUpdate ? (
+                  <>
+                    <CircularProgress size={24} color="inherit" />
+                    "Saving..."
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
+            </Box>
+          </form>
         </Box>
       </Modal>
     </>

@@ -240,23 +240,23 @@ export default function ManagerProfile() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const progress = 70;
-  // Keep it as is or calculate based on your logic
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        setLoading(true);
-        const response = await http.get(`/users/profile/${userdata?.id}`); // your API route
-        if (response.data.status) {
-          console.log(response.data.data);
-          setUser(response.data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Keep it as is or calculate based on your logic\
 
+  const fetchUser = async () => {
+    try {
+      setLoading(true);
+      const response = await http.get(`/users/profile/${userdata?.id}`); // your API route
+      if (response.data.status) {
+        console.log(response.data.data);
+        setUser(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching user:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
     fetchUser();
   }, [userdata?.id]);
   const [formData, setFormData] = useState({
@@ -275,6 +275,7 @@ export default function ManagerProfile() {
     pref_oem_service: "",
     manufacturer_service: "",
     reporting_approver: "",
+    progress: 100,
   });
   const [open, setOpen] = useState(false);
 
@@ -296,6 +297,7 @@ export default function ManagerProfile() {
         pref_oem_service: user.company?.pref_oem_service || "",
         manufacturer_service: user.company?.manufacturer_service || "",
         reporting_approver: user.company?.reporting_approver || "",
+        progress: 100,
       });
     }
     setOpen(true);
@@ -309,6 +311,7 @@ export default function ManagerProfile() {
   };
 
   const [loadingUpdate, setLoadingUpdate] = useState(false);
+
   const handleSubmit = async () => {
     setLoadingUpdate(true);
     try {
@@ -340,6 +343,8 @@ export default function ManagerProfile() {
           timer: 2000,
           showConfirmButton: false,
         });
+        fetchUser();
+
         handleClose();
       } else {
         Swal.fire({
@@ -424,11 +429,11 @@ export default function ManagerProfile() {
                 <div className="relative w-full bg-gray-100 rounded-full h-[3px] mt-2">
                   <div
                     className="bg-blue-500 h-[3px] rounded-full relative transition-all duration-500"
-                    style={{ width: `${progress}%` }}
+                    style={{ width: `${user?.company?.progress}%` }}
                   >
                     <div className="absolute -top-6 right-0 translate-x-1/2">
                       <div className="relative bg-white text-[#000000] text-[10px] sm:text-[11px] font-medium px-2 py-[1px] rounded-full shadow-sm border border-gray-200 whitespace-nowrap">
-                        {progress}% Completed
+                        {user?.company?.progress}% Completed
                         <div className="absolute left-1/2 -bottom-[4px] -translate-x-1/2 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[4px] border-t-white" />
                       </div>
                     </div>
@@ -444,7 +449,7 @@ export default function ManagerProfile() {
             <div className="relative">
               <button className="absolute top-1 right-0 text-gray-500 hover:text-gray-700">
                 <img
-                  src="../../public/elements.png"
+                  src="/elements.png"
                   alt=""
                   className="w-[20px] h-[20px] object-contain"
                 />
@@ -487,7 +492,7 @@ export default function ManagerProfile() {
             <div className="relative">
               <button className="absolute top-1 right-0 text-gray-500 hover:text-gray-700">
                 <img
-                  src="../../public/elements.png"
+                  src="/elements.png"
                   alt=""
                   className="w-[20px] h-[20px] object-contain"
                 />
@@ -526,7 +531,7 @@ export default function ManagerProfile() {
             <div className="relative">
               <button className="absolute top-1 right-0 text-gray-500 hover:text-gray-700">
                 <img
-                  src="../../public/elements.png"
+                  src="/elements.png"
                   alt=""
                   className="w-[20px] h-[20px] object-contain"
                 />
@@ -607,6 +612,7 @@ export default function ManagerProfile() {
               value={formData.email}
               onChange={handleChange}
               fullWidth
+              disabled
             />
             <TextField
               label="Company Name"

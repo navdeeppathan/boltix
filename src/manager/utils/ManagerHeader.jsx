@@ -32,21 +32,20 @@ const ManagerHeader = ({ setIsOpen, title }) => {
         >
           Notifications
         </button> */}
-        <NotificationsButton />
+        <button
+          // onClick={handleOpen}
+          onClick={() => navigate("/manager/dashboard/add-products")}
+          className="bg-[#0088FF] md:w-[126px] md:h-[35px]  md:text-[16px]  font-medium  text-[#FFFFFF] px-3 py-2 md:px-0 md:py-0 rounded-lg text-sm"
+        >
+          Add Product
+        </button>
+        {/* <NotificationsButton /> */}
         <button
           onClick={() => navigate("/manager/dashboard/profile")}
           className=" px-3 text-[#212529] md:text-[16px]  hover:text-[#0088FF] font-medium  py-2 rounded-lg text-sm"
         >
           Profile
         </button>
-        {/* <button
-          // onClick={handleOpen}
-          onClick={() => navigate("/dashboard/create-ticket")}
-          className="bg-[#0088FF] md:w-[126px] md:h-[35px]  md:text-[16px]  font-medium  text-[#FFFFFF] px-3 py-2 md:px-0 md:py-0 rounded-lg text-sm"
-        >
-          Create Ticket
-        </button> */}
-        {/* <CreateTicketModal open={open} handleClose={handleClose} /> */}
       </div>
     </div>
   );

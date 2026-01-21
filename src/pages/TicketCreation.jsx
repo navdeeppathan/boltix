@@ -6,6 +6,12 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Swal from "sweetalert2";
 import { RotatingLines } from "react-loader-spinner";
 import { useNavigate } from "react-router-dom";
+
+import { Editor } from "primereact/editor";
+import "primereact/resources/themes/lara-light-indigo/theme.css";
+import "primereact/resources/primereact.min.css";
+import "primeicons/primeicons.css";
+
 const TicketCreation = () => {
   const [step, setStep] = useState(1);
   const user = JSON.parse(localStorage.getItem("userData"));
@@ -15,46 +21,54 @@ const TicketCreation = () => {
     plant_name: "",
     category: "",
     ticket_title: "",
-    priority: "",
+    priority: null,
     department: "",
     issue_date: "",
     issue_time: "",
     description: "",
     service: "",
     equipment: "",
+    sub_equipment: "",
     model_number: "",
     service_description: "",
     serial_number: "",
-    manufacturer: "",
-    service_provider: "",
+    manufacturer: null,
+    service_provider: null,
     order_reference_number: "",
     service_contract_reference_number: "",
     manufacturer_contact: "",
-    service_provider_contact: "",
+    manufacturer_email: "",
+    service_contact_provider: "",
+    service_provider_email: "",
     service_breakdown: "",
     explanation_of_service_breakdown: "",
+
     need_product_installation_support: "",
     need_service_implementation_support: "",
     replacement: "",
     functional_and_process_information: "",
     response_mode: "",
     status: "",
-    photo: null,
+    // photo: null,
+    // ✅ MULTIPLE PHOTOS
+    photos: [],
     upload_document: null,
     response_time: "",
     resolution_time: "",
     escalation_time: "",
+    product_id: null,
+    parent_user_id: user.parent_id,
+    description_of_machine: "",
   });
 
   const navigate = useNavigate();
 
-  const steps = [
-    "Basic Information",
-    "Equipment Info",
-    "Service Information",
-    "Support",
-    "Define SLA",
-  ];
+  const steps =
+    formData.category?.value === "Machine Breakdown"
+      ? ["Basic Information", "Equipment Details", "Support"]
+      : formData.category?.value === "Service Breakdown"
+        ? ["Basic Information", "Service Details", "Support"]
+        : ["Basic Information", "Support"];
 
   const nextStep = () => {
     if (step < steps.length) setStep(step + 1);
@@ -63,48 +77,223 @@ const TicketCreation = () => {
     if (step > 1) setStep(step - 1);
   };
 
-  const categoryOptions = [
-    { value: "Machine Breakdown", label: "Machine Breakdown" },
-    { value: "Service Breakdown", label: "Service Breakdown" },
-  ];
+  const [categoryOptions, setCategories] = useState([]);
+  const [priorityOptions, setPriorities] = useState([]);
+  const [serviceOptions, setServices] = useState([]);
+  const [equipmentOptions, setEquipments] = useState([]);
+  const [manufacturerOptions, setManufacturers] = useState([]);
+  const [serviceProviderOptions, setServiceProviders] = useState([]);
+  const [orderOptions, setOrders] = useState([]);
+  const [serviceContractOptions, setServiceContracts] = useState([]);
+  const [statusOptions, setStatusOptions] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [responseModeOptions, setModes] = useState([]);
+  const [timeOptions, setTimeOptions] = useState([]);
 
-  const priorityOptions = [
-    { value: "critical", label: "Critical" },
-    { value: "high", label: "High" },
-    { value: "medium", label: "Medium" },
-    { value: "low", label: "Low" },
-  ];
+  useEffect(() => {
+    const now = new Date();
+    const currentDate = now.toISOString().split("T")[0]; // YYYY-MM-DD
+    const currentTime = now.toTimeString().split(" ")[0].slice(0, 5); // HH:MM
 
-  const serviceOptions = [
-    { value: "service", label: "Service" },
-    { value: "maintenance", label: "Maintenance" },
-    { value: "repair", label: "Repair" },
-  ];
+    setFormData((prev) => ({
+      ...prev,
+      issue_date: currentDate,
+      issue_time: currentTime,
+    }));
+  }, []);
 
-  const equipmentOptions = [
-    { value: "machineA", label: "Machine A" },
-    { value: "machineB", label: "Machine B" },
-  ];
+  const [data, setData] = useState([]);
 
-  const manufacturerOptions = [
-    { value: "manufacturerA", label: "Manufacturer A" },
-    { value: "manufacturerB", label: "Manufacturer B" },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [
+          catRes,
+          priRes,
+          servRes,
+          // equipRes,
+          manuRes,
+          provRes,
+          orderRes,
+          contractRes,
+          statusRes,
+          timeRes,
+          depRes,
+          modeRes,
+        ] = await Promise.all([
+          http.get("/categories"),
+          http.get("/priorities"),
+          http.get("/service-types"),
+          // http.get("/equipments"),
+          http.get("/users/manufacturers"),
+          http.get("/service-providers"),
+          http.get("/orders"),
+          http.get("/service-contracts"),
+          http.get("/statuses"),
+          http.get("/time-durations"),
+          http.get("/departments"),
+          http.get("/response-modes"),
+        ]);
 
-  const serviceProviderOptions = [
-    { value: "providerA", label: "Provider A" },
-    { value: "providerB", label: "Provider B" },
-  ];
+        setTimeOptions(
+          timeRes.data.data.map((item) => ({
+            label: item.duration_label,
+            value: item.duration_label,
+          })),
+        );
+        setStatusOptions(
+          statusRes.data.data.map((item) => ({
+            label: item.status_name,
+            value: item.status_name,
+          })),
+        );
 
-  const orderOptions = [
-    { value: "order1", label: "Order 001" },
-    { value: "order2", label: "Order 002" },
-  ];
+        setCategories(
+          catRes.data.data.map((item) => ({
+            label: item.category_name,
+            value: item.category_name,
+          })),
+        );
 
-  const serviceContractOptions = [
-    { value: "contract1", label: "Contract 101" },
-    { value: "contract2", label: "Contract 102" },
-  ];
+        setPriorities(
+          priRes.data.data.map((item) => ({
+            label: item.priority_name,
+            value: item.id,
+          })),
+        );
+
+        setServices(
+          servRes.data.data.map((item) => ({
+            label: item.service_name,
+            value: item.service_name,
+          })),
+        );
+
+        // setEquipments(
+        //   equipRes.data.data.map((item) => ({
+        //     label: item.equipment_name,
+        //     value: item.equipment_name,
+        //   }))
+        // );
+
+        const manufacturers = manuRes.data.data
+          .filter((item) => item.company?.business_type === "Manufacturer")
+          .map((item) => ({
+            label: item.company.company_name,
+            value: item.id,
+            data: item,
+          }));
+
+        setManufacturers(manufacturers);
+        setData(manufacturers.map((m) => m.data));
+
+        // setData(manuRes.data.data);
+
+        // setServiceProviders(
+        //   provRes.data.data.map((item) => ({
+        //     label: item.provider_name,
+        //     value: item.provider_name,
+        //   }))
+        // );
+        const serviceProviders = manuRes.data.data
+          .filter((item) => item.company?.business_type === "Service Provider")
+          .map((item) => ({
+            label: item.company.company_name,
+            value: item.id,
+            data: item,
+          }));
+
+        setServiceProviders(serviceProviders);
+
+        setOrders(
+          orderRes.data.data.map((item) => ({
+            label: item.order_name,
+            value: item.order_name,
+          })),
+        );
+
+        setServiceContracts(
+          contractRes.data.data.map((item) => ({
+            label: item.contract_name,
+            value: item.contract_name,
+          })),
+        );
+
+        setDepartments(
+          depRes.data?.data.map((item) => ({
+            label: item.name,
+            value: item.name,
+          })),
+        );
+        setModes(
+          modeRes.data?.data.map((item) => ({
+            label: item.label,
+            value: item.value,
+          })),
+        );
+      } catch (error) {
+        console.error("Error fetching dropdown data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  console.log("menufactureroption:-", manufacturerOptions);
+
+  const [equipmentData, setEquipmentData] = useState([]);
+  const [parentOptions, setParentOptions] = useState([]);
+  const [childOptions, setChildOptions] = useState([]);
+
+  // 🔹 Fetch parent + child equipment data once
+  useEffect(() => {
+    const fetchEquipments = async () => {
+      try {
+        const response = await http.get("/equipments");
+        if (response.data?.status && Array.isArray(response.data.data)) {
+          setEquipmentData(response.data.data);
+
+          // Convert parent equipment list into dropdown options
+          const parentList = response.data.data.map((item) => ({
+            value: item.equipment_name,
+            label: item.equipment_name,
+            children: item.children || [],
+          }));
+          setParentOptions(parentList);
+        }
+      } catch (error) {
+        console.error("Error fetching equipment data:", error);
+      }
+    };
+    fetchEquipments();
+  }, []);
+
+  // 🔹 Update child options when parent changes
+  const handleParentChange = (selectedParent) => {
+    setFormData((prev) => ({
+      ...prev,
+      equipment: selectedParent,
+      sub_equipment: null, // reset child when parent changes
+    }));
+
+    if (selectedParent?.children?.length > 0) {
+      const mappedChildren = selectedParent.children.map((child) => ({
+        value: child.equipment_name,
+        label: child.equipment_name,
+      }));
+      setChildOptions(mappedChildren);
+    } else {
+      setChildOptions([]);
+    }
+  };
+
+  // 🔹 Handle child selection
+  const handleChildChange = (selectedChild) => {
+    setFormData((prev) => ({
+      ...prev,
+      sub_equipment: selectedChild,
+    }));
+  };
 
   const breakdownOptions = [
     { value: "yes", label: "Yes" },
@@ -116,25 +305,11 @@ const TicketCreation = () => {
     { value: "no", label: "No" },
   ];
 
-  const responseModeOptions = [
-    { value: "chat", label: "System Chat" },
-    { value: "email", label: "Email" },
-    { value: "call", label: "Phone Call" },
-  ];
-
-  const statusOptions = [
-    { value: "new", label: "New" },
-    { value: "inProgress", label: "In Progress" },
-    { value: "completed", label: "Completed" },
-  ];
-
-  const timeOptions = [
-    { value: "1_hour", label: "1 Hour" },
-    { value: "2_hours", label: "2 Hours" },
-    { value: "4_hours", label: "4 Hours" },
-    { value: "1_day", label: "1 Day" },
-    { value: "2_days", label: "2 Days" },
-  ];
+  // const responseModeOptions = [
+  //   { value: "chat", label: "System Chat" },
+  //   { value: "email", label: "Email" },
+  //   { value: "call", label: "Phone Call" },
+  // ];
 
   const customSelectStyles = (hasError = false) => ({
     control: (provided, state) => ({
@@ -143,8 +318,8 @@ const TicketCreation = () => {
       borderColor: hasError
         ? "#DC2626" // red for error
         : state.isFocused
-        ? "#007BFF"
-        : "#D9D4C6",
+          ? "#007BFF"
+          : "#D9D4C6",
       boxShadow: state.isFocused
         ? `0 0 0 1px ${hasError ? "#DC2626" : "#007BFF"}`
         : "none",
@@ -168,37 +343,68 @@ const TicketCreation = () => {
     }),
   });
 
-  const [photo, setPhoto] = useState(null);
-
-  // const handlePhotoCapture = (event) => {
-  //   const file = event.target.files[0];
-  //   if (file) {
-  //     const imageUrl = URL.createObjectURL(file);
-  //     setPhoto(imageUrl);
-  //   }
-  // };
+  // const [photo, setPhoto] = useState(null);
+  const [photos, setPhotos] = useState([]);
 
   const [fileName, setFileName] = useState("");
 
-  // const handleFileChange = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     setFileName(file.name);
-  //   } else {
-  //     setFileName("");
-  //   }
-  // };
+  const selectedManufacturer = manufacturerOptions.find(
+    (m) => m.value === formData.manufacturer?.value,
+  );
+
+  // const productOptions =
+  //   selectedManufacturer?.data?.products?.map((product) => ({
+  //     label: product.name,
+  //     value: product.id,
+  //   })) || [];
+
+  const [productOptions, setProductOptions] = useState([]);
+  useEffect(() => {
+    if (!user?.parent_id) return;
+
+    const fetchProducts = async () => {
+      try {
+        const response = await http.get(`/products/${user.parent_id}`);
+
+        const formatted = response.data?.data.map((p) => ({
+          value: p.id,
+          label: p.name, // or p.machine_type
+        }));
+
+        setProductOptions(formatted);
+      } catch (err) {
+        console.error("Product fetch error", err);
+      }
+    };
+
+    fetchProducts();
+  }, [user?.parent_id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // const handlePhotoCapture = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     setPhoto(URL.createObjectURL(file));
+  //     setFormData((prev) => ({ ...prev, photo: file }));
+  //   }
+  // };
+
   const handlePhotoCapture = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setPhoto(URL.createObjectURL(file));
-      setFormData((prev) => ({ ...prev, photo: file }));
+    const files = Array.from(e.target.files);
+
+    if (files.length > 0) {
+      const previews = files.map((file) => URL.createObjectURL(file));
+
+      setPhotos((prev) => [...prev, ...previews]);
+
+      setFormData((prev) => ({
+        ...prev,
+        photos: [...(prev.photos || []), ...files],
+      }));
     }
   };
 
@@ -226,7 +432,7 @@ const TicketCreation = () => {
       if (!formData.plant_name) newErrors.plant_name = true;
       if (!formData.category) newErrors.category = true;
       if (!formData.ticket_title) newErrors.ticket_title = true;
-
+      if (!formData.priority) newErrors.priority = true;
       if (!formData.department) newErrors.department = true;
       if (!formData.issue_date) newErrors.issue_date = true;
       if (!formData.issue_time) newErrors.issue_time = true;
@@ -235,37 +441,48 @@ const TicketCreation = () => {
         setErrors(newErrors);
         return;
       }
+
       nextStep();
     }
 
-    // Step 2 → Validate photo & service info
-    if (step === 2) {
-      if (!formData.description) newErrors.description = true;
-      if (!formData.photo) newErrors.photo = true;
-      if (!formData.service) newErrors.service = true;
-      if (!formData.equipment) newErrors.equipment = true;
-      if (!formData.model_number) newErrors.model_number = true;
-      if (!formData.service_description) newErrors.service_description = true;
+    console.log("cliecked");
 
+    // Step 2 → Validate photo & service info
+    if (step === 2 && formData.category?.value === "Machine Breakdown") {
+      if (!formData.description) newErrors.description = true;
+      // if (!formData.photo) newErrors.photo = true;
+      if (!formData.equipment) newErrors.equipment = true;
+      if (!formData.sub_equipment) newErrors.sub_equipment = true;
+      if (!formData.model_number) newErrors.model_number = true;
+      if (!formData.order_reference_number)
+        newErrors.order_reference_number = true;
+      // if (!formData.manufacturer_contact) newErrors.manufacturer_contact = true;
+      if (!formData.serial_number) newErrors.serial_number = true;
+      if (!formData.manufacturer) newErrors.manufacturer = true;
+      // if (!formData.product_id) newErrors.product_id = true;
+      if (!formData.service_breakdown) newErrors.service_breakdown = true;
+      if (!formData.explanation_of_service_breakdown)
+        newErrors.explanation_of_service_breakdown = true;
       if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
         return;
       }
       nextStep();
+      return;
     }
 
-    // Step 3 → Validate service provider info
-    if (step === 3) {
-      if (!formData.serial_number) newErrors.serial_number = true;
-      if (!formData.manufacturer) newErrors.manufacturer = true;
+    if (step === 2 && formData.category?.value === "Service Breakdown") {
+      if (!formData.service) newErrors.service = true;
+      if (!formData.service_description) newErrors.service_description = true;
       if (!formData.service_provider) newErrors.service_provider = true;
-      if (!formData.order_reference_number)
-        newErrors.order_reference_number = true;
+
       if (!formData.service_contract_reference_number)
         newErrors.service_contract_reference_number = true;
-      if (!formData.manufacturer_contact) newErrors.manufacturer_contact = true;
-      if (!formData.service_provider_contact)
-        newErrors.service_provider_contact = true;
+
+      if (!formData.service_contact_provider)
+        newErrors.service_contact_provider = true;
+      if (!formData.service_provider_email)
+        newErrors.service_provider_email = true;
       if (!formData.service_breakdown) newErrors.service_breakdown = true;
       if (!formData.explanation_of_service_breakdown)
         newErrors.explanation_of_service_breakdown = true;
@@ -275,10 +492,11 @@ const TicketCreation = () => {
         return;
       }
       nextStep();
+      return;
     }
 
     // Step 4 → Final submit
-    if (step === 4) {
+    if (step === 3) {
       if (!formData.need_product_installation_support)
         newErrors.need_product_installation_support = true;
       if (!formData.need_service_implementation_support)
@@ -287,51 +505,66 @@ const TicketCreation = () => {
       if (!formData.functional_and_process_information)
         newErrors.functional_and_process_information = true;
       if (!formData.response_mode) newErrors.response_mode = true;
-      if (!formData.status) newErrors.status = true;
+      // if (!formData.status) newErrors.status = true;
 
       if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
         return;
       }
 
-      nextStep();
-    }
-
-    if (step === 5) {
-      if (!formData.response_time) newErrors.response_time = true;
-      if (!formData.resolution_time) newErrors.resolution_time = true;
-      if (!formData.escalation_time) newErrors.escalation_time = true;
-      if (!formData.priority) newErrors.priority = true;
-      if (Object.keys(newErrors).length > 0) {
-        setErrors(newErrors);
-        return;
-      }
+      console.log("formdata:-", formData);
 
       const ticketForm = new FormData();
 
       // Append all fields properly (convert selects if needed)
+      // Object.entries(formData).forEach(([key, value]) => {
+      //   if (value !== null && value !== undefined) {
+      //     if (typeof value === "object" && value.value !== undefined) {
+      //       ticketForm.append(key, value.value);
+      //     } else {
+      //       ticketForm.append(key, value);
+      //     }
+      //   }
+      // });
+
+      // if (formData.photo instanceof File) {
+      //   ticketForm.append("photo", formData.photo);
+      // }
+
+      // ✅ Append normal fields
       Object.entries(formData).forEach(([key, value]) => {
         if (value !== null && value !== undefined) {
-          if (typeof value === "object" && value.value !== undefined) {
+          // Handle select fields
+          if (typeof value === "object" && value?.value !== undefined) {
             ticketForm.append(key, value.value);
-          } else {
+          }
+          // ❌ Skip photos here (handled separately)
+          else if (key !== "photos") {
             ticketForm.append(key, value);
           }
         }
       });
 
-      if (formData.photo instanceof File) {
-        ticketForm.append("photo", formData.photo);
+      // ✅ MULTIPLE PHOTOS
+      if (Array.isArray(formData.photos)) {
+        formData.photos.forEach((file) => {
+          if (file instanceof File) {
+            ticketForm.append("photos[]", file);
+          }
+        });
       }
 
       if (formData.upload_document instanceof File) {
         ticketForm.append("upload_documents", formData.upload_document);
       }
 
+      for (let pair of ticketForm.entries()) {
+        console.log(pair[0], pair[1]);
+      }
+
       try {
         setLoading(true);
 
-        // Correct endpoint (matches Laravel)
         const response = await http.post("/tickets", ticketForm, {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -350,12 +583,17 @@ const TicketCreation = () => {
           navigate("/dashboard");
           console.log("Response:", result);
         } else {
+          const errorText =
+            result?.message ||
+            Object.values(result?.errors || {})[0]?.[0] ||
+            "Submission failed";
+
           Swal.fire({
             icon: "error",
             title: "Submission failed",
-            text: result.message || "Submission failed",
+            text: errorText,
             showConfirmButton: false,
-            timer: 1500,
+            timer: 2000,
           });
         }
       } catch (error) {
@@ -381,48 +619,6 @@ const TicketCreation = () => {
       {/* Left Form Section */}
       <div className="w-full  bg-[#FFFFFF]  ">
         {/* Tabs */}
-        {/* <div className="w-full mb-6 bg-[#F9F9F9] rounded-xl shadow-sm overflow-hidden">
-          <div className="flex flex-wrap border border-[#E5E5E5] rounded-xl overflow-hidden">
-            {steps.map((title, index) => {
-              const isCompleted = step > index + 1;
-              const isActive = step === index + 1;
-
-              return (
-                <button
-                  key={index}
-                  onClick={() => setStep(index + 1)}
-                  className={`relative flex items-center justify-center gap-2 w-full sm:w-1/2 md:w-1/4 py-5 px-2 border-r border-[#E5E5E5] last:border-r-0 transition-all 
-                ${
-                  isActive
-                    ? "bg-[#F9F9F9] text-[#207EB1] font-semibold"
-                    : "bg-[#F9F9F9] text-[#000]"
-                }`}
-                >
-                  <div
-                    className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-semibold border 
-                  ${
-                    isCompleted
-                      ? "bg-[#00C6A9] text-white border-[#00C6A9]" // ✅ green check
-                      : isActive
-                      ? "bg-[#207EB1] text-white border-[#207EB1]" // 🔵 active
-                      : "border-[#1E1E1E] text-[#1E1E1E]" // ⚪ inactive
-                  }`}
-                  >
-                    {isCompleted ? <FaCheck size={10} /> : index + 1}
-                  </div>
-
-                  <span className="text-sm md:text-[14px] whitespace-nowrap">
-                    {title}
-                  </span>
-
-                  {isActive && (
-                    <span className="absolute bottom-0 left-0 w-full h-[3px] bg-[#207EB1]" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div> */}
 
         <div className="w-full mb-6 bg-[#F9F9F9] rounded-xl shadow-sm overflow-hidden">
           <div className="flex flex-wrap border border-[#E5E5E5] rounded-xl overflow-hidden">
@@ -445,10 +641,10 @@ const TicketCreation = () => {
                     className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-semibold border 
                 ${
                   isCompleted
-                    ? "bg-[#00C6A9] text-white border-[#00C6A9]" // ✅ green check
+                    ? "bg-[#00C6A9] text-white border-[#00C6A9]" // green check
                     : isActive
-                    ? "bg-[#207EB1] text-white border-[#207EB1]" // 🔵 active
-                    : "border-[#1E1E1E] text-[#1E1E1E]" // ⚪ inactive
+                      ? "bg-[#207EB1] text-white border-[#207EB1]" // active
+                      : "border-[#1E1E1E] text-[#1E1E1E]" // inactive
                 }`}
                   >
                     {isCompleted ? <FaCheck size={10} /> : index + 1}
@@ -495,7 +691,7 @@ const TicketCreation = () => {
                 {/* Category */}
                 <div>
                   <label className="block text-sm font-medium text-[#000] mb-1">
-                    Category
+                    Breakdown Category
                   </label>
                   <Select
                     options={categoryOptions}
@@ -532,22 +728,51 @@ const TicketCreation = () => {
                 </div>
 
                 {/* Department */}
+
                 <div>
                   <label className="block text-sm font-medium text-[#000] mb-1">
                     Department
                   </label>
-                  <input
-                    type="text"
-                    name="department"
-                    placeholder="Department"
-                    value={formData.department}
-                    onChange={handleChange}
-                    // className="w-full border bg-white border-[#D9D4C6] rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-[#007BFF]"
-                    className={`w-full border ${
-                      errors.department ? "border-red-500" : "border-[#D9D4C6]"
-                    } bg-white rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-${
-                      errors.department ? "red-500" : "007BFF"
-                    }`}
+                  <Select
+                    options={departments} // from state
+                    placeholder="Select Department"
+                    styles={customSelectStyles(errors.department)}
+                    value={
+                      departments.find(
+                        (option) => option.value === formData.department,
+                      ) || null
+                    }
+                    onChange={(option) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        department: option.value,
+                      }))
+                    }
+                    components={{ IndicatorSeparator: () => null }}
+                  />
+                </div>
+
+                {/* Priority */}
+                <div>
+                  <label className="block text-sm font-medium text-[#000] mb-1">
+                    Priority
+                  </label>
+                  <Select
+                    options={priorityOptions}
+                    placeholder="Select priority"
+                    styles={customSelectStyles(errors.priority)}
+                    value={
+                      priorityOptions.find(
+                        (option) => option.value === formData.priority,
+                      ) || null
+                    }
+                    onChange={(option) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        priority: option.value,
+                      }))
+                    }
+                    components={{ IndicatorSeparator: () => null }}
                   />
                 </div>
 
@@ -589,119 +814,513 @@ const TicketCreation = () => {
                 </div>
               </div>
             )}
-
-            {step === 2 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Description of Issue */}
+            {formData.category?.value === "Machine Breakdown" && step === 2 && (
+              <>
                 <div>
                   <label className="block text-sm font-medium text-[#000] mb-1">
                     Description of Issue
                   </label>
-                  <input
-                    type="text"
-                    name="description"
+
+                  <Editor
+                    style={{
+                      height: "200px",
+                      border: errors.description
+                        ? "1px solid #f87171"
+                        : "1px solid #D9D4C6",
+                      // borderRadius: "8px",
+                    }}
                     value={formData.description}
-                    onChange={handleChange}
-                    placeholder="Description"
-                    // className="w-full border bg-white border-[#D9D4C6] rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-[#007BFF]"
-                    className={`w-full border ${
-                      errors.description ? "border-red-500" : "border-[#D9D4C6]"
-                    } bg-white rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-${
-                      errors.description ? "red-500" : "007BFF"
-                    }`}
+                    onTextChange={(e) =>
+                      setFormData({ ...formData, description: e.htmlValue })
+                    }
                   />
+
+                  {errors.description && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.description}
+                    </p>
+                  )}
                 </div>
 
-                {/* Photo Upload */}
-                <div>
-                  <label className="block text-sm font-medium text-[#000] mb-1">
-                    Photo
-                  </label>
-                  <div
-                    className={`flex items-center bg-white justify-between w-full border  ${
-                      errors.photo ? "border-red-600" : "border-[#D9D4C6]"
-                    } rounded-[8px] p-1.5`}
-                  >
-                    <div className="flex items-center gap-2">
-                      {photo && (
-                        <img
-                          src={photo}
-                          alt="Machine"
-                          className="w-10 h-10 rounded-md object-cover"
-                        />
-                      )}
-                    </div>
-                    <label
-                      htmlFor="photo-upload"
-                      className="cursor-pointer px-4 py-2 bg-[#007BFF] text-white rounded-md hover:bg-[#0066DD] text-sm whitespace-nowrap"
-                    >
-                      Take Machine Photo
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Select Equipment */}
+
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-[#000] mb-1">
+                      Equipment (Category)
+                    </label>
+                    <Select
+                      options={parentOptions}
+                      placeholder="Select Equipment"
+                      styles={customSelectStyles(errors.equipment)}
+                      value={formData.equipment}
+                      onChange={handleParentChange}
+                      components={{ IndicatorSeparator: () => null }}
+                    />
+                  </div>
+
+                  {/* Child Equipment */}
+                  <div>
+                    <label className="block text-sm font-medium text-[#000] mb-1">
+                      Equipment (Sub Category)
+                    </label>
+                    <Select
+                      options={childOptions}
+                      placeholder={
+                        formData.equipment
+                          ? "Select sub Equipment"
+                          : "Select Equipment First"
+                      }
+                      isDisabled={!formData.equipment}
+                      styles={customSelectStyles(errors.sub_equipment)}
+                      value={formData.sub_equipment}
+                      onChange={handleChildChange}
+                      components={{ IndicatorSeparator: () => null }}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#000] mb-1">
+                      Serial Number
                     </label>
                     <input
-                      id="photo-upload"
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      onChange={handlePhotoCapture}
-                      className="hidden"
+                      type="text"
+                      name="serial_number"
+                      value={formData.serial_number}
+                      onChange={handleChange}
+                      placeholder="Serial Number"
+                      // className="w-full border bg-white border-[#D9D4C6] rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-[#007BFF]"
+                      className={`w-full border ${
+                        errors.serial_number
+                          ? "border-red-500"
+                          : "border-[#D9D4C6]"
+                      } bg-white rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-${
+                        errors.serial_number ? "red-500" : "007BFF"
+                      }`}
+                    />
+                  </div>
+                  {/* Model Number */}
+                  <div>
+                    <label className="block text-sm font-medium text-[#000] mb-1">
+                      Model Number
+                    </label>
+                    <input
+                      type="text"
+                      name="model_number"
+                      value={formData.model_number}
+                      onChange={handleChange}
+                      placeholder="Model Number"
+                      // className="w-full border bg-white border-[#D9D4C6] rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-[#007BFF]"
+                      className={`w-full border ${
+                        errors.model_number
+                          ? "border-red-500"
+                          : "border-[#D9D4C6]"
+                      } bg-white rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-${
+                        errors.model_number ? "red-500" : "007BFF"
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#000] mb-1">
+                      Select Manufacturer(OEM)
+                    </label>
+                    <Select
+                      options={manufacturerOptions}
+                      placeholder="Select Manufacturer"
+                      styles={customSelectStyles(errors.manufacturer)}
+                      value={formData.manufacturer}
+                      onChange={(option) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          manufacturer: option, // store only ID
+                          manufacturer_contact:
+                            option?.data?.mobile_number || "",
+                          manufacturer_email: option?.data?.email || "",
+                          product_id: null,
+                        }))
+                      }
+                      components={{ IndicatorSeparator: () => null }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#000] mb-1">
+                      Select Machine Type of OEM
+                    </label>
+
+                    <Select
+                      options={productOptions}
+                      placeholder={"Select Product"}
+                      value={
+                        productOptions.find(
+                          (p) => p.value === formData.product_id,
+                        ) || null
+                      }
+                      onChange={(option) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          product_id: option.value, // store only product ID
+                        }))
+                      }
+                      components={{ IndicatorSeparator: () => null }}
+                      styles={customSelectStyles(errors.product_id)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#000] mb-1">
+                      Manufacturer Contact Number (OEM)
+                    </label>
+                    <input
+                      type="text"
+                      name="manufacturer_contact"
+                      placeholder="Manufacturer Contact"
+                      value={formData.manufacturer_contact}
+                      onChange={handleChange}
+                      disabled
+                      // className="w-full border bg-white border-[#D9D4C6] rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-[#007BFF]"
+                      className={`w-full border ${
+                        errors.manufacturer_contact
+                          ? "border-red-500"
+                          : "border-[#D9D4C6]"
+                      } bg-white rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-${
+                        errors.manufacturer_contact ? "red-500" : "007BFF"
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#000] mb-1">
+                      Manufacturer Email (OEM)
+                    </label>
+                    <input
+                      type="text"
+                      name="manufacturer_email"
+                      placeholder="Manufacturer Email"
+                      value={formData.manufacturer_email}
+                      onChange={handleChange}
+                      disabled
+                      // className="w-full border bg-white border-[#D9D4C6] rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-[#007BFF]"
+                      className={`w-full border ${
+                        errors.manufacturer_email
+                          ? "border-red-500"
+                          : "border-[#D9D4C6]"
+                      } bg-white rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-${
+                        errors.manufacturer_email ? "red-500" : "007BFF"
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#000] mb-1">
+                      Order / Reference Number
+                    </label>
+                    {/* <Select
+                      options={orderOptions}
+                      placeholder="Select Order"
+                      styles={customSelectStyles(errors.order_reference_number)}
+                      value={formData.order_reference_number}
+                      onChange={(option) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          order_reference_number: option,
+                        }))
+                      }
+                      components={{ IndicatorSeparator: () => null }}
+                    /> */}
+                    <input
+                      type="text"
+                      name="order_reference_number"
+                      value={formData.order_reference_number}
+                      onChange={handleChange}
+                      placeholder="Order / Reference Number"
+                      // className="w-full border bg-white border-[#D9D4C6] rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-[#007BFF]"
+                      className={`w-full border ${
+                        errors.order_reference_number
+                          ? "border-red-500"
+                          : "border-[#D9D4C6]"
+                      } bg-white rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-${
+                        errors.order_reference_number ? "red-500" : "007BFF"
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block  text-sm font-medium text-[#000] mb-1">
+                      Equipment Breakdown?
+                    </label>
+                    <Select
+                      options={breakdownOptions}
+                      placeholder="Select"
+                      styles={customSelectStyles(errors.service_breakdown)}
+                      value={formData.service_breakdown}
+                      onChange={(option) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          service_breakdown: option,
+                        }))
+                      }
+                      components={{ IndicatorSeparator: () => null }}
+                    />
+                  </div>
+                  {/* Photo Upload */}
+                  {/* Photo Upload */}
+                  <div>
+                    <label className="block text-sm font-medium text-[#000] mb-1">
+                      Machine Photos
+                    </label>
+
+                    <div
+                      className={`flex flex-wrap gap-2 bg-white border ${
+                        errors.photos ? "border-red-600" : "border-[#D9D4C6]"
+                      } rounded-[8px] p-2`}
+                    >
+                      {photos.map((img, index) => (
+                        <img
+                          key={index}
+                          src={img}
+                          alt="preview"
+                          className="w-12 h-12 rounded-md object-cover"
+                        />
+                      ))}
+
+                      <label
+                        htmlFor="photo-upload"
+                        className="cursor-pointer px-4 py-2 bg-[#007BFF] text-white rounded-md hover:bg-[#0066DD] text-sm"
+                      >
+                        Upload Photos
+                      </label>
+
+                      <input
+                        id="photo-upload"
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        multiple
+                        onChange={handlePhotoCapture}
+                        className="hidden"
+                      />
+                    </div>
+                  </div>
+                </div>
+                {/* MachineExplanation */}
+                <div>
+                  <label className="block text-sm  font-medium text-[#000] mb-1">
+                    Description of Machine
+                  </label>
+                  <textarea
+                    rows="3"
+                    name="description_of_machine"
+                    value={formData.description_of_machine}
+                    onChange={handleChange}
+                    placeholder="Description of Machine"
+                    // className="w-full border bg-white border-[#D9D4C6] rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-[#007BFF]"
+                    className={`w-full border ${
+                      errors.description_of_machine
+                        ? "border-red-500"
+                        : "border-[#D9D4C6]"
+                    } bg-white rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-${
+                      errors.description_of_machine ? "red-500" : "007BFF"
+                    }`}
+                  ></textarea>
+                </div>
+                {/* Explanation */}
+                <div>
+                  <label className="block text-sm  font-medium text-[#000] mb-1">
+                    Detailed Explanation of Equipment Breakdown
+                  </label>
+                  <textarea
+                    rows="3"
+                    name="explanation_of_service_breakdown"
+                    value={formData.explanation_of_service_breakdown}
+                    onChange={handleChange}
+                    placeholder="Explanation of Service Breakdown"
+                    // className="w-full border bg-white border-[#D9D4C6] rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-[#007BFF]"
+                    className={`w-full border ${
+                      errors.explanation_of_service_breakdown
+                        ? "border-red-500"
+                        : "border-[#D9D4C6]"
+                    } bg-white rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-${
+                      errors.explanation_of_service_breakdown
+                        ? "red-500"
+                        : "007BFF"
+                    }`}
+                  ></textarea>
+                </div>
+              </>
+            )}
+
+            {formData.category?.value === "Service Breakdown" && step === 2 && (
+              <div className="bg-[#F9F9F9]  rounded-2xl space-y-4">
+                {/* Row 1 */}
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-[#000] mb-1">
+                      Select Service Provider
+                    </label>
+                    <Select
+                      options={serviceProviderOptions}
+                      placeholder="Select Service Provider"
+                      styles={customSelectStyles(errors.service_provider)}
+                      value={formData.service_provider}
+                      onChange={(option) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          service_provider: option,
+                          service_contact_provider:
+                            option?.data?.mobile_number || "",
+                          service_provider_email: option?.data?.email || "",
+                        }))
+                      }
+                      components={{ IndicatorSeparator: () => null }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#000] mb-1">
+                      Service Provider Contact
+                    </label>
+                    <input
+                      type="text"
+                      name="service_contact_provider"
+                      placeholder="Service Provider Contact"
+                      disabled
+                      value={formData.service_contact_provider}
+                      onChange={handleChange}
+                      // className="w-full border bg-white border-[#D9D4C6] rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-[#007BFF]"
+                      className={`w-full border ${
+                        errors.service_contact_provider
+                          ? "border-red-500"
+                          : "border-[#D9D4C6]"
+                      } bg-white rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-${
+                        errors.service_contact_provider ? "red-500" : "007BFF"
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#000] mb-1">
+                      Service Provider Email
+                    </label>
+                    <input
+                      type="text"
+                      name="service_provider_email"
+                      placeholder="Service Provider Contact"
+                      value={formData.service_provider_email}
+                      disabled
+                      onChange={handleChange}
+                      // className="w-full border bg-white border-[#D9D4C6] rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-[#007BFF]"
+                      className={`w-full border ${
+                        errors.service_provider_email
+                          ? "border-red-500"
+                          : "border-[#D9D4C6]"
+                      } bg-white rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-${
+                        errors.service_provider_email ? "red-500" : "007BFF"
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#000] mb-1">
+                      Service Contract Reference Number
+                    </label>
+                    {/* <Select
+                      options={serviceContractOptions}
+                      placeholder="Select Contract"
+                      styles={customSelectStyles(
+                        errors.service_contract_reference_number
+                      )}
+                      value={formData.service_contract_reference_number}
+                      onChange={(option) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          service_contract_reference_number: option,
+                        }))
+                      }
+                      components={{ IndicatorSeparator: () => null }}
+                    /> */}
+                    <input
+                      type="text"
+                      name="service_contract_reference_number"
+                      placeholder="Service Contract Reference Number"
+                      value={formData.service_contract_reference_number}
+                      onChange={handleChange}
+                      // className="w-full border bg-white border-[#D9D4C6] rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-[#007BFF]"
+                      className={`w-full border ${
+                        errors.service_contract_reference_number
+                          ? "border-red-500"
+                          : "border-[#D9D4C6]"
+                      } bg-white rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-${
+                        errors.service_contract_reference_number
+                          ? "red-500"
+                          : "007BFF"
+                      }`}
                     />
                   </div>
                 </div>
 
-                {/* Select Equipment */}
-                <div>
-                  <label className="block text-sm font-medium text-[#000] mb-1">
-                    Select Equipment
-                  </label>
-                  <Select
-                    options={serviceOptions}
-                    placeholder="Select Equipment"
-                    styles={customSelectStyles(errors.equipment)}
-                    value={formData.equipment}
-                    onChange={(option) =>
-                      setFormData((prev) => ({ ...prev, equipment: option }))
-                    }
-                    components={{ IndicatorSeparator: () => null }}
-                  />
+                {/* Row 2 */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  {/* select service */}
+                  <div>
+                    <label className="block text-sm font-medium text-[#000] mb-1">
+                      Select Service
+                    </label>
+                    <Select
+                      options={serviceOptions}
+                      placeholder="Select Service"
+                      styles={customSelectStyles(errors.service)}
+                      value={formData.service}
+                      onChange={(option) =>
+                        setFormData((prev) => ({ ...prev, service: option }))
+                      }
+                      components={{ IndicatorSeparator: () => null }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#000] mb-1">
+                      Service Breakdown?
+                    </label>
+                    <Select
+                      options={breakdownOptions}
+                      placeholder="Select"
+                      styles={customSelectStyles(errors.service_breakdown)}
+                      value={formData.service_breakdown}
+                      onChange={(option) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          service_breakdown: option,
+                        }))
+                      }
+                      components={{ IndicatorSeparator: () => null }}
+                    />
+                  </div>
                 </div>
 
-                {/* Select Service */}
-                <div>
-                  <label className="block text-sm font-medium text-[#000] mb-1">
-                    Select Service
-                  </label>
-                  <Select
-                    options={equipmentOptions}
-                    placeholder="Select Service"
-                    styles={customSelectStyles(errors.service)}
-                    value={formData.service}
-                    onChange={(option) =>
-                      setFormData((prev) => ({ ...prev, service: option }))
-                    }
-                    components={{ IndicatorSeparator: () => null }}
-                  />
-                </div>
+                {/* Row 3 */}
+                <div className="grid md:grid-cols-2 gap-4"></div>
 
-                {/* Model Number */}
+                {/* Row 4 */}
+                <div className="grid md:grid-cols-2 gap-4"></div>
+
+                {/* Explanation */}
                 <div>
                   <label className="block text-sm font-medium text-[#000] mb-1">
-                    Model Number
+                    Explanation of Service Breakdown
                   </label>
-                  <input
-                    type="text"
-                    name="model_number"
-                    value={formData.model_number}
+                  <textarea
+                    rows="3"
+                    name="explanation_of_service_breakdown"
+                    value={formData.explanation_of_service_breakdown}
                     onChange={handleChange}
-                    placeholder="Model Number"
+                    placeholder="Explanation of Service Breakdown"
                     // className="w-full border bg-white border-[#D9D4C6] rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-[#007BFF]"
                     className={`w-full border ${
-                      errors.model_number
+                      errors.explanation_of_service_breakdown
                         ? "border-red-500"
                         : "border-[#D9D4C6]"
                     } bg-white rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-${
-                      errors.model_number ? "red-500" : "007BFF"
+                      errors.explanation_of_service_breakdown
+                        ? "red-500"
+                        : "007BFF"
                     }`}
-                  />
+                  ></textarea>
                 </div>
 
                 {/* Service Description */}
@@ -729,214 +1348,22 @@ const TicketCreation = () => {
             )}
 
             {step === 3 && (
-              <div className="bg-[#F9F9F9]  rounded-2xl space-y-4">
-                {/* Row 1 */}
-                <div>
-                  <label className="block text-sm font-medium text-[#000] mb-1">
-                    Serial Number
-                  </label>
-                  <input
-                    type="text"
-                    name="serial_number"
-                    value={formData.serial_number}
-                    onChange={handleChange}
-                    placeholder="Serial Number"
-                    // className="w-full border bg-white border-[#D9D4C6] rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-[#007BFF]"
-                    className={`w-full border ${
-                      errors.serial_number
-                        ? "border-red-500"
-                        : "border-[#D9D4C6]"
-                    } bg-white rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-${
-                      errors.serial_number ? "red-500" : "007BFF"
-                    }`}
-                  />
-                </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-[#000] mb-1">
-                      Select Manufacturer
-                    </label>
-                    <Select
-                      options={manufacturerOptions}
-                      placeholder="Select Manufacturer"
-                      styles={customSelectStyles(errors.manufacturer)}
-                      value={formData.manufacturer}
-                      onChange={(option) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          manufacturer: option,
-                        }))
-                      }
-                      components={{ IndicatorSeparator: () => null }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#000] mb-1">
-                      Select Service Provider
-                    </label>
-                    <Select
-                      options={serviceProviderOptions}
-                      placeholder="Select Service Provider"
-                      styles={customSelectStyles(errors.service_provider)}
-                      value={formData.service_provider}
-                      onChange={(option) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          service_provider: option,
-                        }))
-                      }
-                      components={{ IndicatorSeparator: () => null }}
-                    />
-                  </div>
-                </div>
-
-                {/* Row 2 */}
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-[#000] mb-1">
-                      Order / Reference Number
-                    </label>
-                    <Select
-                      options={orderOptions}
-                      placeholder="Select Order"
-                      styles={customSelectStyles(errors.order_reference_number)}
-                      value={formData.order_reference_number}
-                      onChange={(option) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          order_reference_number: option,
-                        }))
-                      }
-                      components={{ IndicatorSeparator: () => null }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#000] mb-1">
-                      Service Contract Reference Number
-                    </label>
-                    <Select
-                      options={serviceContractOptions}
-                      placeholder="Select Contract"
-                      styles={customSelectStyles(
-                        errors.service_contract_reference_number
-                      )}
-                      value={formData.service_contract_reference_number}
-                      onChange={(option) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          service_contract_reference_number: option,
-                        }))
-                      }
-                      components={{ IndicatorSeparator: () => null }}
-                    />
-                  </div>
-                </div>
-
-                {/* Row 3 */}
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-[#000] mb-1">
-                      Manufacturer Contact
-                    </label>
-                    <input
-                      type="text"
-                      name="manufacturer_contact"
-                      placeholder="Manufacturer Contact"
-                      value={formData.manufacturer_contact}
-                      onChange={handleChange}
-                      // className="w-full border bg-white border-[#D9D4C6] rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-[#007BFF]"
-                      className={`w-full border ${
-                        errors.manufacturer_contact
-                          ? "border-red-500"
-                          : "border-[#D9D4C6]"
-                      } bg-white rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-${
-                        errors.manufacturer_contact ? "red-500" : "007BFF"
-                      }`}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#000] mb-1">
-                      Service Provider Contact
-                    </label>
-                    <input
-                      type="text"
-                      name="service_provider_contact"
-                      placeholder="Service Provider Contact"
-                      value={formData.service_provider_contact}
-                      onChange={handleChange}
-                      // className="w-full border bg-white border-[#D9D4C6] rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-[#007BFF]"
-                      className={`w-full border ${
-                        errors.service_provider_contact
-                          ? "border-red-500"
-                          : "border-[#D9D4C6]"
-                      } bg-white rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-${
-                        errors.service_provider_contact ? "red-500" : "007BFF"
-                      }`}
-                    />
-                  </div>
-                </div>
-
-                {/* Row 4 */}
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-[#000] mb-1">
-                      Service Breakdown?
-                    </label>
-                    <Select
-                      options={breakdownOptions}
-                      placeholder="Select"
-                      styles={customSelectStyles(errors.service_breakdown)}
-                      value={formData.service_breakdown}
-                      onChange={(option) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          service_breakdown: option,
-                        }))
-                      }
-                      components={{ IndicatorSeparator: () => null }}
-                    />
-                  </div>
-                </div>
-
-                {/* Explanation */}
-                <div>
-                  <label className="block text-sm font-medium text-[#000] mb-1">
-                    Explanation of Service Breakdown
-                  </label>
-                  <textarea
-                    rows="3"
-                    name="explanation_of_service_breakdown"
-                    value={formData.explanation_of_service_breakdown}
-                    onChange={handleChange}
-                    placeholder="Explanation of Service Breakdown"
-                    // className="w-full border bg-white border-[#D9D4C6] rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-[#007BFF]"
-                    className={`w-full border ${
-                      errors.explanation_of_service_breakdown
-                        ? "border-red-500"
-                        : "border-[#D9D4C6]"
-                    } bg-white rounded-[8px] p-2.5 focus:outline-none focus:ring-2 focus:ring-${
-                      errors.explanation_of_service_breakdown
-                        ? "red-500"
-                        : "007BFF"
-                    }`}
-                  ></textarea>
-                </div>
-              </div>
-            )}
-
-            {step === 4 && (
               <div className="bg-[#F9F9F9] p-6 rounded-2xl space-y-4">
                 {/* Row 1 */}
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-[#000] mb-1">
-                      Do You Need Product Installation Support?
+                      Do you need{" "}
+                      {formData.category?.value === "Service Breakdown"
+                        ? "additional service"
+                        : "product installation"}{" "}
+                      support?
                     </label>
                     <Select
                       options={yesNoOptions}
                       placeholder="Select"
                       styles={customSelectStyles(
-                        errors.need_product_installation_support
+                        errors.need_product_installation_support,
                       )}
                       value={formData.need_product_installation_support}
                       onChange={(option) =>
@@ -950,13 +1377,17 @@ const TicketCreation = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-[#000] mb-1">
-                      Do You Need Service Implementation support?
+                      Do you need{" "}
+                      {formData.category?.value === "Service Breakdown"
+                        ? "service implementation"
+                        : "equipment maintenance and service"}{" "}
+                      support?
                     </label>
                     <Select
                       options={yesNoOptions}
                       placeholder="Select"
                       styles={customSelectStyles(
-                        errors.need_service_implementation_support
+                        errors.need_service_implementation_support,
                       )}
                       value={formData.need_service_implementation_support}
                       onChange={(option) =>
@@ -974,7 +1405,11 @@ const TicketCreation = () => {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-[#000] mb-1">
-                      Replacement
+                      Do you need product or{" "}
+                      {formData.category?.value === "Service Breakdown"
+                        ? "service"
+                        : "equipment"}{" "}
+                      replacement
                     </label>
                     <Select
                       options={yesNoOptions}
@@ -992,7 +1427,7 @@ const TicketCreation = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-[#000] mb-1">
-                      Functional and Process information if any
+                      Functional and process information if any
                     </label>
                     <input
                       type="text"
@@ -1018,7 +1453,7 @@ const TicketCreation = () => {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-[#000] mb-1">
-                      Response Mode
+                      Response mode
                     </label>
                     <Select
                       options={responseModeOptions}
@@ -1036,7 +1471,7 @@ const TicketCreation = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-[#000] mb-1">
-                      Upload Documents if any
+                      Upload documents if any
                     </label>
                     <div
                       className={`flex items-center bg-white gap-2 border ${
@@ -1067,7 +1502,7 @@ const TicketCreation = () => {
                 </div>
 
                 {/* Row 4 */}
-                <div className="grid md:grid-cols-2 gap-4">
+                {/* <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-[#000] mb-1">
                       Status
@@ -1086,84 +1521,7 @@ const TicketCreation = () => {
                       components={{ IndicatorSeparator: () => null }}
                     />
                   </div>
-                </div>
-              </div>
-            )}
-
-            {step === 5 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-[#000] mb-1">
-                    Response Time
-                  </label>
-                  <Select
-                    options={timeOptions}
-                    placeholder="How long it takes to acknowledge a new ticket."
-                    styles={customSelectStyles(errors.response_time)}
-                    value={formData.response_time}
-                    onChange={(option) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        response_time: option,
-                      }))
-                    }
-                    components={{ IndicatorSeparator: () => null }}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-[#000] mb-1">
-                    Resolution Time
-                  </label>
-                  <Select
-                    options={timeOptions}
-                    placeholder="How long it takes to close or resolve the ticket."
-                    styles={customSelectStyles(errors.resolution_time)}
-                    value={formData.resolution_time}
-                    onChange={(option) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        resolution_time: option,
-                      }))
-                    }
-                    components={{ IndicatorSeparator: () => null }}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[#000] mb-1">
-                    Escalation Time
-                  </label>
-                  <Select
-                    options={timeOptions}
-                    placeholder="When a ticket should auto-escalate if not resolved."
-                    styles={customSelectStyles(errors.escalation_time)}
-                    value={formData.escalation_time}
-                    onChange={(option) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        escalation_time: option,
-                      }))
-                    }
-                    components={{ IndicatorSeparator: () => null }}
-                  />
-                </div>
-
-                {/* Priority */}
-                <div>
-                  <label className="block text-sm font-medium text-[#000] mb-1">
-                    Priority
-                  </label>
-                  <Select
-                    options={priorityOptions}
-                    placeholder="Select priority"
-                    styles={customSelectStyles(errors.priority)}
-                    value={formData.priority}
-                    onChange={(option) =>
-                      setFormData((prev) => ({ ...prev, priority: option }))
-                    }
-                    components={{ IndicatorSeparator: () => null }}
-                  />
-                </div>
+                </div> */}
               </div>
             )}
 
@@ -1180,20 +1538,8 @@ const TicketCreation = () => {
               </button>
 
               {/* Step 4 (final step) buttons */}
-              {step === 5 && (
+              {step === 3 && (
                 <>
-                  {/* <button
-                    type="button"
-                    className="px-6 py-2 bg-[#007BFF] text-white rounded-md hover:bg-[#0066DD]"
-                  >
-                    Submit for Approval
-                  </button> */}
-                  {/* <button
-                    type="button"
-                    className="px-6 py-2 bg-[#A8D0FF] text-white rounded-md cursor-default"
-                  >
-                    Approval yes
-                  </button> */}
                   <button
                     type="submit"
                     disabled={loading}
@@ -1221,7 +1567,7 @@ const TicketCreation = () => {
                 </>
               )}
 
-              {step !== 5 && (
+              {step !== 3 && (
                 /* Step 1–3: Next button */
                 <button
                   type="submit"
@@ -1235,96 +1581,8 @@ const TicketCreation = () => {
           </form>
         </div>
       </div>
-
-      {/* Right Sidebar */}
-      {/* <div className="w-full md:w-[20%]">
-        <UserCard />
-        <div className=" bg-[#F9F9F9] rounded-xl shadow-sm p-4">
-          <h4 className="font-semibold text-[#212529] mb-3">Recent Messages</h4>
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="bg-white rounded-lg p-3 shadow-sm text-sm text-[#333]"
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <img
-                    src="https://upload.wikimedia.org/wikipedia/commons/3/34/Red_circle.svg"
-                    alt="icon"
-                    className="w-4 h-4"
-                  />
-                  <span className="font-semibold text-[#D8232A]">Daihatsu</span>
-                </div>
-                <p className="text-[12px] text-[#555] mb-2 leading-snug">
-                  Thank you for reaching out. We’ve received your inquiry
-                  regarding the centrifugal pump repair and are reviewing your
-                  details.
-                </p>
-                <div className="flex justify-between text-[11px] text-[#9D9D9D]">
-                  <span>1m ago</span>
-                  <button className="text-[#007BFF] hover:underline">
-                    Reply
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div> */}
     </div>
   );
 };
 
-const UserCard = () => {
-  const [userData, setUserData] = useState(null);
-
-  useEffect(() => {
-    const storedData = localStorage.getItem("userData");
-    console.log(storedData);
-    if (storedData) {
-      setUserData(JSON.parse(storedData));
-    }
-  }, []);
-
-  if (!userData) {
-    return <div>Loading...</div>; // or return null to render nothing until data is loaded
-  }
-
-  return (
-    <div className="bg-[#F9F9F9] rounded-2xl shadow p-4 w-full mx-auto mb-6 flex flex-col items-center">
-      {/* Role / Designation */}
-      <p className="text-sm text-[#212529] text-[16px] font-bold mb-4 self-start">
-        {userData.company?.designation || "N/A"}
-      </p>
-
-      {/* Profile Image */}
-      <img
-        src="https://i.pravatar.cc/100"
-        alt="user"
-        className="w-16 h-16 rounded-full mb-2 object-cover"
-      />
-
-      {/* Email */}
-      <p className="text-sm text-[16px] font-bold text-[#212529]">
-        {userData.email || "User email not available"}
-      </p>
-
-      {/* Company Name */}
-      <p className="text-sm text-[#666] text-[14px] mt-1">
-        {userData.company?.company_name || "Company name not available"}
-      </p>
-
-      {/* Logout Button */}
-      <button
-        onClick={() => {
-          localStorage.clear();
-          window.location.reload();
-        }}
-        className="mt-10 px-4 py-2 bg-[#D9D9D9]/20 rounded-[30px] flex items-center text-[16px] font-semibold justify-center gap-2 text-[#212529] hover:bg-gray-200 transition text-sm"
-      >
-        <FaSignOutAlt className="text-gray-600" /> Logout
-      </button>
-    </div>
-  );
-};
 export default TicketCreation;

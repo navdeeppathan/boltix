@@ -1,44 +1,55 @@
-// LoginPage.jsx
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import http from "../service/http";
-import CircularProgress from "@mui/material/CircularProgress";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { RotatingLines } from "react-loader-spinner";
+import { motion } from "framer-motion";
+
+const container = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.2 },
+  },
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.7, ease: "easeOut" },
+  },
+};
+
+const cardVariant = {
+  hidden: { opacity: 0, x: 40, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    scale: 1,
+    transition: { duration: 0.8, ease: "easeOut" },
+  },
+};
 
 const LoginPage = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showForgot, setShowForgot] = useState(false);
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
+  const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.email) {
+    if (!formData.email || !formData.password) {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "Please enter your email address.",
-      });
-      return;
-    }
-
-    if (!formData.password) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Please enter your password.",
+        text: "Please enter email and password.",
       });
       return;
     }
@@ -46,43 +57,23 @@ const LoginPage = () => {
     try {
       setLoading(true);
       const response = await http.post("/users/login", formData);
+      const data = response.data;
 
-      const data = await response.data;
+      Swal.fire({
+        icon: "success",
+        title: "Login Successful",
+        text: data.message || "Welcome back!",
+        timer: 2000,
+        showConfirmButton: false,
+      });
 
-      if (response.status) {
-        localStorage.setItem("token", data?.token);
-        localStorage.setItem("userData", JSON.stringify(data?.data));
-
-        const roleId = data?.data?.role_id;
-        // Show success alert
-        Swal.fire({
-          icon: "success",
-          title: "Login Successful",
-          text: data.message || "You have logged in successfully!",
-          timer: 2000,
-          showConfirmButton: false,
-        });
-
-        if (roleId === 2) {
-          navigate("/manager/dashboard");
-          localStorage.setItem("asManager", 1);
-        } else {
-          navigate("/dashboard");
-          localStorage.setItem("asCompany", 1);
-        }
-      } else {
-        // Show error alert
-        Swal.fire({
-          icon: "error",
-          title: "Login Failed",
-          text: data.message || "Invalid credentials",
-        });
-      }
+      localStorage.setItem("token", data?.token);
+      localStorage.setItem("userData", JSON.stringify(data?.data));
+      navigate("/dashboard");
     } catch (error) {
-      console.error("Login error:", error);
       Swal.fire({
         icon: "error",
-        title: "Error",
+        title: "Login Failed",
         text:
           error.response?.data?.message ||
           "Something went wrong. Please try again.",
@@ -93,200 +84,121 @@ const LoginPage = () => {
   };
 
   return (
-    <section className="relative bg-gray-100">
+    <section className="relative bg-gray-100 overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0">
+      <motion.div
+        initial={{ scale: 1.05 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 6, ease: "easeOut" }}
+        className="absolute inset-0"
+      >
         <img
           src="/loginbg.png"
           alt="Background"
-          className="w-full h-full object-cover "
+          className="w-full h-full object-cover"
         />
-      </div>
+      </motion.div>
 
       {/* Content */}
-      <div className="relative z-10  mx-auto px-4 sm:px-6 lg:px-32 py-12 lg:py-20 flex flex-col lg:flex-row items-center justify-between gap-10">
-        {/* Left Side */}
-        <div className="lg:w-1/2 text-white">
+      <motion.div
+        variants={container}
+        initial="hidden"
+        animate="visible"
+        className="relative z-10 mx-auto px-4 sm:px-6 lg:px-32 py-12 lg:py-20 flex flex-col lg:flex-row items-center justify-between gap-10"
+      >
+        {/* Left Content */}
+        <motion.div variants={fadeUp} className="lg:w-1/2">
           <h2 className="text-2xl sm:text-3xl md:text-[48.65px] font-bold text-[#212529]">
-            Welcome to the Boltix
+            Welcome to Boltix
           </h2>
-          <p className="mt-2 text-sm sm:text-base md:text-[24px] font-normal text-[#212529]">
-            {/* Your account has been successfully <br /> verified! */}
+          <p className="mt-2 md:text-[24px] text-[#212529]">
             The first AI-driven collaboration hub for industrial plants and OEM
             ecosystems.
           </p>
-          <p className="mt-4 text-sm sm:text-base md:text-[24px] font-normal text-[#5D5D5D]">
-            Please log in using the username and password sent to your
-            registered email. Once logged in, you can access your personalized
-            dashboard, whether you’re a Plant Operator or an OEM Supplier, to
-            manage profiles, collaborate, and connect seamlessly within our
-            network.
+          <p className="mt-4 md:text-[24px] text-[#5D5D5D]">
+            Login to access your personalized dashboard and collaborate
+            seamlessly within our network.
           </p>
-        </div>
+        </motion.div>
 
-        {/* Right Side Login Card */}
-        {/* <div className="lg:w-1/2 max-w-md w-full space-y-8 bg-[#212529] text-white rounded-[14px] shadow-lg p-8">
-          <div className="flex flex-col gap-2">
-            <h2 className="text-2xl text-center sm:text-3xl md:text-[48.65px] font-bold text-[#FFFFFF]">
-              Login
-            </h2>
-            <p className="mt-2 text-sm  text-center sm:text-base md:text-[20px] font-normal text-[#FFFFFF]">
-              After First Login Change the password
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-           
-            <div>
-              <input
-                type="text"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="User Name"
-                className="w-full px-4 py-2 rounded-md bg-[#FFFFFF] md:text-[18px] font-normal text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-
-            
-            <div>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Password"
-                className="w-full px-4 py-2 rounded-md bg-[#FFFFFF] md:text-[18px] font-normal text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-              <div className="flex justify-between items-center">
-                <Link
-                  to="/register"
-                  href="#"
-                  className="text-sm md:text-[14px] text-[#207EB1] font-normal  hover:underline mt-4 block text-right"
-                >
-                  Sigup now
-                </Link>
-                <a
-                  href="#"
-                  className="text-sm md:text-[14px]  font-normal text-[#FAF9F6] hover:underline mt-4 block text-right"
-                >
-                  Forgot password?
-                </a>
-              </div>
-            </div>
-
-           
-            <div className="flex justify-end mt-24">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full md:w-[154px] md:h-[48px] md:text-[16px] font-semibold bg-[#207EB1] hover:bg-blue-700 text-[#FFFFFF] py-2 rounded-md transition"
-              >
-                {loading ? (
-                  <>
-                    <CircularProgress size={20} color="inherit" />
-                    Logging in...
-                  </>
-                ) : (
-                  "Login"
-                )}
-              </button>
-            </div>
-          </form>
-        </div> */}
-        <div className="lg:w-1/2 max-w-md w-full space-y-8 bg-[#212529] text-white rounded-[14px] shadow-lg p-8">
-          <div className="flex flex-col gap-2">
-            <h2 className="text-2xl text-center sm:text-3xl md:text-[48.65px] font-bold text-[#FFFFFF]">
-              Login
-            </h2>
-            <p className="mt-2 text-sm text-center sm:text-base md:text-[20px] font-normal text-[#FFFFFF]">
+        {/* Login Card */}
+        <motion.div
+          variants={cardVariant}
+          className="lg:w-1/2 max-w-md w-full bg-[#212529] text-white rounded-[14px] shadow-lg p-8"
+        >
+          <div className="text-center mb-6">
+            <h2 className="text-2xl md:text-[48.65px] font-bold">Login</h2>
+            <p className="md:text-[20px]">
               After first login change the password
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Username */}
-            <div>
-              <label className="block text-sm mb-2 text-[#FFFFFF]">
-                User Name
-              </label>
+            {/* Email */}
+            <motion.div variants={fadeUp}>
+              <label className="block mb-2">User Name</label>
               <input
                 type="text"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="Your User Name"
-                className="w-full px-4 py-2 rounded-md placeholder:text-[#8C8C8C] bg-[#FFFFFF] md:text-[18px] font-normal text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
+                className="w-full px-4 py-2 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-blue-500"
               />
-            </div>
+            </motion.div>
 
-            {/* Password with Eye Icon */}
-            <div>
-              <label className="block text-sm mb-2 text-[#FFFFFF]">
-                Password
-              </label>
+            {/* Password */}
+            <motion.div variants={fadeUp}>
+              <label className="block mb-2">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="••••••••"
-                  className="w-full px-4 py-2 rounded-md placeholder:text-[#8C8C8C] bg-[#FFFFFF] md:text-[18px] font-normal text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
-                  required
+                  className="w-full px-4 py-2 rounded-md bg-white text-gray-900 pr-10 focus:ring-2 focus:ring-blue-500"
                 />
                 {formData.password && (
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-3 flex items-center text-gray-600 hover:text-[#207EB1]"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-[#207EB1]"
                   >
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
                 )}
               </div>
 
-              <div className="flex justify-end mt-3">
-                <a
-                  // href="/login/forgot-password"
-                  onClick={() => navigate("/login/forgot-password")}
-                  className="text-sm md:text-[14px] font-normal text-[#FAF9F6] hover:underline"
+              <div className="text-right mt-2">
+                <Link
+                  to="/login/forgot-password"
+                  className="text-sm hover:underline"
                 >
                   Forgot password?
-                </a>
+                </Link>
               </div>
-            </div>
+            </motion.div>
 
             {/* Submit */}
-            <div className="flex justify-end mt-10">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full md:w-[154px] md:h-[48px] md:text-[16px] font-semibold bg-[#0088FF] hover:bg-blue-700 text-[#FFFFFF] py-2 rounded-md transition flex justify-center items-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    {/* <CircularProgress size={20} color="inherit" /> */}
-                    <RotatingLines
-                      strokeColor="#FFFFFF"
-                      strokeWidth="5"
-                      animationDuration="0.75"
-                      width="20"
-                      visible={true}
-                    />
-                    Logging in...
-                  </>
-                ) : (
-                  "Login"
-                )}
-              </button>
-            </div>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              disabled={loading}
+              type="submit"
+              className="w-full md:w-[154px] md:h-[48px] bg-[#0088FF] rounded-md font-semibold flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <RotatingLines width="20" strokeColor="#fff" />
+                  Logging in...
+                </>
+              ) : (
+                "Login"
+              )}
+            </motion.button>
           </form>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 };

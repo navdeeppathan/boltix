@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
 
-import { Route, Routes, Navigate, useLocation } from "react-router-dom";
+import {
+  Route,
+  Routes,
+  Navigate,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 
 import { FaSignOutAlt } from "react-icons/fa";
 import ManagerSidebar from "./utils/ManagerSidebar";
@@ -20,10 +26,18 @@ import ManagerNotifications from "./pages/ManagerNotifications";
 import ManagerProfile from "./pages/ManagerProfile";
 import ManagerTicketListUpStages from "./pages/ManagerTicketListUpStages";
 import { RotatingLines } from "react-loader-spinner";
+import ManagerUsers from "./pages/ManagerUsers";
+import CreateUsers from "./pages/CreateUsers";
+import ManagerTicketDetails from "./pages/ManagerTicketDetails";
+import { Create } from "@mui/icons-material";
+import CreateProduct from "./pages/CreateProduct";
+import ManageProducts from "./pages/ManageProducts";
+import EditProduct from "./pages/EditProduct";
 
 const UserCard = () => {
   const [userData, setUserData] = useState(null);
-
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   useEffect(() => {
     const storedData = localStorage.getItem("userData");
     if (storedData) {
@@ -61,7 +75,7 @@ const UserCard = () => {
         {userData.company?.company_name || "Company name not available"}
       </p>
 
-      <button
+      {/* <button
         onClick={() => {
           localStorage.clear();
           window.location.reload();
@@ -69,6 +83,39 @@ const UserCard = () => {
         className="mt-10 px-4 py-2 bg-[#D9D9D9]/20 rounded-[30px] flex items-center text-[16px] font-semibold justify-center gap-2 text-[#212529] hover:bg-gray-200 transition text-sm"
       >
         <FaSignOutAlt className="text-gray-600" /> Logout
+      </button> */}
+      <button
+        onClick={() => {
+          setLoading(true);
+          localStorage.clear();
+          setTimeout(() => {
+            navigate("/");
+          }, 2000);
+        }}
+        disabled={loading}
+        className="mt-10 px-4 py-2 bg-[#D9D9D9]/20 rounded-[30px] flex items-center justify-center gap-2 text-[16px] font-semibold text-[#212529] hover:bg-gray-200 transition text-sm h-[44px]" // 👈 fixed height added
+      >
+        <div className="flex items-center justify-center gap-2">
+          {loading ? (
+            <>
+              <div className="flex items-center justify-center w-[20px] h-[20px]">
+                <RotatingLines
+                  strokeColor="#1E1E1E"
+                  strokeWidth="5"
+                  animationDuration="0.75"
+                  width="20"
+                  visible={true}
+                />
+              </div>
+              <span>Logging out...</span>
+            </>
+          ) : (
+            <>
+              <FaSignOutAlt className="text-gray-600" />
+              <span>Logout</span>
+            </>
+          )}
+        </div>
       </button>
     </div>
   );
@@ -83,21 +130,28 @@ const ManagerDashboard = () => {
   useEffect(() => {
     const path = location.pathname;
     if (path.includes("create-ticket")) setTitle("Create Ticket");
-    else if (path.includes("tickets")) setTitle("My Inquiries");
+    else if (path.includes("tickets")) setTitle("My Tickets");
     else if (path.includes("communication")) setTitle("Communication");
     else if (path.includes("notifications")) setTitle("Notifications");
     else if (path.includes("profile")) setTitle("Profile");
-    else if (path.includes("ticket-details")) setTitle("My Inquiries");
+    else if (path.includes("ticket-details")) setTitle("Tickets Details");
+    else if (path.includes("ticket-stages")) setTitle("Ticket Stages");
+    else if (path.includes("users-list")) setTitle("Users");
+    else if (path.includes("add-users")) setTitle("Add Users");
+    else if (path.includes("manage-products")) setTitle("Manage Products");
+    else if (path.includes("add-products")) setTitle("Create Product");
+    else if (path.includes("edit-products")) setTitle("Edit Product");
     else setTitle("Dashboard");
   }, [location]);
 
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     const fetchMessages = async () => {
       try {
         setLoading(true);
-        const response = await http.get(`/chats/receiver/${user.id}`);
+        const response = await http.get(`/chats`);
         console.log("responisve:-", response.data);
         setMessages(response.data.data || []);
       } catch (error) {
@@ -140,9 +194,19 @@ const ManagerDashboard = () => {
                 <Route path="profile" element={<ManagerProfile />} />
                 <Route path="ticket-details/:id" element={<TicketDetails />} />
                 <Route
+                  path="ticket/ticket-details/:id"
+                  element={<ManagerTicketDetails />}
+                />
+
+                <Route
                   path="ticket-stages"
                   element={<ManagerTicketListUpStages />}
                 />
+                <Route path="users-list" element={<ManagerUsers />} />
+                <Route path="add-users" element={<CreateUsers />} />
+                <Route path="add-products" element={<CreateProduct />} />
+                <Route path="manage-products" element={<ManageProducts />} />
+                <Route path="edit-products/:id" element={<EditProduct />} />
 
                 <Route path="*" element={<Navigate to="home" replace />} />
               </Routes>
@@ -151,40 +215,15 @@ const ManagerDashboard = () => {
             {/* Right: User Info & Messages (20%) */}
             <div className="w-full lg:w-[20%] space-y-6">
               <UserCard />
-              <div className="bg-[#F9F9F9] rounded-xl shadow-sm p-4">
+              {/* <div className="bg-[#F9F9F9] rounded-xl shadow-sm p-4">
                 <h4 className="font-semibold text-[#212529] mb-3">
                   Recent Messages
                 </h4>
-                {/* <div className="space-y-3">
-                  {[1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className="bg-white rounded-lg p-3 shadow-sm text-sm text-[#333]"
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <img src="/sany.png" alt="icon" className="w-4 h-4" />
-                        <span className="font-semibold text-[#D8232A]">
-                          Daihatsu
-                        </span>
-                      </div>
-                      <p className="text-[12px] text-[#555] mb-2 leading-snug">
-                        Thank you for reaching out. We’ve received your inquiry
-                        regarding the centrifugal pump repair and are reviewing
-                        your details.
-                      </p>
-                      <div className="flex justify-between text-[11px] text-[#9D9D9D]">
-                        <span>1m ago</span>
-                        <button className="text-[#007BFF] hover:underline">
-                          Reply
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div> */}
+               
                 <div className="space-y-3">
                   {loading ? (
                     <div className="flex justify-center py-4">
-                      {/* <CircularProgress size={20} color="inherit" /> */}
+                      
                       <RotatingLines
                         strokeColor="#1E1E1E"
                         strokeWidth="5"
@@ -201,6 +240,7 @@ const ManagerDashboard = () => {
                         key={msg.id}
                         className="bg-white rounded-lg p-3 shadow-sm text-sm text-[#333]"
                       >
+                        <p>{msg.ticket.ticket_number}</p>
                         <div className="flex items-center gap-2 mb-1">
                           <img src="/sany.png" alt="icon" className="w-4 h-4" />
                           <span className="font-semibold text-[#D8232A]">
@@ -214,15 +254,13 @@ const ManagerDashboard = () => {
                           <span>
                             {new Date(msg.date_time).toLocaleTimeString()}
                           </span>
-                          {/* <button className="text-[#007BFF] hover:underline">
-                            Reply
-                          </button> */}
+                          
                         </div>
                       </div>
                     ))
                   )}
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         </main>

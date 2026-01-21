@@ -108,9 +108,14 @@ function TicketChat() {
                 <h3 className="text-lg font-bold text-gray-800 mb-2">
                   {ticket.ticket_title}
                 </h3>
-                <p className="text-gray-600 text-sm line-clamp-3">
-                  {ticket.description || "No description available."}
-                </p>
+                <p
+                  className="text-gray-600 text-sm line-clamp-3"
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      ticket.description?.split(" ").slice(0, 10).join(" ") +
+                        "..." || "No description available.",
+                  }}
+                ></p>
               </div>
 
               <button className="mt-4 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg transition-all">

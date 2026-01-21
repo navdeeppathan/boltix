@@ -33,6 +33,9 @@ import { Videocam, Call, Close } from "@mui/icons-material";
 import { toast } from "react-toastify";
 
 import "../utils/CustomScroll.css";
+import { useNavigate } from "react-router-dom";
+import { callUser, endCall, registerClient } from "../service/twilio";
+import IncomingCallPopup from "../service/IncomingCallPopup";
 
 const DashboardPage = () => {
   const stats = [
@@ -84,6 +87,7 @@ const DashboardPage = () => {
 export default DashboardPage;
 
 const DashboardStatus = () => {
+  const navigate = useNavigate();
   // const stats = [
   //   {
   //     label: "Open Tickets",
@@ -125,11 +129,14 @@ const DashboardStatus = () => {
 
   const [stats, setStats] = useState([]);
 
+  const user = JSON.parse(localStorage.getItem("userData"));
+
   useEffect(() => {
     const fetchTickets = async () => {
       try {
-        const res = await http.get("/tickets/by-stage"); // your API endpoint
+        const res = await http.get(`/tickets/by-stage/${user.id}`); // your API endpoint
         const groupedTickets = res.data.data;
+        console.log("grptockets:-", groupedTickets);
 
         const statsArray = [
           {
@@ -137,49 +144,58 @@ const DashboardStatus = () => {
             value: groupedTickets.open.length,
             icon: "/h1.png",
             color: "bg-[#DC2776]",
+            link: "/dashboard/tickets",
           },
           {
-            label: "In Progress Tickets",
-            value: groupedTickets.in_progress.length,
+            label: "Closed Tickets",
+            value: groupedTickets.closed.length,
             icon: "/h2.png",
             color: "bg-[#9532E9]",
+            link: "/dashboard/closed-tickets",
           },
           {
-            label: "High Priority Issues",
-            value: groupedTickets.high_priority.length,
-            icon: "/h3.png",
-            color: "bg-[#EA2179]",
-          },
-          {
-            label: "Recently Created Tickets",
-            value: groupedTickets.recently_created.length,
-            icon: "/h4.png",
-            color: "bg-[#2466EB]",
-          },
-          {
-            label: "Issues Reported",
-            value:
-              groupedTickets.pending.length +
-              groupedTickets.in_progress.length +
-              groupedTickets.open.length,
+            label: "Pending Tickets",
+            value: groupedTickets.pending.length,
             icon: "/h5.png",
             color: "bg-[#037DC8]",
+            link: "/dashboard/pending-tickets",
           },
           {
-            label: "Active Conversations",
-            value:
-              groupedTickets.pending.reduce(
-                (acc, t) => acc + t.chats.length,
-                0
-              ) +
-              groupedTickets.in_progress.reduce(
-                (acc, t) => acc + t.chats.length,
-                0
-              ) +
-              groupedTickets.open.reduce((acc, t) => acc + t.chats.length, 0),
-            icon: "/h6.png",
-            color: "bg-[#09A7EA]",
+            label: "Returned Tickets",
+            value: groupedTickets.returned.length,
+            icon: "/h3.png",
+            color: "bg-[#EA2179]",
+            link: "/dashboard/returned-tickets",
           },
+          {
+            label: "Rejected Tickets",
+            value: groupedTickets.rejected.length,
+            icon: "/h4.png",
+            color: "bg-[#2466EB]",
+            link: "/dashboard/rejected-tickets",
+          },
+          {
+            label: "Total Tickets",
+            value: groupedTickets.all_tickets,
+            icon: "/h5.png",
+            color: "bg-[#037DC8]",
+            link: "/dashboard/tickets",
+          },
+          // {
+          //   label: "Active Conversations",
+          //   value:
+          //     groupedTickets.pending.reduce(
+          //       (acc, t) => acc + t.chats.length,
+          //       0
+          //     ) +
+          //     groupedTickets.in_progress.reduce(
+          //       (acc, t) => acc + t.chats.length,
+          //       0
+          //     ) +
+          //     groupedTickets.open.reduce((acc, t) => acc + t.chats.length, 0),
+          //   icon: "/h6.png",
+          //   color: "bg-[#09A7EA]",
+          // },
         ];
 
         setStats(statsArray);
@@ -192,10 +208,10 @@ const DashboardStatus = () => {
   }, []);
   return (
     <div className="flex flex-col lg:flex-row gap-4 w-full">
-      {/* ✅ Left: Current Status (80%) */}
+      {/* Left: Current Status (80%) */}
       <div className="w-full  bg-[#F9F9F9] rounded-[14px] p-4 sm:p-6 md:p-4">
         {/* Header Section */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2">
+        {/* <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2">
           <h2 className="text-base sm:text-lg md:text-xl lg:text-[16px] text-[#212529] font-bold">
             Current Status
           </h2>
@@ -204,13 +220,14 @@ const DashboardStatus = () => {
             <option>Weekly</option>
             <option>Monthly</option>
           </select>
-        </div>
+        </div> */}
 
         {/* Responsive Grid of Status Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
           {stats.map((item, i) => (
             <div
               key={i}
+              onClick={() => navigate(item.link)}
               className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-3 sm:p-4 flex flex-col items-start justify-between text-start min-h-[120px] sm:min-h-[150px]"
             >
               <div
@@ -272,6 +289,7 @@ const DashboardStatus = () => {
 };
 
 const TicketOverview = () => {
+  const navigate = useNavigate();
   const [tickets, setTickets] = useState([]);
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -377,6 +395,12 @@ const TicketOverview = () => {
     setSelectedTicketId(null);
     if (refresh) fetchTickets();
   };
+  const myIdentity = "user_101"; // login user (User dashboard)
+
+  useEffect(() => {
+    registerClient("user_" + user.id); // Identity of logged-in user
+  }, []);
+  console.log("Calling:", "supplier_" + activeTicket?.manufacturer);
 
   return (
     <>
@@ -430,37 +454,51 @@ const TicketOverview = () => {
           </div>
 
           {/* Tabs */}
-          <div className="border-b border-[#CECECE]/40 py-2 pl-4 flex gap-6  text-sm">
+          <div className="border-b border-[#CECECE]/40 py-2 pl-4 flex items-center gap-4 md:gap-6 text-sm overflow-x-auto no-scrollbar">
             {tickets.length > 0 ? (
-              tickets.map((ticket, index) => (
-                <button
-                  key={ticket.id}
-                  onClick={() => {
-                    setActiveTab(index);
-                    setActiveTicket(ticket);
-                    localStorage.setItem(
-                      "activeTicket",
-                      JSON.stringify(ticket)
-                    );
-                  }}
-                  className={`md:text-[14px] whitespace-nowrap ${
-                    activeTab === index
-                      ? "text-[#282D37] font-bold"
-                      : "text-[#9D9D9D]"
-                  }`}
-                >
-                  {`Ticket ${index + 1}`}
-                </button>
-              ))
+              tickets
+                .filter((ticket) => ticket?.stage == 1)
+                .slice(0, 5)
+                .map((ticket, index) => (
+                  <button
+                    key={ticket.id}
+                    onClick={() => {
+                      setActiveTab(index);
+                      setActiveTicket(ticket);
+                      localStorage.setItem(
+                        "activeTicket",
+                        JSON.stringify(ticket)
+                      );
+                    }}
+                    className={`md:text-[14px] whitespace-nowrap flex-shrink-0 ${
+                      activeTab === index
+                        ? "text-[#282D37] font-bold"
+                        : "text-[#9D9D9D]"
+                    }`}
+                  >
+                    {`Ticket ${index + 1}`}
+                  </button>
+                ))
             ) : (
-              <p className="text-gray-400 pl-4 text-sm">No tickets found</p>
+              <p className="text-gray-400 pl-4 text-sm whitespace-nowrap flex-shrink-0">
+                No tickets found
+              </p>
+            )}
+
+            {tickets.length > 2 && (
+              <button
+                onClick={() => navigate("/dashboard/tickets")}
+                className="ml-auto md:ml-4 border border-blue-500 rounded-full px-3 py-1 text-blue-500 text-sm font-medium flex-shrink-0"
+              >
+                View All
+              </button>
             )}
           </div>
 
           <div className="flex bg-white border-b border-[#CECECE]/40  flex-col md:flex-row justify-between items-start md:items-center p-4">
-            <h2 className="text-base md:text-[13px] text-[#212529] font-semibold">
+            {/* <h2 className="text-base md:text-[13px] text-[#212529] font-semibold">
               OEM / Service <br /> Provider Name
-            </h2>
+            </h2> */}
 
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2 md:mt-0">
@@ -468,24 +506,69 @@ const TicketOverview = () => {
               {/* <button className="w-9 h-9 flex items-center justify-center rounded-full bg-[#707578] text-white hover:opacity-90 transition">
                 <FaFileAlt size={16} />
               </button> */}
-              <UploadTicketDoc
-                ticketId={activeTicket?.id}
-                fetchTickets={fetchTickets}
-              />
+              {activeTicket?.stage == 1 &&
+                activeTicket?.assigned_tickets.length > 0 && (
+                  <UploadTicketDoc
+                    ticketId={activeTicket?.id}
+                    fetchTickets={fetchTickets}
+                  />
+                )}
 
               {/* Chat Icon */}
-              {activeTicket?.response_mode?.toLowerCase() === "chat" && (
+              {activeTicket?.response_mode?.toLowerCase() === "chat" &&
+                activeTicket?.stage == 1 &&
+                activeTicket?.assigned_tickets.length > 0 && (
+                  <button
+                    // onClick={() => setOpen(true)}
+                    onClick={() => {
+                      setSelectedTicketId(activeTicket.id);
+                      setOpenChat(true);
+                    }}
+                    className="w-9 h-9 flex items-center justify-center rounded-full bg-[#8FCAA1] text-white hover:opacity-90 transition"
+                  >
+                    <FaCommentAlt size={16} />
+                  </button>
+                )}
+
+              {/* Video + Call pill */}
+              <div className="flex items-center bg-[#09A7EA] rounded-full overflow-hidden">
+                {activeTicket?.response_mode?.toLowerCase() === "video" &&
+                  activeTicket?.stage == 1 &&
+                  activeTicket?.assigned_tickets.length > 0 && (
+                    <a
+                      href={`/video-user/${user.full_name}/${activeTicket?.id}/${user.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-2 text-white flex items-center hover:bg-[#0c9dd9] transition"
+                    >
+                      <FaVideo size={15} />
+                    </a>
+                  )}
+                <div className="w-px bg-white h-5"></div>
+                {/* {activeTicket?.response_mode?.toLowerCase() === "call" && (
+                  <button className="px-3 py-2 text-white flex items-center hover:bg-[#0c9dd9] transition">
+                    <FaPhone size={15} />
+                  </button>
+                )} */}
+                {/* 
                 <button
-                  // onClick={() => setOpen(true)}
-                  onClick={() => {
-                    setSelectedTicketId(activeTicket.id);
-                    setOpenChat(true);
-                  }}
-                  className="w-9 h-9 flex items-center justify-center rounded-full bg-[#8FCAA1] text-white hover:opacity-90 transition"
+                  className="flex items-center justify-center gap-2 px-4 py-2 bg-[#0A84FF] hover:bg-[#007AFF] text-white text-[13px] sm:text-[14px] font-medium rounded-full transition-all duration-200 w-full sm:w-auto"
+                  onClick={() =>
+                    callUser("supplier_" + activeTicket?.manufacturer)
+                  }
                 >
-                  <FaCommentAlt size={16} />
+                  Call Supplier
                 </button>
-              )}
+                <button
+                  className=" flex items-center justify-center gap-2 px-4 py-2 bg-[#0A84FF] hover:bg-[#007AFF] text-white text-[13px] sm:text-[14px] font-medium rounded-full transition-all duration-200 w-full sm:w-auto"
+                  onClick={endCall}
+                  style={{ marginLeft: 10 }}
+                >
+                  End Call
+                </button>
+
+                <IncomingCallPopup /> */}
+              </div>
 
               <ChatModal
                 open={openChat}
@@ -495,7 +578,7 @@ const TicketOverview = () => {
               />
 
               {/* Video + Call pill */}
-              <div className="flex items-center bg-[#09A7EA] rounded-full overflow-hidden">
+              {/* <div className="flex items-center bg-[#09A7EA] rounded-full overflow-hidden">
                 {activeTicket?.response_mode?.toLowerCase() === "video" && (
                   <button className="px-3 py-2 text-white flex items-center hover:bg-[#0c9dd9] transition">
                     <FaVideo size={15} />
@@ -507,17 +590,20 @@ const TicketOverview = () => {
                     <FaPhone size={15} />
                   </button>
                 )}
-              </div>
+              </div> */}
 
               {/* Take Photo */}
               {/* <button className="flex items-center justify-center gap-2 px-4 py-2 bg-[#0A84FF] hover:bg-[#007AFF] text-white text-[13px] sm:text-[14px] font-medium rounded-full transition-all duration-200 w-full sm:w-auto">
                 <FaCamera className="text-[14px]" />
                 Take Photo/Upload
               </button> */}
-              <UploadTicketImage
-                ticketId={activeTicket?.id}
-                fetchTickets={fetchTickets}
-              />
+              {activeTicket?.stage == 1 &&
+                activeTicket?.assigned_tickets.length > 0 && (
+                  <UploadTicketImage
+                    ticketId={activeTicket?.id}
+                    fetchTickets={fetchTickets}
+                  />
+                )}
             </div>
           </div>
 
@@ -680,7 +766,7 @@ const UploadTicketImage = ({ ticketId, fetchTickets }) => {
         }`}
       >
         <FaCamera className="text-[14px]" />
-        {loading ? "Uploading..." : "Take Photo / Upload"}
+        {loading ? "Uploading..." : "Upload Photo"}
       </button>
 
       {/* Hidden file input */}
@@ -758,43 +844,12 @@ const TicketBoard = ({ tickets = [], onClick }) => {
   const ticket = tickets[0];
   if (!ticket) return null;
   console.log("ticket:-", ticket);
-  // const [pictureTicket, setPictureTicket] = useState(null);
-
-  // Sync pictureTicket with ticket prop on mount or when ticket changes
-  // useEffect(() => {
-  //   if (ticket?.pic_status === 1 && ticket?.photo) {
-  //     setPictureTicket(ticket);
-  //   } else {
-  //     setPictureTicket(null);
-  //   }
-  // }, [ticket]);
-
-  // const handleDragStart = (e, t) => {
-  //   e.dataTransfer.setData("ticketId", t.id);
-  // };
-
-  // const handleDragOver = (e) => e.preventDefault();
-
-  // const handleDrop = async (e) => {
-  //   e.preventDefault();
-  //   if (ticket?.pic_status === 0 && ticket?.photo) {
-  //     try {
-  //       // Call API to update pic_status
-  //       await http.post(`/tickets/update-pic-status/${ticket.id}/1`);
-
-  //       // Update pictureTicket state
-  //       setPictureTicket({ ...ticket, pic_status: 1 });
-  //     } catch (error) {
-  //       console.error(
-  //         "Error updating pic_status",
-  //         error.response?.data || error.message
-  //       );
-  //     }
-  //   }
-  // };
 
   const [showPreview, setShowPreview] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState(null);
+
+  const documentUrl = ticket?.upload_documents
+    ? `${baseURL}/${ticket?.upload_documents}`
+    : null;
 
   const getTimeAgo = (createdAt) => {
     if (!createdAt) return "N/A";
@@ -812,34 +867,111 @@ const TicketBoard = ({ tickets = [], onClick }) => {
     if (diffDay < 7) return `${diffDay}d ago`;
     return created.toLocaleDateString();
   };
+  const getPriorityColor = (priority) => {
+    const priorityValue =
+      typeof priority === "object" && priority !== null
+        ? priority.priority_name
+        : priority;
 
+    switch (String(priorityValue || "").toLowerCase()) {
+      case "high":
+        return "bg-red-500 text-white";
+      case "medium":
+        return "bg-yellow-500 text-black";
+      case "low":
+        return "bg-cyan-500 text-white";
+      case "critical":
+        return "bg-red-600 text-white";
+      default:
+        return "bg-gray-500 text-white";
+    }
+  };
   return (
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* New Column */}
-        <div className="md:border-r md:min-h-screen md:border-[#CECECE]/40 px-4">
-          <h3 className="font-bold text-[#282D37] md:text-xs mb-2 mt-2">New</h3>
+      {/* Ticket Board */}
+      {ticket.stage == 1 ? (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* New Column */}
+          <div className="md:border-r md:min-h-screen md:border-[#CECECE]/40 px-4">
+            <h3 className="font-bold text-[#282D37] md:text-xs mb-2 mt-2">
+              New
+            </h3>
 
-          {/* Static Title & Description */}
-          {/* <div className="bg-white rounded-[10px] shadow p-4 mb-3">
-            <h4 className="font-semibold text-xs">
-              Ticket Created to {ticket?.manufacturer || "N/A"}
-            </h4>
-            <p className="text-xs text-gray-500">{ticket?.description}</p>
-          </div> */}
-          <div className="h-[100vh] overflow-y-auto custom-scroll">
-            <div className="bg-white rounded-[10px] shadow p-4 mb-3 w-full">
-              {/* Title */}
+            {/* Static Title & Description */}
+            <div className="h-[100vh] overflow-y-auto custom-scroll">
+              <div className="bg-white rounded-[10px] shadow p-2 mb-3 w-full">
+                {/* Title */}
+                <h4 className="font-semibold text-[13px] text-[#212529] mb-1">
+                  Ticket Created to {ticket?.manufacturer || "N/A"}
+                </h4>
+
+                {/* Description */}
+                <p className="text-[12px] text-gray-500 mb-3 line-clamp-2">
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        ticket.description?.split(" ").slice(0, 10).join(" ") +
+                        "...",
+                    }}
+                  />
+                </p>
+
+                {/* Footer */}
+                <div className="flex items-center justify-between text-[12px] text-gray-500">
+                  <div className="flex items-center gap-0.5">
+                    <img
+                      src="/clock.png"
+                      alt=""
+                      className="w-[13px] h-[13px] object-cover"
+                    />
+                    <span>{getTimeAgo(ticket?.created_at)}</span>
+                  </div>
+
+                  {/* Priority Badge */}
+                  <div className="flex gap-0.5 items-center">
+                    <img
+                      src="/priority.png"
+                      alt=""
+                      className="w-[13px] h-[13px] object-cover"
+                    />
+                    <span
+                      className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
+                        ticket.priority?.priority_name
+                      )}`}
+                    >
+                      {ticket.priority?.priority_name || "N/A"}
+                    </span>
+                  </div>
+
+                  {/* Profile Avatar */}
+                  <img
+                    src={ticket?.user?.company?.profile_pic || "/person.jpg"}
+                    alt="User"
+                    className="w-6 h-6 rounded-full object-cover"
+                  />
+                </div>
+              </div>
+              {/* <div className="bg-white rounded-[10px] shadow p-2 mb-3 w-full">
+             
               <h4 className="font-semibold text-[13px] text-[#212529] mb-1">
-                Ticket Created to {ticket?.manufacturer || "N/A"}
+                SLA
               </h4>
 
-              {/* Description */}
+            
+              <p className="text-[12px] text-gray-500  line-clamp-2">
+                Priority:&nbsp;
+                <span className="font-semibold">
+                  {ticket?.priority?.priority_name || "N/A"}
+                </span>
+              </p>
               <p className="text-[12px] text-gray-500 mb-3 line-clamp-2">
-                {ticket?.description || "No description available."}
+                Response Time:&nbsp;
+                <span className="font-semibold">
+                  {ticket?.priority?.days || "N/A"} days
+                </span>
               </p>
 
-              {/* Footer */}
+             
               <div className="flex items-center justify-between text-[12px] text-gray-500">
                 <div className="flex items-center gap-0.5">
                   <img
@@ -850,7 +982,7 @@ const TicketBoard = ({ tickets = [], onClick }) => {
                   <span>{getTimeAgo(ticket?.created_at)}</span>
                 </div>
 
-                {/* Priority Badge */}
+             
                 <div className="flex gap-0.5 items-center">
                   <img
                     src="/priority.png"
@@ -858,177 +990,41 @@ const TicketBoard = ({ tickets = [], onClick }) => {
                     className="w-[13px] h-[13px] object-cover"
                   />
                   <span
-                    className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${
-                      ticket?.priority?.toLowerCase() === "high"
-                        ? "bg-red-100 text-red-600"
-                        : ticket?.priority?.toLowerCase() === "medium"
-                        ? "bg-yellow-100 text-yellow-600"
-                        : ticket?.priority?.toLowerCase() === "low"
-                        ? "bg-cyan-100 text-cyan-600"
-                        : ticket?.priority?.toLowerCase() === "critical"
-                        ? "bg-red-100 text-red-600"
-                        : "bg-green-100 text-green-600"
-                    }`}
+                    className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
+                      ticket.priority?.priority_name
+                    )}`}
                   >
-                    {ticket?.priority || "N/A"}
+                    {ticket.priority?.priority_name || "N/A"}
                   </span>
                 </div>
 
-                {/* Profile Avatar */}
+                
                 <img
                   src={ticket?.user?.company?.profile_pic || "/person.jpg"}
                   alt="User"
                   className="w-6 h-6 rounded-full object-cover"
                 />
               </div>
-            </div>
-          </div>
+            </div> */}
 
-          {/* Draggable Photo */}
-          {/* {ticket?.pic_status === 0 && ticket?.photo && !pictureTicket && (
-            <img
-              src={`${baseURL}/${ticket.photo}`}
-              alt="ticket"
-              className="mt-2 w-full h-20 object-contain rounded cursor-move"
-              draggable
-              onDragStart={(e) => handleDragStart(e, ticket)}
-            />
-          )} */}
-        </div>
-
-        <div className="border-r border-[#CECECE]/40 px-4 pl-4 md:pl-0">
-          <>
-            <h3 className="font-bold text-[#282D37] md:text-xs mb-2 mt-2">
-              Documents
-            </h3>
-            <div className="h-[100vh] overflow-y-auto custom-scroll">
-              {/* basic info */}
-              <div className="bg-white rounded-[10px] shadow p-4 mb-3 w-full">
+              <div className="bg-white rounded-[10px] shadow p-2 mb-3 w-full">
                 {/* Title */}
                 <h4 className="font-semibold text-[13px] text-[#212529] mb-1">
-                  Basic Information
+                  SLA
                 </h4>
-                <p className="text-[12px] text-gray-500 line-clamp-2">
-                  Plant Name: {ticket?.plant_name || "N/A"}
-                </p>
+
                 {/* Description */}
-                <p className="text-[12px] text-gray-500 mb-3 line-clamp-2">
-                  Category: {ticket?.category || "N/A"}
-                </p>
-
-                {/* Footer */}
-                <div className="flex items-center justify-between text-[12px] text-gray-500">
-                  <div className="flex items-center gap-0.5">
-                    <img
-                      src="/clock.png"
-                      alt=""
-                      className="w-[13px] h-[13px] object-cover"
-                    />
-                    <span>{getTimeAgo(ticket?.created_at)}</span>
-                  </div>
-
-                  {/* Priority Badge */}
-                  <div className="flex gap-0.5 items-center">
-                    <img
-                      src="/priority.png"
-                      alt=""
-                      className="w-[13px] h-[13px] object-cover"
-                    />
-                    <span
-                      className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${
-                        ticket?.priority?.toLowerCase() === "high"
-                          ? "bg-red-100 text-red-600"
-                          : ticket?.priority?.toLowerCase() === "medium"
-                          ? "bg-yellow-100 text-yellow-600"
-                          : ticket?.priority?.toLowerCase() === "low"
-                          ? "bg-cyan-100 text-cyan-600"
-                          : ticket?.priority?.toLowerCase() === "critical"
-                          ? "bg-red-100 text-red-600"
-                          : "bg-green-100 text-green-600"
-                      }`}
-                    >
-                      {ticket?.priority || "N/A"}
-                    </span>
-                  </div>
-
-                  {/* Profile Avatar */}
-                  <img
-                    src={ticket?.user?.company?.profile_pic || "/person.jpg"}
-                    alt="User"
-                    className="w-6 h-6 rounded-full object-cover"
-                  />
-                </div>
-              </div>
-              {/* equipment info */}
-              <div className="bg-white rounded-[10px] shadow p-4 mb-3 w-full">
-                {/* Title */}
-                <h4 className="font-semibold text-[13px] text-[#212529] mb-1">
-                  Equipment Info
-                </h4>
-                <p className="text-[12px] text-gray-500 line-clamp-2">
-                  Equipment: {ticket?.equipment || "N/A"}
-                </p>
-                {/* Description */}
-                <p className="text-[12px] text-gray-500 mb-3 line-clamp-2">
-                  Model :{ticket?.model_number || "N/A"}
-                </p>
-
-                {/* Footer */}
-                <div className="flex items-center justify-between text-[12px] text-gray-500">
-                  <div className="flex items-center gap-0.5">
-                    <img
-                      src="/clock.png"
-                      alt=""
-                      className="w-[13px] h-[13px] object-cover"
-                    />
-                    <span>{getTimeAgo(ticket?.created_at)}</span>
-                  </div>
-
-                  {/* Priority Badge */}
-                  <div className="flex gap-0.5 items-center">
-                    <img
-                      src="/priority.png"
-                      alt=""
-                      className="w-[13px] h-[13px] object-cover"
-                    />
-                    <span
-                      className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${
-                        ticket?.priority?.toLowerCase() === "high"
-                          ? "bg-red-100 text-red-600"
-                          : ticket?.priority?.toLowerCase() === "medium"
-                          ? "bg-yellow-100 text-yellow-600"
-                          : ticket?.priority?.toLowerCase() === "low"
-                          ? "bg-cyan-100 text-cyan-600"
-                          : ticket?.priority?.toLowerCase() === "critical"
-                          ? "bg-red-100 text-red-600"
-                          : "bg-green-100 text-green-600"
-                      }`}
-                    >
-                      {ticket?.priority || "N/A"}
-                    </span>
-                  </div>
-
-                  {/* Profile Avatar */}
-                  <img
-                    src={ticket?.user?.company?.profile_pic || "/person.jpg"}
-                    alt="User"
-                    className="w-6 h-6 rounded-full object-cover"
-                  />
-                </div>
-              </div>
-
-              {/* service info */}
-              <div className="bg-white rounded-[10px] shadow p-4 mb-3 w-full">
-                {/* Title */}
-                <h4 className="font-semibold text-[13px] text-[#212529] mb-1">
-                  Service Information
-                </h4>
                 <p className="text-[12px] text-gray-500  line-clamp-2">
-                  Provider: {ticket?.service_provider || "N/A"}
+                  Complexity:&nbsp;
+                  <span className="font-semibold">
+                    {ticket?.complexity?.priority_name || "N/A"}
+                  </span>
                 </p>
-                {/* Description */}
                 <p className="text-[12px] text-gray-500 mb-3 line-clamp-2">
-                  Manufacturer :{ticket?.manufacturer || "N/A"}
+                  Response Time:&nbsp;
+                  <span className="font-semibold">
+                    {ticket?.complexity?.days || "N/A"} days
+                  </span>
                 </p>
 
                 {/* Footer */}
@@ -1050,19 +1046,11 @@ const TicketBoard = ({ tickets = [], onClick }) => {
                       className="w-[13px] h-[13px] object-cover"
                     />
                     <span
-                      className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${
-                        ticket?.priority?.toLowerCase() === "high"
-                          ? "bg-red-100 text-red-600"
-                          : ticket?.priority?.toLowerCase() === "medium"
-                          ? "bg-yellow-100 text-yellow-600"
-                          : ticket?.priority?.toLowerCase() === "low"
-                          ? "bg-cyan-100 text-cyan-600"
-                          : ticket?.priority?.toLowerCase() === "critical"
-                          ? "bg-red-100 text-red-600"
-                          : "bg-green-100 text-green-600"
-                      }`}
+                      className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
+                        ticket.complexity?.priority_name
+                      )}`}
                     >
-                      {ticket?.priority || "N/A"}
+                      {ticket.complexity?.priority_name || "N/A"}
                     </span>
                   </div>
 
@@ -1075,108 +1063,40 @@ const TicketBoard = ({ tickets = [], onClick }) => {
                 </div>
               </div>
 
-              {/* support info */}
-              <div className="bg-white rounded-[10px] shadow p-4 mb-3 w-full">
-                {/* Title */}
-                <h4 className="font-semibold text-[13px] text-[#212529] mb-1">
-                  Support
-                </h4>
-                <p className="text-[12px] text-gray-500  line-clamp-2">
-                  Installation Support:{" "}
-                  {ticket?.need_product_installation_support
-                    ? ticket.need_product_installation_support
-                        .charAt(0)
-                        .toUpperCase() +
-                      ticket.need_product_installation_support.slice(1)
-                    : "N/A"}
-                </p>
-                {/* Description */}
-                <p className="text-[12px] text-gray-500 mb-3 line-clamp-2">
-                  Implementation Support :
-                  {ticket?.need_service_implementation_support
-                    ? ticket.need_service_implementation_support
-                        .charAt(0)
-                        .toUpperCase() +
-                      ticket.need_service_implementation_support.slice(1)
-                    : "N/A"}
-                </p>
-
-                {/* Footer */}
-                <div className="flex items-center justify-between text-[12px] text-gray-500">
-                  <div className="flex items-center gap-0.5">
-                    <img
-                      src="/clock.png"
-                      alt=""
-                      className="w-[13px] h-[13px] object-cover"
-                    />
-                    <span>{getTimeAgo(ticket?.created_at)}</span>
-                  </div>
-
-                  {/* Priority Badge */}
-                  <div className="flex gap-0.5 items-center">
-                    <img
-                      src="/priority.png"
-                      alt=""
-                      className="w-[13px] h-[13px] object-cover"
-                    />
-                    <span
-                      className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${
-                        ticket?.priority?.toLowerCase() === "high"
-                          ? "bg-red-100 text-red-600"
-                          : ticket?.priority?.toLowerCase() === "medium"
-                          ? "bg-yellow-100 text-yellow-600"
-                          : ticket?.priority?.toLowerCase() === "low"
-                          ? "bg-cyan-100 text-cyan-600"
-                          : ticket?.priority?.toLowerCase() === "critical"
-                          ? "bg-red-100 text-red-600"
-                          : "bg-green-100 text-green-600"
-                      }`}
+              {ticket?.activities?.length > 0
+                ? ticket?.activities.map((activity, index) => (
+                    <div
+                      key={index}
+                      className="bg-white rounded-[10px] shadow p-2 mb-3 w-full"
                     >
-                      {ticket?.priority || "N/A"}
-                    </span>
-                  </div>
+                      {/* Title */}
+                      <h4 className="font-semibold text-[13px] text-[#212529] ">
+                        {activity.title || "Activity"}
+                      </h4>
 
-                  {/* Profile Avatar */}
-                  <img
-                    src={ticket?.user?.company?.profile_pic || "/person.jpg"}
-                    alt="User"
-                    className="w-6 h-6 rounded-full object-cover"
-                  />
-                </div>
-              </div>
+                      {/* User Name */}
+                      <span className="text-[13px] text-[#212529]  font-medium text-[#333]">
+                        {activity?.user?.full_name || "Unknown User"}
+                      </span>
 
-              <div>
-                {ticket?.documents && ticket?.documents.length > 0 ? (
-                  ticket?.documents.map((doc, i) => {
-                    const documentUrl = `${baseURL}/${doc.upload_documents}`;
-                    return (
-                      <div
-                        key={i}
-                        className="bg-white rounded-xl mb-3 shadow p-4 min-h-20 flex flex-col"
-                      >
-                        <button
-                          onClick={() => {
-                            setSelectedDocument(documentUrl);
-                            setShowPreview(true);
-                          }}
-                          className="text-blue-600 underline mb-4 text-sm truncate"
-                        >
-                          {doc.upload_documents.split("/").pop()}
-                        </button>
-                        <div className="flex items-center justify-between text-[12px] text-gray-500">
-                          <div className="flex items-center gap-0.5">
-                            <img
-                              src="/clock.png"
-                              alt=""
-                              className="w-[13px] h-[13px] object-cover"
-                            />
-                            <span>{getTimeAgo(ticket?.created_at)}</span>
-                          </div>
+                      {/* Footer */}
+                      <div className="flex items-center justify-between text-[12px] text-gray-500">
+                        {/* Time */}
+                        <div className="flex items-center gap-0.5">
+                          <img
+                            src="/clock.png"
+                            alt="Clock"
+                            className="w-[13px] h-[13px] object-cover"
+                          />
+                          <span>{getTimeAgo(activity?.created_at)}</span>
+                        </div>
 
-                          {/* Profile Avatar */}
+                        {/* User Info */}
+                        <div className="flex items-center gap-2">
+                          {/* User Avatar */}
                           <img
                             src={
-                              ticket?.user?.company?.profile_pic ||
+                              activity?.user?.company?.profile_pic ||
                               "/person.jpg"
                             }
                             alt="User"
@@ -1184,129 +1104,85 @@ const TicketBoard = ({ tickets = [], onClick }) => {
                           />
                         </div>
                       </div>
-                    );
-                  })
-                ) : (
-                  <p className="text-gray-400 text-sm">No document uploaded</p>
-                )}
-              </div>
-            </div>
-            {/* Popup Modal */}
-            {showPreview && (
-              <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-                <div className="bg-white w-[90%] md:w-[70%] h-[80vh] rounded-xl shadow-lg relative">
-                  <button
-                    onClick={() => setShowPreview(false)}
-                    className="absolute top-1 right-2 text-gray-600 text-lg font-bold"
-                  >
-                    ✕
-                  </button>
-
-                  <iframe
-                    src={selectedDocument}
-                    title="Document Preview"
-                    className="w-full h-full rounded-b-xl"
-                  />
-                </div>
-              </div>
-            )}
-          </>
-        </div>
-
-        {/* Calling Column */}
-        <div className="border-[#CECECE]/40 border-r pr-4 pl-4 md:pl-0">
-          <h3 className="font-bold text-[#282D37] md:text-xs mb-2 mt-2">
-            {/* {ticket?.response_mode?.toLowerCase() === "chat" && "Chat"}
-            {ticket?.response_mode?.toLowerCase() === "video" && "Video Call"}
-            {!ticket?.response_mode && "Calling"} */}
-            Communication
-          </h3>
-          {/* <div className="bg-white rounded-xl shadow p-6 h-20"></div> */}
-          <div className="h-[100vh] overflow-y-auto custom-scroll">
-            {ticket?.chats?.map((chat) => (
-              <div
-                key={chat.id}
-                className="bg-white rounded-[10px] shadow p-4 mb-3 w-full"
-                onClick={onClick}
-              >
-                {/* Title */}
-                <h4 className="font-semibold flex items-center gap-1 text-[13px] text-[#212529] mb-1">
-                  <img
-                    src="/chaticon.png"
-                    alt=""
-                    className="w-[11px] h-[11px]"
-                  />
-                  Chat
-                </h4>
-                <p className="text-[12px] text-gray-500 mb-2 line-clamp-2">
-                  <p className="text-gray-700">{chat?.message}</p>
-                </p>
-
-                {/* Footer */}
-                <div className="flex items-center justify-between text-[12px] text-gray-500">
-                  <div className="flex items-center gap-1 text-gray-600 text-sm">
-                    <img
-                      src="/calender.png"
-                      alt=""
-                      className="w-[11px] h-[11px]"
-                    />
-                    <span className="text-[12px] text-gray-500">
-                      {new Date(chat.created_at).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "2-digit",
-                      })}
-                    </span>
-                  </div>
-
-                  {/* Profile Avatar */}
-                  <img
-                    src={
-                      chat?.sender_user?.company?.profile_pic || "/person.jpg"
-                    }
-                    alt="User"
-                    className="w-6 h-6 rounded-full object-cover"
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Pictures Column */}
-        <div className="pr-4 pl-4 md:pl-0 mb-2">
-          <h3 className="font-bold text-[#282D37] md:text-xs mb-2 mt-2">
-            Pictures
-          </h3>
-          {/* <div
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-            className="min-h-[200px] bg-white rounded-xl shadow p-4 flex items-center justify-center"
-          >
-            {pictureTicket && pictureTicket.photo ? (
-              <img
-                src={`${baseURL}/${pictureTicket.photo}`}
-                alt="dropped"
-                className="w-20 h-20 object-cover rounded"
-              />
-            ) : (
-              <p className="text-gray-400 text-xs">Drag photos here</p>
-            )}
-          </div> */}
-          <div className="h-[100vh] overflow-y-auto custom-scroll">
-            {ticket.images && ticket.images.length > 0 ? (
-              ticket.images.map((img, i) => (
-                <>
-                  <div
-                    key={i}
-                    className="min-h-[110px] bg-white rounded-xl shadow p-4 mb-2 flex flex-col"
-                  >
-                    <div className="flex items-center justify-center">
-                      <img
-                        src={`${baseURL}/${img.photo}`}
-                        alt={`ticket-${i}`}
-                        className="w-20 h-20 mb-2 object-cover rounded"
-                      />
                     </div>
+                  ))
+                : ""}
+            </div>
+          </div>
+
+          <div className="border-r border-[#CECECE]/40 px-4 pl-4 md:pl-0">
+            <>
+              <h3 className="font-bold text-[#282D37] md:text-xs mb-2 mt-2">
+                Documents
+              </h3>
+
+              <div className="h-[100vh] overflow-y-auto custom-scroll">
+                {/* basic info */}
+                <div className="bg-white rounded-[10px] shadow p-2 mb-3 w-full">
+                  {/* Title */}
+                  <h4 className="font-semibold text-[13px] text-[#212529] mb-1">
+                    Basic Information
+                  </h4>
+                  <p className="text-[12px] text-gray-500 line-clamp-2">
+                    Plant Name: {ticket?.plant_name || "N/A"}
+                  </p>
+                  {/* Description */}
+                  <p className="text-[12px] text-gray-500 mb-3 line-clamp-2">
+                    Category: {ticket?.category || "N/A"}
+                  </p>
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-between text-[12px] text-gray-500">
+                    <div className="flex items-center gap-0.5">
+                      <img
+                        src="/clock.png"
+                        alt=""
+                        className="w-[13px] h-[13px] object-cover"
+                      />
+                      <span>{getTimeAgo(ticket?.created_at)}</span>
+                    </div>
+
+                    {/* Priority Badge */}
+                    <div className="flex gap-0.5 items-center">
+                      <img
+                        src="/priority.png"
+                        alt=""
+                        className="w-[13px] h-[13px] object-cover"
+                      />
+                      <span
+                        className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
+                          ticket.priority?.priority_name
+                        )}`}
+                      >
+                        {ticket.priority?.priority_name || "N/A"}
+                      </span>
+                    </div>
+
+                    {/* Profile Avatar */}
+                    <img
+                      src={ticket?.user?.company?.profile_pic || "/person.jpg"}
+                      alt="User"
+                      className="w-6 h-6 rounded-full object-cover"
+                    />
+                  </div>
+                </div>
+
+                {/* equipment info */}
+                {ticket?.category == "Machine Breakdown" && (
+                  <div className="bg-white rounded-[10px] shadow p-2 mb-3 w-full">
+                    {/* Title */}
+                    <h4 className="font-semibold text-[13px] text-[#212529] mb-1">
+                      Equipment Info
+                    </h4>
+                    <p className="text-[12px] text-gray-500 line-clamp-2">
+                      Equipment: {ticket?.equipment || "N/A"}
+                    </p>
+                    {/* Description */}
+                    <p className="text-[12px] text-gray-500 mb-3 line-clamp-2">
+                      Model :{ticket?.model_number || "N/A"}
+                    </p>
+
+                    {/* Footer */}
                     <div className="flex items-center justify-between text-[12px] text-gray-500">
                       <div className="flex items-center gap-0.5">
                         <img
@@ -1314,22 +1190,22 @@ const TicketBoard = ({ tickets = [], onClick }) => {
                           alt=""
                           className="w-[13px] h-[13px] object-cover"
                         />
-                        <span>{getTimeAgo(img?.created_at)}</span>
+                        <span>{getTimeAgo(ticket?.created_at)}</span>
                       </div>
-                      <div className="flex items-center gap-1 text-gray-600 text-sm">
+
+                      {/* Priority Badge */}
+                      <div className="flex gap-0.5 items-center">
                         <img
-                          src="/calender.png"
+                          src="/priority.png"
                           alt=""
-                          className="w-[11px] h-[11px]"
+                          className="w-[13px] h-[13px] object-cover"
                         />
-                        <span className="text-[12px] text-gray-500">
-                          {new Date(img.created_at).toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "short",
-                              day: "2-digit",
-                            }
-                          )}
+                        <span
+                          className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
+                            ticket.priority?.priority_name
+                          )}`}
+                        >
+                          {ticket.priority?.priority_name || "N/A"}
                         </span>
                       </div>
 
@@ -1343,14 +1219,337 @@ const TicketBoard = ({ tickets = [], onClick }) => {
                       />
                     </div>
                   </div>
-                </>
-              ))
-            ) : (
-              <p className="text-gray-400">No image available</p>
-            )}
+                )}
+
+                {/* service info */}
+                {ticket?.category == "Service Breakdown" && (
+                  <div className="bg-white rounded-[10px] shadow p-2 mb-3 w-full">
+                    {/* Title */}
+                    <h4 className="font-semibold text-[13px] text-[#212529] mb-1">
+                      Service Information
+                    </h4>
+                    <p className="text-[12px] text-gray-500  line-clamp-2">
+                      Provider: {ticket?.service_provider || "N/A"}
+                    </p>
+                    {/* Description */}
+                    <p className="text-[12px] text-gray-500 mb-3 line-clamp-2">
+                      Manufacturer :{ticket?.manufacturer || "N/A"}
+                    </p>
+
+                    {/* Footer */}
+                    <div className="flex items-center justify-between text-[12px] text-gray-500">
+                      <div className="flex items-center gap-0.5">
+                        <img
+                          src="/clock.png"
+                          alt=""
+                          className="w-[13px] h-[13px] object-cover"
+                        />
+                        <span>{getTimeAgo(ticket?.created_at)}</span>
+                      </div>
+
+                      {/* Priority Badge */}
+                      <div className="flex gap-0.5 items-center">
+                        <img
+                          src="/priority.png"
+                          alt=""
+                          className="w-[13px] h-[13px] object-cover"
+                        />
+                        <span
+                          className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
+                            ticket.priority?.priority_name
+                          )}`}
+                        >
+                          {ticket.priority?.priority_name || "N/A"}
+                        </span>
+                      </div>
+
+                      {/* Profile Avatar */}
+                      <img
+                        src={
+                          ticket?.user?.company?.profile_pic || "/person.jpg"
+                        }
+                        alt="User"
+                        className="w-6 h-6 rounded-full object-cover"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* support info */}
+                <div className="bg-white rounded-[10px] shadow p-2 mb-3 w-full">
+                  {/* Title */}
+                  <h4 className="font-semibold text-[13px] text-[#212529] mb-1">
+                    Support
+                  </h4>
+                  <p className="text-[12px] text-gray-500  line-clamp-2">
+                    Installation Support:{" "}
+                    {ticket?.need_product_installation_support
+                      ? ticket.need_product_installation_support
+                          .charAt(0)
+                          .toUpperCase() +
+                        ticket.need_product_installation_support.slice(1)
+                      : "N/A"}
+                  </p>
+                  {/* Description */}
+                  <p className="text-[12px] text-gray-500 mb-3 line-clamp-2">
+                    Implementation Support :
+                    {ticket?.need_service_implementation_support
+                      ? ticket.need_service_implementation_support
+                          .charAt(0)
+                          .toUpperCase() +
+                        ticket.need_service_implementation_support.slice(1)
+                      : "N/A"}
+                  </p>
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-between text-[12px] text-gray-500">
+                    <div className="flex items-center gap-0.5">
+                      <img
+                        src="/clock.png"
+                        alt=""
+                        className="w-[13px] h-[13px] object-cover"
+                      />
+                      <span>{getTimeAgo(ticket?.created_at)}</span>
+                    </div>
+
+                    {/* Priority Badge */}
+                    <div className="flex gap-0.5 items-center">
+                      <img
+                        src="/priority.png"
+                        alt=""
+                        className="w-[13px] h-[13px] object-cover"
+                      />
+                      <span
+                        className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
+                          ticket.priority?.priority_name
+                        )}`}
+                      >
+                        {ticket.priority?.priority_name || "N/A"}
+                      </span>
+                    </div>
+
+                    {/* Profile Avatar */}
+                    <img
+                      src={ticket?.user?.company?.profile_pic || "/person.jpg"}
+                      alt="User"
+                      className="w-6 h-6 rounded-full object-cover"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  {ticket?.documents && ticket?.documents.length > 0 ? (
+                    ticket?.documents.map((doc, i) => {
+                      const documentUrl = `${baseURL}/${doc.upload_documents}`;
+                      return (
+                        <div
+                          key={i}
+                          className="bg-white rounded-xl mb-3 shadow p-2 min-h-20 flex flex-col"
+                        >
+                          <button
+                            onClick={() => {
+                              setSelectedDocument(documentUrl);
+                              setShowPreview(true);
+                            }}
+                            className="text-blue-600 underline mb-4 text-sm truncate"
+                          >
+                            {doc.upload_documents.split("/").pop()}
+                          </button>
+                          <div className="flex items-center justify-between text-[12px] text-gray-500">
+                            <div className="flex items-center gap-0.5">
+                              <img
+                                src="/clock.png"
+                                alt=""
+                                className="w-[13px] h-[13px] object-cover"
+                              />
+                              <span>{getTimeAgo(ticket?.created_at)}</span>
+                            </div>
+
+                            {/* Profile Avatar */}
+                            <img
+                              src={
+                                ticket?.user?.company?.profile_pic ||
+                                "/person.jpg"
+                              }
+                              alt="User"
+                              className="w-6 h-6 rounded-full object-cover"
+                            />
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p className="text-gray-400 text-sm">
+                      No document uploaded
+                    </p>
+                  )}
+                </div>
+              </div>
+              {/* Popup Modal */}
+              {showPreview && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                  <div className="bg-white w-[90%] md:w-[70%] h-[80vh] rounded-xl shadow-lg relative">
+                    <button
+                      onClick={() => setShowPreview(false)}
+                      className="absolute top-1 right-2 text-gray-600 text-lg font-bold"
+                    >
+                      ✕
+                    </button>
+
+                    <iframe
+                      src={selectedDocument}
+                      title="Document Preview"
+                      className="w-full h-full rounded-b-xl"
+                    />
+                  </div>
+                </div>
+              )}
+            </>
+          </div>
+
+          {/* Calling Column */}
+          <div className="border-[#CECECE]/40 border-r pr-4 pl-4 md:pl-0">
+            <h3 className="font-bold text-[#282D37] md:text-xs mb-2 mt-2">
+              {/* {ticket?.response_mode?.toLowerCase() === "chat" && "Chat"}
+              {ticket?.response_mode?.toLowerCase() === "video" && "Video Call"}
+              {!ticket?.response_mode && "Calling"} */}
+              Communication
+            </h3>
+            {/* <div className="bg-white rounded-xl shadow p-6 h-20"></div> */}
+            <div className="h-[100vh] overflow-y-auto custom-scroll">
+              {ticket?.chats?.map((chat) => (
+                <div
+                  key={chat.id}
+                  className="bg-white rounded-[10px] shadow p-2 mb-3 w-full"
+                  onClick={onClick}
+                >
+                  {/* Title */}
+                  <h4 className="font-semibold flex items-center gap-1 text-[13px] text-[#212529] mb-1">
+                    <img
+                      src="/chaticon.png"
+                      alt=""
+                      className="w-[11px] h-[11px]"
+                    />
+                    Chat
+                  </h4>
+                  <p className="text-[12px] text-gray-500 mb-2 line-clamp-2">
+                    <p className="text-gray-700">{chat?.message}</p>
+                  </p>
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-between text-[12px] text-gray-500">
+                    <div className="flex items-center gap-1 text-gray-600 text-sm">
+                      <img
+                        src="/calender.png"
+                        alt=""
+                        className="w-[11px] h-[11px]"
+                      />
+                      <span className="text-[12px] text-gray-500">
+                        {new Date(chat.created_at).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "2-digit",
+                        })}
+                      </span>
+                    </div>
+
+                    {/* Profile Avatar */}
+                    <img
+                      src={
+                        chat?.sender_user?.company?.profile_pic || "/person.jpg"
+                      }
+                      alt="User"
+                      className="w-6 h-6 rounded-full object-cover"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Pictures Column */}
+          <div className="pr-4 pl-4 md:pl-0 mb-2">
+            <h3 className="font-bold text-[#282D37] md:text-xs mb-2 mt-2">
+              Pictures
+            </h3>
+            {/* <div
+                      onDragOver={handleDragOver}
+                      onDrop={handleDrop}
+                      className="min-h-[200px] bg-white rounded-xl shadow p-4 flex items-center justify-center"
+                    >
+                      {pictureTicket && pictureTicket.photo ? (
+                        <img
+                          src={`${baseURL}/${pictureTicket.photo}`}
+                          alt="dropped"
+                          className="w-20 h-20 object-cover rounded"
+                        />
+                      ) : (
+                        <p className="text-gray-400 text-xs">Drag photos here</p>
+                      )}
+                    </div> */}
+            <div className="h-[100vh] overflow-y-auto custom-scroll">
+              {ticket.images && ticket.images.length > 0 ? (
+                ticket.images.map((img, i) => (
+                  <>
+                    <div
+                      key={i}
+                      className="min-h-[110px] bg-white rounded-xl shadow p-2 mb-2 flex flex-col"
+                    >
+                      <div className="flex items-center justify-center">
+                        <img
+                          src={`${baseURL}/${img.photo}`}
+                          alt={`ticket-${i}`}
+                          className="w-20 h-20 mb-2 object-cover rounded"
+                        />
+                      </div>
+                      <div className="flex items-center justify-between text-[12px] text-gray-500">
+                        <div className="flex items-center gap-0.5">
+                          <img
+                            src="/clock.png"
+                            alt=""
+                            className="w-[13px] h-[13px] object-cover"
+                          />
+                          <span>{getTimeAgo(img?.created_at)}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-gray-600 text-sm">
+                          <img
+                            src="/calender.png"
+                            alt=""
+                            className="w-[11px] h-[11px]"
+                          />
+                          <span className="text-[12px] text-gray-500">
+                            {new Date(img.created_at).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "short",
+                                day: "2-digit",
+                              }
+                            )}
+                          </span>
+                        </div>
+
+                        {/* Profile Avatar */}
+                        <img
+                          src={
+                            ticket?.user?.company?.profile_pic || "/person.jpg"
+                          }
+                          alt="User"
+                          className="w-6 h-6 rounded-full object-cover"
+                        />
+                      </div>
+                    </div>
+                  </>
+                ))
+              ) : (
+                <p className="text-gray-400">No image available</p>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="flex items-center justify-center mt-4">
+          <p className="text-gray-400">No ticket selected</p>
+        </div>
+      )}
     </div>
   );
 };

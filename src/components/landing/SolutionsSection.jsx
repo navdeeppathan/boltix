@@ -2,9 +2,29 @@
 import React, { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
+import { motion } from "framer-motion";
 import "swiper/css";
 import "swiper/css/navigation";
 import { FaArrowLeft, FaArrowRight, FaPlus } from "react-icons/fa6";
+
+const headingVariant = {
+  hidden: { opacity: 0, y: -40 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 1, ease: "easeOut" },
+  },
+};
+
+const cardVariant = {
+  hidden: { opacity: 0, y: 50, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.7, ease: "easeOut" },
+  },
+};
 
 const SolutionsSection = () => {
   const [activeButton, setActiveButton] = useState("next");
@@ -23,31 +43,31 @@ const SolutionsSection = () => {
     {
       title: "Secure Document Sharing",
       description:
-        "Advanced encryption ensures the safe storage and transfer of design files, service documents, and compliance paperwork, protecting sensitive information.",
+        "Advanced encryption ensures the safe storage and transfer of design files, service documents, and compliance paperwork.",
       icon: "/frame2.png",
     },
     {
       title: "AI-Driven Partner Matching",
       description:
-        "Smart algorithms automatically recommend the most suitable suppliers and manufacturers, eliminating delays in identifying the right contact.",
+        "Smart algorithms automatically recommend the most suitable suppliers and manufacturers.",
       icon: "/frame3.png",
     },
     {
       title: "Integrated Collaboration",
       description:
-        "Secure video meetings, task tracking, and knowledge sharing enable faster and more effective resolution of service breakdowns.",
+        "Secure video meetings, task tracking, and knowledge sharing enable faster resolution.",
       icon: "/frame4.png",
     },
     {
       title: "AI-Driven Partner Matching",
       description:
-        "Smart algorithms automatically recommend the most suitable suppliers and manufacturers, eliminating delays in identifying the right contact.",
+        "Smart algorithms automatically recommend the most suitable suppliers and manufacturers.",
       icon: "/frame1.png",
     },
     {
       title: "Integrated Collaboration",
       description:
-        "Secure video meetings, task tracking, and knowledge sharing enable faster and more effective resolution of service breakdowns.",
+        "Secure video meetings, task tracking, and knowledge sharing enable faster resolution.",
       icon: "/frame4.png",
     },
   ];
@@ -56,23 +76,25 @@ const SolutionsSection = () => {
     const prevBtn = document.querySelector(".custom-prev");
     const nextBtn = document.querySelector(".custom-next");
 
-    if (prevBtn && nextBtn) {
-      prevBtn.addEventListener("click", () => setActiveButton("prev"));
-      nextBtn.addEventListener("click", () => setActiveButton("next"));
-    }
+    prevBtn?.addEventListener("click", () => setActiveButton("prev"));
+    nextBtn?.addEventListener("click", () => setActiveButton("next"));
 
     return () => {
-      if (prevBtn && nextBtn) {
-        prevBtn.removeEventListener("click", () => setActiveButton("prev"));
-        nextBtn.removeEventListener("click", () => setActiveButton("next"));
-      }
+      prevBtn?.removeEventListener("click", () => setActiveButton("prev"));
+      nextBtn?.removeEventListener("click", () => setActiveButton("next"));
     };
   }, []);
 
   return (
-    <section className="bg-white py-16 px-4 sm:px-6 lg:px-32">
+    <section className="bg-white py-16 px-4 sm:px-6 lg:px-32 overflow-hidden">
       {/* Heading */}
-      <div className="text-center mx-auto mb-12">
+      <motion.div
+        variants={headingVariant}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        className="text-center mx-auto mb-12"
+      >
         <h2 className="text-2xl sm:text-3xl md:text-[48.65px] font-bold text-[#212529]">
           How We Solve Your Connection Challenges
         </h2>
@@ -82,64 +104,88 @@ const SolutionsSection = () => {
         <p className="mt-1 text-sm sm:text-base md:text-[24px] font-medium text-[#212529]">
           Plant & Service Breakdowns
         </p>
-      </div>
+      </motion.div>
 
-      {/* Cards Slider */}
-      <div className="relative">
+      {/* Slider */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        viewport={{ once: true }}
+        className="relative"
+      >
         <Swiper
           spaceBetween={20}
-          navigation={{
-            nextEl: ".custom-next",
-            prevEl: ".custom-prev",
-          }}
+          navigation={{ nextEl: ".custom-next", prevEl: ".custom-prev" }}
           modules={[Navigation]}
           breakpoints={{
             320: { slidesPerView: 1 },
             640: { slidesPerView: 2 },
             1024: { slidesPerView: 3 },
-            1280: { slidesPerView: 3 },
           }}
         >
           {solutions.map((item, index) => (
             <SwiperSlide key={index}>
-              <div className="bg-[#212529] text-[#FFFFFF] rounded-[14px] shadow-md p-8 min-h-[314px] flex flex-col justify-between">
+              <motion.div
+                variants={cardVariant}
+                initial="hidden"
+                whileInView="visible"
+                whileHover={{
+                  y: -12,
+                  boxShadow: "0px 25px 60px rgba(0,0,0,0.25)",
+                }}
+                viewport={{ once: true }}
+                className="bg-[#212529] text-white rounded-[14px] p-8 min-h-[314px] flex flex-col justify-between transition-all"
+              >
                 <div className="flex items-center gap-4">
-                  <img src={item.icon} alt="" className="w-[55px] h-[51px]" />
-                  <h3 className="text-lg md:text-[24px] font-bold mb-2 leading-[36px]">
+                  <motion.img
+                    src={item.icon}
+                    alt=""
+                    className="w-[55px] h-[51px]"
+                    whileHover={{ rotate: 8, scale: 1.1 }}
+                    transition={{ duration: 0.4 }}
+                  />
+                  <h3 className="text-lg md:text-[24px] font-bold leading-[36px]">
                     {item.title}
                   </h3>
                 </div>
-                <p className="text-sm md:text-[16px] font-normal mt-4 text-[#FFFFFF]">
+
+                <p className="text-sm md:text-[16px] mt-4 text-white/90">
                   {item.description}
                 </p>
+
                 <div className="flex justify-end">
-                  <button className="mt-4 cursor-pointer bg-[#FFFFFF] text-[#212529] w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition">
+                  <motion.button
+                    whileHover={{ scale: 1.15 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="mt-4 bg-white text-[#212529] w-8 h-8 flex items-center justify-center rounded-full"
+                  >
                     <FaPlus size={12} />
-                  </button>
+                  </motion.button>
                 </div>
-              </div>
+              </motion.div>
             </SwiperSlide>
           ))}
         </Swiper>
 
-        {/* Custom Navigation Arrows */}
+        {/* Navigation */}
         <div className="absolute -bottom-12 right-0 flex gap-2">
           <button
-            className={`custom-prev cursor-pointer text-white w-9 h-9 flex items-center justify-center rounded-full transition-colors duration-300 ${
+            className={`custom-prev w-9 h-9 flex items-center justify-center rounded-full text-white transition ${
               activeButton === "prev" ? "bg-[#212529]" : "bg-[#B7B7B7]"
             }`}
           >
             <FaArrowLeft />
           </button>
           <button
-            className={`custom-next cursor-pointer text-white w-9 h-9 flex items-center justify-center rounded-full transition-colors duration-300 ${
+            className={`custom-next w-9 h-9 flex items-center justify-center rounded-full text-white transition ${
               activeButton === "next" ? "bg-[#212529]" : "bg-[#B7B7B7]"
             }`}
           >
             <FaArrowRight />
           </button>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 };

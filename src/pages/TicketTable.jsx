@@ -1,12 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { FileText, ChevronDown, ChevronUp } from "lucide-react";
-import { useLocation, useNavigate } from "react-router-dom";
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import http from "../service/http";
 import { baseURL } from "../service/api";
 import { CircularProgress } from "@mui/material";
 import { RotatingLines } from "react-loader-spinner";
 
 const TicketTable = () => {
+  const [searchParams] = useSearchParams();
+  const query = searchParams.get("query");
+
   const [expandedRow, setExpandedRow] = useState(null);
   const [tickets, setTickets] = useState([]);
   const [viewMode, setViewMode] = useState("table"); // 'table' or 'cards'
@@ -15,12 +23,14 @@ const TicketTable = () => {
 
   const user = JSON.parse(localStorage.getItem("userData"));
   const user_id = user?.id;
-  // ✅ Fetch user's tickets on mount
+  // Fetch user's tickets on mount
   useEffect(() => {
     const fetchTickets = async () => {
       try {
         setLoading(true);
-        const response = await http.get(`/tickets/user/${user_id}`);
+        const response = await http.get(
+          `/tickets/user/${user_id}?query=${query}`
+        );
         if (response.data.status && Array.isArray(response.data.data)) {
           setTickets(response.data.data);
           console.log("Tickets:", response.data.data);
@@ -146,7 +156,12 @@ const TicketTable = () => {
   // ];
 
   const getPriorityColor = (priority) => {
-    switch (priority?.toLowerCase()) {
+    const priorityValue =
+      typeof priority === "object" && priority !== null
+        ? priority.priority_name
+        : priority;
+
+    switch (String(priorityValue || "").toLowerCase()) {
       case "high":
         return "bg-red-500 text-white";
       case "medium":
@@ -189,6 +204,17 @@ const TicketTable = () => {
     navigate(`/dashboard/ticket-details/${id}`);
   };
 
+  const hasManufacturer = tickets?.some(
+    (ticket) =>
+      ticket.manufacturer_user !== null &&
+      ticket.manufacturer_user !== undefined
+  );
+
+  const hasServiceProvider = tickets?.some(
+    (ticket) =>
+      ticket.service_user !== null && ticket.service_user !== undefined
+  );
+
   return (
     <div className="w-full max-w-sm sm:max-w-3xl md:max-w-4xl lg:max-w-5xl  bg-gray-50">
       {/* Table View (Always visible on desktop, toggleable on mobile) */}
@@ -201,23 +227,23 @@ const TicketTable = () => {
         >
           <style>
             {`
-      /* Chrome, Edge, Safari */
-      ::-webkit-scrollbar {
-        width: 3px;
-        height: 2px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #f3f4f6; /* Tailwind gray-100 */
-        border-radius: 10px;
-      }
-      ::-webkit-scrollbar-thumb {
-        background-color: #9ca3af; /* Tailwind gray-400 */
-        border-radius: 10px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background-color: #6b7280; /* Tailwind gray-500 */
-      }
-    `}
+        /* Chrome, Edge, Safari */
+        ::-webkit-scrollbar {
+          width: 3px;
+          height: 2px;
+        }
+        ::-webkit-scrollbar-track {
+          background: #f3f4f6; /* Tailwind gray-100 */
+          border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+          background-color: #9ca3af; /* Tailwind gray-400 */
+          border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background-color: #6b7280; /* Tailwind gray-500 */
+        }
+      `}
           </style>
 
           <table className="w-full min-w-max">
@@ -228,6 +254,9 @@ const TicketTable = () => {
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[200px]">
                   OEM Supplier Name
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[200px]">
+                  Manufacturer / Service Provider
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[150px]">
                   Category
@@ -241,14 +270,17 @@ const TicketTable = () => {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[100px]">
                   Priority
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[120px]">
+                {/* <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[120px]">
                   Ticket Status
-                </th>
+                </th> */}
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[120px]">
                   Created On
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[120px]">
                   Attachments
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[120px]">
+                  Status
                 </th>
               </tr>
             </thead>
@@ -268,80 +300,79 @@ const TicketTable = () => {
                   </td>
                 </tr>
               ) : tickets.length > 0 ? (
-                tickets.map((ticket, index) => (
-                  <tr
-                    key={ticket.id}
-                    onClick={() => handleTicketClick(ticket?.id)}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-4 py-4 text-sm text-gray-900">
-                      {index + 1}
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-3">
-                        {/* <div className="flex-shrink-0">
-                          {ticket.supplierIcon ? (
-                            <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
-                              <span className="text-white text-lg">⚠</span>
-                            </div>
-                          ) : (
-                            <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center">
-                              <span className="text-white text-sm font-bold">
-                                {ticket.logo}
-                              </span>
-                            </div>
-                          )}
-                        </div> */}
-                        <div className="flex-shrink-0">
-                          {ticket?.user?.company?.profile_pic ? (
-                            <img
-                              src={ticket?.user?.company?.profile_pic} // if path stored like "uploads/tickets/filename.jpg"
-                              alt="Ticket"
-                              className="w-10 h-10 rounded-full object-cover border border-gray-300"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center">
-                              <span className="text-white text-sm font-bold">
-                                {ticket.logo || "T"}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium text-gray-900 whitespace-nowrap">
-                            {ticket.plant_name || "N/A"}
+                tickets
+                  .sort((a, b) => b.id - a.id)
+                  .filter((ticket) => ticket.stage != 0)
+                  .map((ticket, index) => (
+                    <tr
+                      key={ticket.id}
+                      onClick={() => handleTicketClick(ticket?.id)}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-4 py-4 text-sm text-gray-900">
+                        {index + 1}
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex-shrink-0">
+                            {ticket?.user?.company?.profile_pic ? (
+                              <img
+                                src={ticket?.user?.company?.profile_pic} // if path stored like "uploads/tickets/filename.jpg"
+                                alt="Ticket"
+                                className="w-10 h-10 rounded-full object-cover border border-gray-300"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center">
+                                <span className="text-white text-sm font-bold">
+                                  {ticket.logo || "T"}
+                                </span>
+                              </div>
+                            )}
                           </div>
-                          {/* <div className="text-xs text-gray-500 whitespace-nowrap">
-                            ({ticket.location})
-                          </div> */}
+                          <div>
+                            <div className="text-sm font-medium text-gray-900 whitespace-nowrap">
+                              {ticket.plant_name || "N/A"}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <span
-                        className={`text-sm font-medium whitespace-nowrap ${getCategoryColor(
-                          ticket.category
-                        )}`}
-                      >
-                        {ticket.category || "N/A"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-900">
-                      {ticket.service || ticket.equipment || "N/A"}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-900">
-                      {ticket.description || "-"}
-                    </td>
-                    <td className="px-4 py-4">
-                      <span
-                        className={`inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getPriorityColor(
-                          ticket.priority
-                        )}`}
-                      >
-                        {ticket.priority || "N/A"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4">
+                      </td>
+                      <td className="px-4 py-2 whitespace-nowrap">
+                        {hasManufacturer && ticket.manufacturer_user?.full_name}
+                        {hasServiceProvider && ticket.service_user?.full_name}
+                      </td>
+                      <td className="px-4 py-4">
+                        <span
+                          className={`text-sm font-medium whitespace-nowrap ${getCategoryColor(
+                            ticket.category
+                          )}`}
+                        >
+                          {ticket.category || "N/A"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-900">
+                        {ticket.service || ticket.equipment || "N/A"}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-900">
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html:
+                              ticket.description
+                                ?.split(" ")
+                                .slice(0, 10)
+                                .join(" ") + "...",
+                          }}
+                        />
+                      </td>
+                      <td className="px-4 py-4">
+                        <span
+                          className={`inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getPriorityColor(
+                            ticket.priority?.priority_name
+                          )}`}
+                        >
+                          {ticket.priority?.priority_name || "N/A"}
+                        </span>
+                      </td>
+                      {/* <td className="px-4 py-4">
                       <span
                         className={`inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getStatusColor(
                           ticket.status
@@ -349,22 +380,70 @@ const TicketTable = () => {
                       >
                         {ticket.status || "N/A"}
                       </span>
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-900 whitespace-nowrap">
-                      {new Date(ticket.issue_date).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <FileText size={16} />
-                        <span>{ticket.upload_documents ? 1 : 0}</span>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                    </td> */}
+                      <td className="px-4 py-4 text-sm text-gray-900 whitespace-nowrap">
+                        {new Date(ticket.issue_date).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          }
+                        )}
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <FileText size={16} />
+                          <span>{ticket.documents.length ? 1 : 0}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        {ticket.stage === 1 && (
+                          <button
+                            disabled
+                            className="px-3 py-2 bg-[#E9F6E9] text-[#1E824C] h-[32px] flex items-center justify-center text-xs font-bold rounded-[8px]"
+                          >
+                            Approved
+                          </button>
+                        )}
+
+                        {ticket.stage === 2 && (
+                          <button
+                            disabled
+                            className="px-3 py-2 bg-[#FDE0DF] text-[#DC6A64] h-[32px] flex items-center justify-center text-xs font-bold rounded-[8px]"
+                          >
+                            Rejected
+                          </button>
+                        )}
+                        {ticket.stage === 3 && (
+                          <button
+                            disabled
+                            className="px-3 py-2 bg-[#FFF4E0] text-[#A67C00] h-[32px] flex items-center justify-center text-xs font-bold rounded-[8px]"
+                          >
+                            Returned
+                          </button>
+                        )}
+
+                        {ticket.stage === 4 && (
+                          <button
+                            disabled
+                            className="px-3 py-2 bg-[#E9F6E9] text-[#1E824C] h-[32px] flex items-center justify-center text-xs font-bold rounded-[8px]"
+                          >
+                            Closed
+                          </button>
+                        )}
+
+                        {ticket.stage === 0 && (
+                          <button
+                            disabled
+                            className="px-3 py-2 bg-[#FDE0DF] text-[#DC6A64] h-[32px] flex items-center justify-center text-xs font-bold rounded-[8px]"
+                          >
+                            Pending
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))
               ) : (
                 <tr>
                   <td colSpan={8} className="text-center py-6 text-gray-500">
@@ -428,10 +507,10 @@ const TicketTable = () => {
               <div className="flex flex-wrap gap-2 mb-3">
                 <span
                   className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getPriorityColor(
-                    ticket.priority
+                    ticket.priority?.priority_name
                   )}`}
                 >
-                  {ticket.priority}
+                  {ticket.priority?.priority_name}
                 </span>
                 <span
                   className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(

@@ -10,6 +10,8 @@ const ManagerNotifications = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const user = JSON.parse(localStorage.getItem("userData"));
+
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
@@ -43,9 +45,9 @@ const ManagerNotifications = () => {
 
   return (
     <div className="space-y-3">
-      {loading ? (
+      {/* {loading ? (
         <div className="flex justify-center py-4">
-          {/* <CircularProgress size={20} color="inherit" /> */}
+          
           <RotatingLines
             strokeColor="#1E1E1E"
             strokeWidth="5"
@@ -76,9 +78,113 @@ const ManagerNotifications = () => {
             </div>
           </div>
         ))
-      )}
+      )} */}
+
+      <TicketNotifications user={user} />
     </div>
   );
 };
 
 export default ManagerNotifications;
+
+const TicketNotifications = ({ user }) => {
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchTickets = async () => {
+    try {
+      setLoading(true);
+      const res = await http.get(`/tickets/approved/${user.id}`);
+
+      console.log("resnotify:-", res.data);
+
+      if (res.data.status && Array.isArray(res.data.data)) {
+        setTickets(res.data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching tickets:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchTickets();
+    }
+  }, [user?.id]);
+
+  return (
+    <div className="p-4">
+      {loading && (
+        <div className="flex justify-center py-4">
+          {/* <CircularProgress size={20} color="inherit" /> */}
+          <RotatingLines
+            strokeColor="#1E1E1E"
+            strokeWidth="5"
+            animationDuration="0.75"
+            width="20"
+            visible={true}
+          />
+        </div>
+      )}
+
+      {!loading && tickets.length === 0 && (
+        <p className="text-gray-500">No Notifications found.</p>
+      )}
+
+      {!loading &&
+        tickets
+          .filter((ticket) => ticket.notifications?.length > 0)
+          .map((ticket) => (
+            <div
+              key={ticket.id}
+              className="border border-gray-300 shadow-sm p-4 rounded-lg mb-4"
+            >
+              {/* Ticket Title */}
+              <h2 className="font-medium text-base text-black">
+                {ticket.category}
+              </h2>
+              <p className="text-xs font-normal text-gray-600 mb-2">
+                Ticket Title: {ticket.ticket_title}
+              </p>
+              <p className="text-xs font-normal text-gray-600 mb-2">
+                Ticket No: {ticket.ticket_number}
+              </p>
+
+              {/* Notifications */}
+              <h3 className=" text-sm font-normal mt-2 text-blue-600">
+                Notifications:
+              </h3>
+
+              {ticket.notifications?.length > 0 ? (
+                ticket.notifications
+                  .sort(
+                    (a, b) => new Date(b.created_at) - new Date(a.created_at)
+                  )
+                  .filter(
+                    (note) =>
+                      note.oem_supervisor == ticket?.manufacturer_user?.id ||
+                      note.oem_supervisor == ticket?.service_user?.id
+                  )
+                  .map((note) => (
+                    <div
+                      key={note.id}
+                      className={`p-2 rounded my-2 border ${
+                        note.is_read === 0
+                          ? "bg-yellow-100 border-yellow-500"
+                          : "bg-gray-100 border-gray-300"
+                      }`}
+                    >
+                      {/* <p className="text-sm font-medium">{note.title}</p> */}
+                      <p className="text-xs text-gray-700">{note.message}</p>
+                    </div>
+                  ))
+              ) : (
+                <p className="text-sm text-gray-400">No notifications</p>
+              )}
+            </div>
+          ))}
+    </div>
+  );
+};
