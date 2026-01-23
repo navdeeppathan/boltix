@@ -6,7 +6,7 @@ import http from "../../service/http";
 import CircularProgress from "@mui/material/CircularProgress";
 import { RotatingLines } from "react-loader-spinner";
 
-const RegisterOptions = () => {
+const RegisterOptionsOem = () => {
   const [selectedForm, setSelectedForm] = useState("plant"); // "plant" or "supplier"
   const [loading, setLoading] = useState(false);
 
@@ -129,15 +129,15 @@ const RegisterOptions = () => {
           />
         </div>
       ) : selectedForm === "plant" ? ( */}
-      <PlantRegistrationForm />
-      {/* ) : (
-        <SupplierRegistrationForm />
-      )} */}
+      {/* <PlantRegistrationForm />
+      ) : ( */}
+      <SupplierRegistrationForm />
+      {/* )} */}
     </div>
   );
 };
 
-export default RegisterOptions;
+export default RegisterOptionsOem;
 
 // adjust your import path
 
@@ -308,7 +308,7 @@ const PlantRegistrationForm = () => {
   };
 
   return (
-    <div className="relative w-full min-h-screen mt-24 flex items-center justify-center bg-gray-50 px-4">
+    <div className="relative w-full min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="absolute inset-0">
         <img
           src="/regbg.png"
@@ -318,19 +318,16 @@ const PlantRegistrationForm = () => {
       </div>
 
       <div className="relative z-10 w-full flex flex-col items-center p-6 sm:p-10">
-        <h2 className="text-2xl sm:text-3xl md:text-[36px] font-bold text-[#212529]">
+        <h2 className="text-2xl sm:text-3xl md:text-[48px] font-bold text-[#212529]">
           Industrial Plant Registration Form
         </h2>
-        {/* <p className="mt-2 text-sm sm:text-base md:text-[24px] font-normal text-[#212529]">
+        <p className="mt-2 text-sm sm:text-base md:text-[24px] font-normal text-[#212529]">
           Submit a link with the list of Questions
-        </p> */}
-        <p className="mt-2 text-sm sm:text-sm md:text-lg font-normal text-[#212529] text-center">
-          Once registered, a link will be sent to access your profile dashboard.
         </p>
 
         <form
           onSubmit={handleSubmit}
-          className=" w-full max-w-4xl mx-auto p-6 sm:p-8"
+          className="mt-10 w-full max-w-4xl mx-auto p-6 sm:p-8"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Company Name */}
@@ -541,46 +538,23 @@ const PlantRegistrationForm = () => {
 };
 
 // Reusable Input Component
-const InputField = ({
-  label,
-  name,
-  type = "text",
-  value,
-  onChange,
-  error,
-  isTextarea = false,
-}) => (
+const InputField = ({ label, name, type = "text", value, onChange, error }) => (
   <div>
     <label className="block text-sm font-medium text-gray-700 mb-1">
       {label}
     </label>
-    {isTextarea ? (
-      <textarea
-        name={name}
-        rows={rows}
-        placeholder={`Enter ${label.toLowerCase()}`}
-        value={value}
-        onChange={onChange}
-        className={`w-full border rounded-[10px] bg-white px-3 py-2 focus:ring-2 focus:outline-none transition resize-none ${
-          error
-            ? "border-red-500 focus:ring-red-400"
-            : "border-[#D9D4C6] focus:ring-[#207EB1]"
-        }`}
-      />
-    ) : (
-      <input
-        type={type}
-        name={name}
-        placeholder={`Enter ${label.toLowerCase()}`}
-        value={value}
-        onChange={onChange}
-        className={`w-full border rounded-[10px] bg-white px-3 py-2 focus:ring-2 focus:outline-none ${
-          error
-            ? "border-red-500 focus:ring-red-400"
-            : "border-[#D9D4C6] focus:ring-[#207EB1]"
-        }`}
-      />
-    )}
+    <input
+      type={type}
+      name={name}
+      placeholder={`Enter ${label.toLowerCase()}`}
+      value={value}
+      onChange={onChange}
+      className={`w-full border rounded-[10px] bg-white px-3 py-2 focus:ring-2 focus:outline-none ${
+        error
+          ? "border-red-500 focus:ring-red-400"
+          : "border-[#D9D4C6] focus:ring-[#207EB1]"
+      }`}
+    />
     {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
   </div>
 );
@@ -742,7 +716,7 @@ const SupplierRegistrationForm = () => {
   };
 
   return (
-    <div className="relative w-full min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="relative w-full min-h-screen mt-24 flex items-center justify-center bg-gray-50 px-4">
       {/* Background Image */}
       <div className="absolute inset-0">
         <img
@@ -754,16 +728,16 @@ const SupplierRegistrationForm = () => {
 
       {/* Content */}
       <div className="relative z-10 w-full flex flex-col items-center p-6 sm:p-10">
-        <h2 className="text-2xl sm:text-3xl md:text-[48px] font-bold text-[#212529] text-center">
+        <h2 className="text-2xl sm:text-3xl md:text-[36px] font-bold text-[#212529] text-center">
           OEM/Service Provider Registration Form
         </h2>
-        <p className="mt-2 text-sm sm:text-base md:text-[24px] font-normal text-[#212529] text-center">
+        <p className="mt-2 text-sm sm:text-sm md:text-lg font-normal text-[#212529] text-center">
           Once registered, a link will be sent to access your profile dashboard.
         </p>
 
         <form
           onSubmit={handleSubmit}
-          className="mt-14 max-w-3xl w-full  backdrop-blur-sm  p-6 "
+          className=" max-w-3xl w-full  backdrop-blur-sm  p-6 "
         >
           {/* Company Information Section */}
           <h2 className="text-lg font-semibold text-[#212529] mb-4">
@@ -827,6 +801,7 @@ const SupplierRegistrationForm = () => {
               value={formData.head_office_address}
               onChange={handleChange}
               error={errors.head_office_address}
+              isTextarea
             />
 
             <InputFieldSupplier
@@ -835,6 +810,7 @@ const SupplierRegistrationForm = () => {
               value={formData.regional_off_add}
               onChange={handleChange}
               error={errors.regional_off_add}
+              isTextarea
             />
 
             {/* Country Select */}
@@ -988,6 +964,7 @@ const InputFieldSupplier = ({
   name,
   type = "text",
   value,
+  isTextarea = false,
   onChange,
   error,
 }) => (
@@ -995,18 +972,33 @@ const InputFieldSupplier = ({
     <label className="block text-sm font-medium text-[#212529] mb-1">
       {label}
     </label>
-    <input
-      type={type}
-      name={name}
-      placeholder={`Enter ${label.toLowerCase()}`}
-      value={value}
-      onChange={onChange}
-      className={`w-full border rounded-[10px] bg-white px-3 py-2 focus:ring-2 focus:outline-none transition ${
-        error
-          ? "border-red-500 focus:ring-red-400"
-          : "border-[#D9D4C6] focus:ring-[#207EB1]"
-      }`}
-    />
+    {isTextarea ? (
+      <textarea
+        name={name}
+        rows={3}
+        placeholder={`Enter ${label.toLowerCase()}`}
+        value={value}
+        onChange={onChange}
+        className={`w-full border rounded-[10px] bg-white px-3 py-2 focus:ring-2 focus:outline-none transition resize-none ${
+          error
+            ? "border-red-500 focus:ring-red-400"
+            : "border-[#D9D4C6] focus:ring-[#207EB1]"
+        }`}
+      />
+    ) : (
+      <input
+        type={type}
+        name={name}
+        placeholder={`Enter ${label.toLowerCase()}`}
+        value={value}
+        onChange={onChange}
+        className={`w-full border rounded-[10px] bg-white px-3 py-2 focus:ring-2 focus:outline-none transition ${
+          error
+            ? "border-red-500 focus:ring-red-400"
+            : "border-[#D9D4C6] focus:ring-[#207EB1]"
+        }`}
+      />
+    )}
     {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
   </div>
 );

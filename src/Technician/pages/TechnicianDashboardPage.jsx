@@ -54,12 +54,14 @@ const DashboardStatus = () => {
               value: d.new,
               icon: "/message.png",
               color: "bg-[#DC2776]",
+              bg: "bg-pink-50",
             },
             {
               label: "Open Tickets",
               value: d.open,
               icon: "/h2.png",
               color: "bg-[#9532E9]",
+              bg: "bg-indigo-50",
             },
             // {
             //   label: "Priority Inquiries",
@@ -72,12 +74,14 @@ const DashboardStatus = () => {
               value: d.close,
               icon: "/file.png",
               color: "bg-[#2466EB]",
+              bg: "bg-emerald-50",
             },
             {
               label: "Total Tickets",
               value: d.total,
               icon: "/h1.png",
               color: "bg-[#DC2776]",
+              bg: "bg-slate-100",
             },
           ]);
         }
@@ -154,7 +158,7 @@ const DashboardStatus = () => {
           {stats.map((item, i) => (
             <div
               key={i}
-              className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-3 sm:p-4 flex flex-col items-start justify-between text-start min-h-[120px] sm:min-h-[150px] ${
+              className={`${item.bg} rounded-xl shadow-sm hover:shadow-md transition-shadow p-3 sm:p-4 flex flex-col items-start justify-between text-start min-h-[120px] sm:min-h-[150px] ${
                 item.button ? "lg:col-span-2" : ""
               }`}
             >

@@ -128,7 +128,7 @@ const Header = () => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => navigate("/register")}
+                onClick={() => navigate("/boltix-registeration")}
                 className="bg-[#0088FF] text-white w-[145px] h-[40px] rounded"
               >
                 Let’s Start
@@ -182,7 +182,7 @@ const Header = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   onClick={() => {
-                    navigate("/register");
+                    navigate("/boltix-registeration");
                     setSidebarOpen(false);
                   }}
                   className="bg-[#0088FF] text-white py-2 rounded"

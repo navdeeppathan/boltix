@@ -48,6 +48,7 @@ const DashboardStatus = () => {
               value: d.new_inquiries,
               icon: "/message.png",
               color: "bg-[#DC2776]",
+              bg: "bg-pink-50",
               link: "/plant-supervisor/dashboard/tickets",
             },
             {
@@ -55,6 +56,7 @@ const DashboardStatus = () => {
               value: d.in_progress_inquiries,
               icon: "/h2.png",
               color: "bg-[#9532E9]",
+              bg: "bg-indigo-50",
               link: "/plant-supervisor/dashboard/tickets-approved",
             },
             {
@@ -62,6 +64,7 @@ const DashboardStatus = () => {
               value: d.pending,
               icon: "/h3.png",
               color: "bg-[#EA2179]",
+              bg: "bg-amber-50",
               link: "/plant-supervisor/dashboard/tickets",
             },
 
@@ -70,6 +73,7 @@ const DashboardStatus = () => {
               value: d.completed_inquiries,
               icon: "/file.png",
               color: "bg-[#2466EB]",
+              bg: "bg-emerald-50",
               // link: "/plant-supervisor/dashboard/tickets",
             },
             {
@@ -77,6 +81,7 @@ const DashboardStatus = () => {
               value: d.total_tickets,
               icon: "/h2.png",
               color: "bg-[#9532E9]",
+              bg: "bg-slate-100",
               // link: "/plant-supervisor/dashboard/tickets",
             },
           ]);
@@ -155,7 +160,7 @@ const DashboardStatus = () => {
             <div
               key={i}
               onClick={() => navigate(item.link)}
-              className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-3 sm:p-4 flex flex-col items-start justify-between text-start min-h-[120px] sm:min-h-[150px] ${
+              className={`${item.bg} rounded-xl shadow-sm hover:shadow-md transition-shadow p-3 sm:p-4 flex flex-col items-start justify-between text-start min-h-[120px] sm:min-h-[150px] ${
                 item.button ? "lg:col-span-2" : ""
               }`}
             >

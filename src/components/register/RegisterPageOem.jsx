@@ -5,14 +5,15 @@ import RegisterOptions from "./RegisterOptions";
 import CompanyRegistrationForm from "../../auth/CompanyRegistrationForm";
 import HowItWorks from "./HowItWorks";
 import Footer from "../../utils/Footer";
+import RegisterOptionsOem from "./RegisterOptionsOem";
 
-const RegisterPage = () => {
+const RegisterPageOem = () => {
   return (
     <div>
       <div>
         <Header />
         {/* <RegHeroSection /> */}
-        <RegisterOptions />
+        <RegisterOptionsOem />
         {/* <CompanyRegistrationForm /> */}
         <HowItWorks />
         <Footer />
@@ -21,4 +22,4 @@ const RegisterPage = () => {
   );
 };
 
-export default RegisterPage;
+export default RegisterPageOem;

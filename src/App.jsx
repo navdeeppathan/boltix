@@ -21,6 +21,13 @@ import PlantDashboard from "./PlantSupervisor/pages/PlantDashboard";
 import VideoCallUser from "../videocall/VideoCallUser";
 import VideoCallSupplier from "../videocall/VideoCallSupplier";
 import VoiceCallUser from "../videocall/VoiceCallUser";
+import BoltixLogin from "./auth/BoltixLogin";
+import PlantSupervisorLoginPage from "./auth/PlantSupervisorLoginPage";
+import PlantUserLoginPage from "./auth/PlantUserLoginPage";
+import OEMUserLoginPage from "./auth/OEMUserLoginPage";
+import OEMSupervisorLoginPage from "./auth/OEMSupervisorLoginPage";
+import BoltixRegister from "./auth/BoltixRegister";
+import RegisterPageOem from "./components/register/RegisterPageOem";
 
 const App = () => {
   return (
@@ -38,19 +45,90 @@ const App = () => {
       />
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route
+        {/* <Route
           path="/register"
           element={
             <PublicRoute>
               <RegisterPage />
             </PublicRoute>
           }
-        />
-        <Route
+        /> */}
+        {/* <Route
           path="/login/*"
           element={
             <PublicRoute>
               <LoginLayoutPage />
+            </PublicRoute>
+          }
+        /> */}
+
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <BoltixLogin />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/plant-supervisor-login"
+          element={
+            <PublicRoute>
+              <PlantSupervisorLoginPage />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/plant-user-login"
+          element={
+            <PublicRoute>
+              <PlantUserLoginPage />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/oem-user-login"
+          element={
+            <PublicRoute>
+              <OEMUserLoginPage />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/oem-supervisor-login"
+          element={
+            <PublicRoute>
+              <OEMSupervisorLoginPage />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/boltix-registeration"
+          element={
+            <PublicRoute>
+              <BoltixRegister />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/plant-operator-registration"
+          element={
+            <PublicRoute>
+              <RegisterPage />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/oem-service-provider-registration"
+          element={
+            <PublicRoute>
+              <RegisterPageOem />
             </PublicRoute>
           }
         />

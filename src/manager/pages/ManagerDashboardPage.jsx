@@ -92,6 +92,7 @@ const DashboardStatus = () => {
               value: d.new,
               icon: "/message.png",
               color: "bg-[#DC2776]",
+              bg: "bg-pink-50",
               link: "/manager/dashboard/tickets?query=new",
             },
             {
@@ -99,18 +100,21 @@ const DashboardStatus = () => {
               value: d.open,
               icon: "/h2.png",
               color: "bg-[#9532E9]",
+              bg: "bg-indigo-50",
             },
             {
               label: "Not Acknowledged Tickets",
               value: d.not_acknowledged,
               icon: "/h2.png",
               color: "bg-[#9532E9]",
+              bg: "bg-amber-50",
             },
             {
               label: "Total Tickets",
               value: d.total,
               icon: "/h3.png",
               color: "bg-[#EA2179]",
+              bg: "bg-slate-100",
               link: "/manager/dashboard/tickets",
             },
             {
@@ -118,6 +122,7 @@ const DashboardStatus = () => {
               value: d.closed,
               icon: "/file.png",
               color: "bg-[#2466EB]",
+              bg: "bg-emerald-50",
               link: "/manager/dashboard/tickets?query=completed",
             },
             {
@@ -125,6 +130,7 @@ const DashboardStatus = () => {
               value: d.products_categories,
               icon: "/setting.png",
               color: "bg-[#E11279]",
+              bg: "bg-blue-50",
               button: isManager ? "Manage Products" : "View Products",
               wide: true,
               link: "/manager/dashboard/manage-products",
@@ -205,7 +211,7 @@ const DashboardStatus = () => {
             <div
               key={i}
               onClick={() => navigate(item.link)}
-              className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-3 sm:p-4 flex flex-col items-start justify-between text-start min-h-[120px] sm:min-h-[150px] ${
+              className={`${item.bg} rounded-xl shadow-sm hover:shadow-md transition-shadow p-3 sm:p-4 flex flex-col items-start justify-between text-start min-h-[120px] sm:min-h-[150px] ${
                 item.button ? "lg:col-span-2" : ""
               }`}
             >

@@ -144,6 +144,7 @@ const DashboardStatus = () => {
             value: groupedTickets.open.length,
             icon: "/h1.png",
             color: "bg-[#DC2776]",
+            bg: "bg-indigo-50",
             link: "/dashboard/tickets",
           },
           {
@@ -151,12 +152,14 @@ const DashboardStatus = () => {
             value: groupedTickets.closed.length,
             icon: "/h2.png",
             color: "bg-[#9532E9]",
+            bg: "bg-emerald-50",
             link: "/dashboard/closed-tickets",
           },
           {
             label: "Pending Tickets",
             value: groupedTickets.pending.length,
             icon: "/h5.png",
+            bg: "bg-amber-50",
             color: "bg-[#037DC8]",
             link: "/dashboard/pending-tickets",
           },
@@ -164,6 +167,7 @@ const DashboardStatus = () => {
             label: "Returned Tickets",
             value: groupedTickets.returned.length,
             icon: "/h3.png",
+            bg: "bg-pink-50",
             color: "bg-[#EA2179]",
             link: "/dashboard/returned-tickets",
           },
@@ -172,15 +176,17 @@ const DashboardStatus = () => {
             value: groupedTickets.rejected.length,
             icon: "/h4.png",
             color: "bg-[#2466EB]",
+            bg: "bg-red-50",
             link: "/dashboard/rejected-tickets",
           },
-          {
-            label: "Total Tickets",
-            value: groupedTickets.all_tickets,
-            icon: "/h5.png",
-            color: "bg-[#037DC8]",
-            link: "/dashboard/tickets",
-          },
+          // {
+          //   label: "Total Tickets",
+          //   value: groupedTickets.all_tickets,
+          //   icon: "/h5.png",
+          //   color: "bg-[#037DC8]",
+          // bg: "bg-slate-100",
+          //   link: "/dashboard/tickets",
+          // },
           // {
           //   label: "Active Conversations",
           //   value:
@@ -228,7 +234,7 @@ const DashboardStatus = () => {
             <div
               key={i}
               onClick={() => navigate(item.link)}
-              className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-3 sm:p-4 flex flex-col items-start justify-between text-start min-h-[120px] sm:min-h-[150px]"
+              className={`${item.bg} rounded-xl shadow-sm hover:shadow-md transition-shadow p-3 sm:p-4 flex flex-col items-start justify-between text-start min-h-[120px] sm:min-h-[150px]`}
             >
               <div
                 className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full text-white mb-2 ${item.color}`}
@@ -467,7 +473,7 @@ const TicketOverview = () => {
                       setActiveTicket(ticket);
                       localStorage.setItem(
                         "activeTicket",
-                        JSON.stringify(ticket)
+                        JSON.stringify(ticket),
                       );
                     }}
                     className={`md:text-[14px] whitespace-nowrap flex-shrink-0 ${
@@ -936,7 +942,7 @@ const TicketBoard = ({ tickets = [], onClick }) => {
                     />
                     <span
                       className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
-                        ticket.priority?.priority_name
+                        ticket.priority?.priority_name,
                       )}`}
                     >
                       {ticket.priority?.priority_name || "N/A"}
@@ -1047,7 +1053,7 @@ const TicketBoard = ({ tickets = [], onClick }) => {
                     />
                     <span
                       className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
-                        ticket.complexity?.priority_name
+                        ticket.complexity?.priority_name,
                       )}`}
                     >
                       {ticket.complexity?.priority_name || "N/A"}
@@ -1151,7 +1157,7 @@ const TicketBoard = ({ tickets = [], onClick }) => {
                       />
                       <span
                         className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
-                          ticket.priority?.priority_name
+                          ticket.priority?.priority_name,
                         )}`}
                       >
                         {ticket.priority?.priority_name || "N/A"}
@@ -1202,7 +1208,7 @@ const TicketBoard = ({ tickets = [], onClick }) => {
                         />
                         <span
                           className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
-                            ticket.priority?.priority_name
+                            ticket.priority?.priority_name,
                           )}`}
                         >
                           {ticket.priority?.priority_name || "N/A"}
@@ -1256,7 +1262,7 @@ const TicketBoard = ({ tickets = [], onClick }) => {
                         />
                         <span
                           className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
-                            ticket.priority?.priority_name
+                            ticket.priority?.priority_name,
                           )}`}
                         >
                           {ticket.priority?.priority_name || "N/A"}
@@ -1321,7 +1327,7 @@ const TicketBoard = ({ tickets = [], onClick }) => {
                       />
                       <span
                         className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
-                          ticket.priority?.priority_name
+                          ticket.priority?.priority_name,
                         )}`}
                       >
                         {ticket.priority?.priority_name || "N/A"}
@@ -1522,7 +1528,7 @@ const TicketBoard = ({ tickets = [], onClick }) => {
                               {
                                 month: "short",
                                 day: "2-digit",
-                              }
+                              },
                             )}
                           </span>
                         </div>

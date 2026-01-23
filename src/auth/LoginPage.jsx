@@ -45,11 +45,20 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.email || !formData.password) {
+    if (!formData.email) {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "Please enter email and password.",
+        text: "Please enter your email address.",
+      });
+      return;
+    }
+
+    if (!formData.password) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Please enter your password.",
       });
       return;
     }
@@ -57,25 +66,52 @@ const LoginPage = () => {
     try {
       setLoading(true);
       const response = await http.post("/users/login", formData);
-      const data = response.data;
 
-      Swal.fire({
-        icon: "success",
-        title: "Login Successful",
-        text: data.message || "Welcome back!",
-        timer: 2000,
-        showConfirmButton: false,
-      });
+      const data = await response.data;
 
-      localStorage.setItem("token", data?.token);
-      localStorage.setItem("userData", JSON.stringify(data?.data));
-      navigate("/dashboard");
+      if (response.status) {
+        localStorage.setItem("token", data?.token);
+        localStorage.setItem("userData", JSON.stringify(data?.data));
+
+        const roleId = data?.data?.role_id;
+        // Show success alert
+        Swal.fire({
+          icon: "success",
+          title: "Login Successful",
+          text: data.message || "You have logged in successfully!",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+
+        if (roleId === 2) {
+          navigate("/manager/dashboard");
+          localStorage.setItem("asOEMSupervisor", 1);
+        } else if (roleId === 4) {
+          navigate("/technician/dashboard");
+          localStorage.setItem("asTechnician", 1);
+        } else if (roleId === 6) {
+          navigate("/plant-supervisor/dashboard");
+          localStorage.setItem("asPlantSupervisor", 1);
+        } else {
+          navigate("/dashboard");
+          localStorage.setItem("asCompany", 1);
+        }
+      } else {
+        // Show error alert
+        Swal.fire({
+          icon: "error",
+          title: "Login Failed",
+          text: data.message || data.error || "Invalid credentials",
+        });
+      }
     } catch (error) {
+      console.error("Login error:", error);
       Swal.fire({
         icon: "error",
-        title: "Login Failed",
+        title: "Error",
         text:
           error.response?.data?.message ||
+          error.response?.data?.error ||
           "Something went wrong. Please try again.",
       });
     } finally {
