@@ -28,6 +28,10 @@ import OEMUserLoginPage from "./auth/OEMUserLoginPage";
 import OEMSupervisorLoginPage from "./auth/OEMSupervisorLoginPage";
 import BoltixRegister from "./auth/BoltixRegister";
 import RegisterPageOem from "./components/register/RegisterPageOem";
+import VerifyEmail from "./components/register/VerifyEmail";
+import AdminDashboard from "./admin/AdminDashboard";
+import AdminLoginPage from "./auth/AdminLoginPage";
+import ForgotPassword from "./auth/ForgotPassword";
 
 const App = () => {
   return (
@@ -62,6 +66,16 @@ const App = () => {
           }
         /> */}
 
+        {/* <Route path="forgot-password" element={<ForgotPassword />} /> */}
+
+        <Route
+          path="/forgot-password"
+          element={
+            <PublicRoute>
+              <ForgotPassword />
+            </PublicRoute>
+          }
+        />
         <Route
           path="/login"
           element={
@@ -102,6 +116,15 @@ const App = () => {
           element={
             <PublicRoute>
               <OEMSupervisorLoginPage />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/admin-login"
+          element={
+            <PublicRoute>
+              <AdminLoginPage />
             </PublicRoute>
           }
         />
@@ -176,11 +199,22 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/admin/dashboard/*"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+
         <Route path="/about" element={<AboutUs />} />
         <Route path="/process" element={<ServiceProcess />} />
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/contact" element={<ContactForm />} />
         <Route path="/contact-us" element={<Contact />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
 
         <Route path="/terms" element={<Terms />} />
       </Routes>

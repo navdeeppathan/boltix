@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import http from "../../service/http";
 import { RotatingLines } from "react-loader-spinner";
 import { ChevronDown, ChevronUp, FileText } from "lucide-react";
+import Swal from "sweetalert2";
 
 const PlantUsers = () => {
   const navigate = useNavigate();
@@ -35,6 +36,55 @@ const UserTable = () => {
 
   const user = JSON.parse(localStorage.getItem("userData"));
   const user_id = user?.id;
+
+  const [showModal, setShowModal] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [description, setDescription] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const openTicketModal = (userId) => {
+    setSelectedUserId(userId);
+    setDescription("");
+    setShowModal(true);
+  };
+
+  const createTicket = async () => {
+    if (!description.trim()) {
+      alert("Please enter description");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const response = await http.post("/admin/tickets", {
+        user_id: selectedUserId,
+        provider_id: user_id,
+        remarks: description,
+      });
+
+      if (response.data.status === "success") {
+        Swal.fire({
+          icon: "success",
+          title: "Ticket created successfully",
+          showConfirmButton: true,
+        });
+        setShowModal(false);
+      }
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        icon: "error",
+        title:
+          error.response.data.message ||
+          error.response.data.error ||
+          "Failed to create ticket",
+        showConfirmButton: true,
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -108,6 +158,9 @@ const UserTable = () => {
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[100px]">
                   Mobile No.
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[100px]">
+                  Action
                 </th>
               </tr>
             </thead>
@@ -183,12 +236,35 @@ const UserTable = () => {
                         {ticket?.mobile_number || "N/A"}
                       </span>
                     </td>
+                    <td className="px-4 py-4">
+                      {ticket?.is_active == 0 ? (
+                        ticket?.admin_tickets?.length == 0 ? (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation(); // prevent row click
+                              openTicketModal(ticket.id);
+                            }}
+                            className="px-3 py-1 text-xs font-semibold text-white bg-black rounded hover:bg-gray-800"
+                          >
+                            Create Ticket
+                          </button>
+                        ) : (
+                          <span className="inline-block px-3 py-1 text-red-900 bg-red-200 rounded-full text-xs font-medium whitespace-nowrap">
+                            inactive
+                          </span>
+                        )
+                      ) : (
+                        <span className="inline-block px-3 py-1 text-green-900 bg-green-200 rounded-full text-xs font-medium whitespace-nowrap">
+                          active
+                        </span>
+                      )}
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td colSpan={8} className="text-center py-6 text-gray-500">
-                    No tickets found.
+                    No User found.
                   </td>
                 </tr>
               )}
@@ -310,6 +386,39 @@ const UserTable = () => {
           </div>
         ))}
       </div>
+
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-lg w-full max-w-md p-5 shadow-lg">
+            <h2 className="text-lg font-semibold mb-3">Create Admin Ticket</h2>
+
+            <textarea
+              rows="4"
+              className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring"
+              placeholder="Enter description..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 text-sm rounded border"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={createTicket}
+                disabled={submitting}
+                className="px-4 py-2 text-sm rounded bg-black text-white hover:bg-gray-800 disabled:opacity-50"
+              >
+                {submitting ? "Submitting..." : "Submit"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

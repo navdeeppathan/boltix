@@ -4,6 +4,8 @@ import Swal from "sweetalert2";
 import http from "../service/http";
 import CircularProgress from "@mui/material/CircularProgress";
 import { motion } from "framer-motion";
+import HeaderAdminLogin from "../utils/HeaderAdminLogin";
+import Footer from "../utils/Footer";
 
 const container = {
   hidden: { opacity: 0 },
@@ -78,101 +80,105 @@ const ForgotPassword = () => {
   };
 
   return (
-    <section className="relative bg-gray-100 overflow-hidden">
-      {/* Background */}
-      <motion.div
-        initial={{ scale: 1.05 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 6, ease: "easeOut" }}
-        className="absolute inset-0"
-      >
-        <img
-          src="/loginbg.png"
-          alt="Background"
-          className="w-full h-full object-cover"
-        />
-      </motion.div>
-
-      {/* Content */}
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate="visible"
-        className="relative z-10 mx-auto px-4 sm:px-6 lg:px-32 py-12 lg:py-20 flex flex-col lg:flex-row items-center justify-between gap-10"
-      >
-        {/* Left Content */}
-        <motion.div variants={fadeUp} className="lg:w-1/2">
-          <h2 className="text-2xl sm:text-3xl md:text-[48.65px] font-bold text-[#212529]">
-            Forgot Your Password?
-          </h2>
-          <p className="mt-2 md:text-[24px] text-[#212529]">
-            No worries — we’ve got you covered!
-          </p>
-          <p className="mt-4 md:text-[24px] text-[#5D5D5D]">
-            Enter your registered email address and we’ll send password reset
-            instructions directly to your inbox.
-          </p>
-        </motion.div>
-
-        {/* Forgot Password Card */}
+    <>
+      <HeaderAdminLogin />
+      <section className="relative bg-gray-100 mt-24 overflow-hidden">
+        {/* Background */}
         <motion.div
-          variants={cardVariant}
-          className="lg:w-1/2 max-w-md w-full bg-[#212529] text-white rounded-[14px] shadow-lg p-8"
+          initial={{ scale: 1.05 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 6, ease: "easeOut" }}
+          className="absolute inset-0"
         >
-          <div className="text-center mb-6">
-            <h2 className="text-2xl md:text-[48.65px] font-bold">
-              Forgot Password
-            </h2>
-            <p className="md:text-[20px]">
-              Enter your registered email to reset your password
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email */}
-            <motion.div variants={fadeUp}>
-              <label className="block mb-2">Email Address</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your registered email"
-                className="w-full px-4 py-2 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-blue-500"
-              />
-            </motion.div>
-
-            {/* Submit */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              disabled={loading}
-              type="submit"
-              className="w-full md:w-[154px] md:h-[48px] bg-[#0088FF] rounded-md font-semibold flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <CircularProgress size={20} color="inherit" />
-                  Sending...
-                </>
-              ) : (
-                "Submit"
-              )}
-            </motion.button>
-
-            {/* Back to Login */}
-            <div className="text-center mt-6">
-              <button
-                type="button"
-                onClick={() => navigate("/login")}
-                className="text-sm hover:underline"
-              >
-                Back to Login
-              </button>
-            </div>
-          </form>
+          <img
+            src="/loginbg.png"
+            alt="Background"
+            className="w-full h-full object-cover"
+          />
         </motion.div>
-      </motion.div>
-    </section>
+
+        {/* Content */}
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate="visible"
+          className="relative z-10 mx-auto px-4 sm:px-6 lg:px-32 py-12 lg:py-20 flex flex-col lg:flex-row items-center justify-between gap-10"
+        >
+          {/* Left Content */}
+          <motion.div variants={fadeUp} className="lg:w-1/2">
+            <h2 className="text-2xl sm:text-3xl md:text-[48.65px] font-bold text-[#212529]">
+              Forgot Your Password?
+            </h2>
+            <p className="mt-2 md:text-[24px] text-[#212529]">
+              No worries — we’ve got you covered!
+            </p>
+            <p className="mt-4 md:text-[24px] text-[#5D5D5D]">
+              Enter your registered email address and we’ll send password reset
+              instructions directly to your inbox.
+            </p>
+          </motion.div>
+
+          {/* Forgot Password Card */}
+          <motion.div
+            variants={cardVariant}
+            className="lg:w-1/2 max-w-md w-full bg-[#212529] text-white rounded-[14px] shadow-lg p-8"
+          >
+            <div className="text-center mb-6">
+              <h2 className="text-2xl md:text-[48.65px] font-bold">
+                Forgot Password
+              </h2>
+              <p className="md:text-[20px]">
+                Enter your registered email to reset your password
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Email */}
+              <motion.div variants={fadeUp}>
+                <label className="block mb-2">Email Address</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your registered email"
+                  className="w-full px-4 py-2 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-blue-500"
+                />
+              </motion.div>
+
+              {/* Submit */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                disabled={loading}
+                type="submit"
+                className="w-full md:w-[154px] md:h-[48px] bg-[#0088FF] rounded-md font-semibold flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <CircularProgress size={20} color="inherit" />
+                    Sending...
+                  </>
+                ) : (
+                  "Submit"
+                )}
+              </motion.button>
+
+              {/* Back to Login */}
+              <div className="text-center mt-6">
+                <button
+                  type="button"
+                  onClick={() => navigate("/login")}
+                  className="text-sm hover:underline"
+                >
+                  Back to Login
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </motion.div>
+      </section>
+      <Footer />
+    </>
   );
 };
 

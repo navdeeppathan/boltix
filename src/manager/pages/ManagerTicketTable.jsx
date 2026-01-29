@@ -712,7 +712,7 @@ const ManagerTicketTable = () => {
     try {
       setLoading(true);
       const response = await http.get(
-        `/tickets/approved/${user_id}?query=${query}`
+        `/tickets/approved/${user_id}?query=${query}`,
       );
       console.log("Tickets:", response.data.data);
 
@@ -940,7 +940,9 @@ const ManagerTicketTable = () => {
                           className="px-4 py-2 text-xs sm:text-sm font-semibold text-gray-700"
                         >
                           Company:{" "}
-                          <span className="font-bold">{group.companyName}</span>{" "}
+                          <span className="font-bold">
+                            {group.companyName}
+                          </span>{" "}
                         </td>
                       </tr>
 
@@ -982,7 +984,7 @@ const ManagerTicketTable = () => {
                           <td className="px-4 py-4">
                             <span
                               className={`text-sm font-medium whitespace-nowrap ${getCategoryColor(
-                                ticket.category
+                                ticket.category,
                               )}`}
                             >
                               {ticket.category || "N/A"}
@@ -1005,7 +1007,7 @@ const ManagerTicketTable = () => {
                           <td className="px-4 py-4">
                             <span
                               className={`inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getPriorityColor(
-                                ticket.priority?.priority_name
+                                ticket.priority?.priority_name,
                               )}`}
                             >
                               {ticket.priority?.priority_name || "N/A"}
@@ -1019,7 +1021,7 @@ const ManagerTicketTable = () => {
                                     month: "short",
                                     day: "numeric",
                                     year: "numeric",
-                                  }
+                                  },
                                 )
                               : "N/A"}
                           </td>
@@ -1166,21 +1168,21 @@ const ManagerTicketTable = () => {
                 <div className="flex flex-wrap gap-2 mb-3">
                   <span
                     className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getPriorityColor(
-                      ticket.priority?.priority_name
+                      ticket.priority?.priority_name,
                     )}`}
                   >
                     {ticket.priority?.priority_name}
                   </span>
                   <span
                     className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                      ticket.status
+                      ticket.status,
                     )}`}
                   >
                     {ticket.status}
                   </span>
                   <span
                     className={`inline-block text-xs font-medium ${getCategoryColor(
-                      ticket.category
+                      ticket.category,
                     )}`}
                   >
                     {ticket.category}

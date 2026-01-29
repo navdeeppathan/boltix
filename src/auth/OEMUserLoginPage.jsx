@@ -116,6 +116,25 @@ const OEMUserLoginPage = () => {
       }
     } catch (error) {
       console.error("Login error:", error);
+
+      // EMAIL NOT VERIFIED
+      if (error.response?.status === 403) {
+        const user = error.response?.data?.data;
+
+        Swal.fire({
+          icon: "warning",
+          title: "Email Not Verified",
+          text: error.response.data.message,
+        });
+
+        navigate("/verify-email", {
+          state: { user_id: user?.id },
+        });
+
+        return;
+      }
+
+      // OTHER ERRORS
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -219,14 +238,14 @@ const OEMUserLoginPage = () => {
                   )}
                 </div>
 
-                <div className="text-right mt-2">
+                {/* <div className="text-right mt-2">
                   <Link
                     to="/login/forgot-password"
                     className="text-sm hover:underline"
                   >
                     Forgot password?
                   </Link>
-                </div>
+                </div> */}
               </motion.div>
 
               {/* Submit */}

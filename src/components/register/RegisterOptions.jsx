@@ -164,6 +164,13 @@ const PlantRegistrationForm = () => {
 
   //  Fetch countries
   useEffect(() => {
+    /*************  ✨ Windsurf Command ⭐  *************/
+    /**
+     * Fetch countries from the API
+     *
+     * @returns {Promise<void>}
+     */
+    /*******  1af02ef0-e3f1-4883-ab82-72df9c3d5238  *******/
     const fetchCountries = async () => {
       try {
         const res = await http.get("/countries");
@@ -264,17 +271,30 @@ const PlantRegistrationForm = () => {
       const res = await http.post("/users/register", formData);
       // console.log("Form submitted successfully:", res.data);
 
+      // if (res.data.status) {
+      //   Swal.fire({
+      //     icon: "success",
+      //     title: "Form Submitted!",
+      //     text:
+      //       res.data.message ||
+      //       "Your plant registration has been successfully submitted.",
+      //     showConfirmButton: false,
+      //     timer: 2000,
+      //   });
+      //   navigate("/login");
+      // }
       if (res.data.status) {
         Swal.fire({
           icon: "success",
-          title: "Form Submitted!",
-          text:
-            res.data.message ||
-            "Your plant registration has been successfully submitted.",
+          title: "OTP Sent",
+          text: "Please verify your email",
+          timer: 1500,
           showConfirmButton: false,
-          timer: 2000,
         });
-        navigate("/login");
+
+        navigate("/verify-email", {
+          state: { user_id: res.data.user_id },
+        });
       } else {
         Swal.fire({
           icon: "error",
