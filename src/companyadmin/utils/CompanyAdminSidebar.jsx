@@ -16,7 +16,12 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 
 // Sidebar Component
-const Sidebar = ({ isOpen, setIsOpen, activeMenu, setActiveMenu }) => {
+const CompanyAdminSidebar = ({
+  isOpen,
+  setIsOpen,
+  activeMenu,
+  setActiveMenu,
+}) => {
   const navigate = useNavigate();
   const location = useLocation();
   const user = JSON.parse(localStorage.getItem("userData"));
@@ -25,13 +30,13 @@ const Sidebar = ({ isOpen, setIsOpen, activeMenu, setActiveMenu }) => {
       id: "home",
       label: "Dashboard",
       icon: LayoutDashboard,
-      path: "/admin/dashboard/home",
+      path: "/company-admin/dashboard/home",
     },
     // {
     //   id: "tickets",
     //   label: "Tickets",
     //   icon: LayoutDashboard,
-    //   path: "/admin/dashboard/tickets",
+    //   path: "/company-admin/dashboard/tickets",
     // },
     // {
     //   id: "categories",
@@ -89,7 +94,7 @@ const Sidebar = ({ isOpen, setIsOpen, activeMenu, setActiveMenu }) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-gray-900 text-white transform transition-transform duration-300 ease-in-out ${
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#212529] text-white transform transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
@@ -190,4 +195,4 @@ const Sidebar = ({ isOpen, setIsOpen, activeMenu, setActiveMenu }) => {
   );
 };
 
-export default Sidebar;
+export default CompanyAdminSidebar;

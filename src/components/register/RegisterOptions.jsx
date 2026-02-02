@@ -145,16 +145,18 @@ const PlantRegistrationForm = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     company_name: "",
-    role_id: 6,
+    role_id: 12,
     plant_name: "",
     location_country: "",
     contact_name: "",
     mobile_number: "",
     email: "",
-    designation: "",
-    approval_level: "",
+    designation: "Admin",
+    approval_level: 1,
     parent_id: null,
     plant_location: "",
+    parentCompanyName: "",
+    parentLocationName: "",
   });
 
   const [countries, setCountries] = useState([]);
@@ -164,13 +166,6 @@ const PlantRegistrationForm = () => {
 
   //  Fetch countries
   useEffect(() => {
-    /*************  ✨ Windsurf Command ⭐  *************/
-    /**
-     * Fetch countries from the API
-     *
-     * @returns {Promise<void>}
-     */
-    /*******  1af02ef0-e3f1-4883-ab82-72df9c3d5238  *******/
     const fetchCountries = async () => {
       try {
         const res = await http.get("/countries");
@@ -230,6 +225,14 @@ const PlantRegistrationForm = () => {
     setErrors((prev) => ({ ...prev, plant_location: "" }));
   };
 
+  const handleParentCountryChange = (selectedOption) => {
+    setFormData((prev) => ({
+      ...prev,
+      parentLocationName: selectedOption ? selectedOption.value : "",
+    }));
+    setErrors((prev) => ({ ...prev, parentLocationName: "" }));
+  };
+
   const handleApprovalChange = (selectedOption) => {
     setFormData({
       ...formData,
@@ -263,6 +266,8 @@ const PlantRegistrationForm = () => {
   //  Submit handler
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    console.log("formdata:-", formData);
 
     if (!validateForm()) return;
 
@@ -374,7 +379,7 @@ const PlantRegistrationForm = () => {
             {/* Location Country */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Company location country
+                Company Location Country
               </label>
               <Select
                 options={countries}
@@ -413,9 +418,10 @@ const PlantRegistrationForm = () => {
                 </p>
               )}
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Plant location country(if diff from company)
+                Plant Location Country(if diff from company)
               </label>
               <Select
                 options={countries}
@@ -455,9 +461,62 @@ const PlantRegistrationForm = () => {
               )}
             </div>
 
+            {/* Plant Name */}
+            <InputField
+              label="Parent Company Name"
+              name="parentCompanyName"
+              value={formData.parentCompanyName}
+              onChange={handleChange}
+              error={errors.parentCompanyName}
+            />
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Parent Company Location
+              </label>
+              <Select
+                options={countries}
+                isLoading={loadingCountries}
+                value={
+                  formData.parentLocationName
+                    ? {
+                        value: formData.parentLocationName,
+                        label: formData.parentLocationName,
+                      }
+                    : null
+                }
+                onChange={handleParentCountryChange}
+                placeholder="Select country"
+                isClearable
+                isSearchable
+                classNamePrefix="react-select"
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    borderRadius: "10px",
+                    borderColor: errors.parentLocationName ? "red" : "#D9D4C6",
+                    boxShadow: "none",
+                    "&:hover": {
+                      borderColor: errors.parentLocationName
+                        ? "red"
+                        : "#207EB1",
+                    },
+                  }),
+                }}
+                components={{
+                  IndicatorSeparator: () => null,
+                }}
+              />
+              {errors.parentLocationName && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.parentLocationName}
+                </p>
+              )}
+            </div>
+
             {/* Contact Name */}
             <InputField
-              label="Contact Name"
+              label="Admin Contact Name"
               name="contact_name"
               value={formData.contact_name}
               onChange={handleChange}
@@ -466,7 +525,7 @@ const PlantRegistrationForm = () => {
 
             {/* Phone Number */}
             <InputField
-              label="Phone Number"
+              label="Admin Phone Number"
               name="mobile_number"
               value={formData.mobile_number}
               onChange={handleChange}
@@ -475,7 +534,7 @@ const PlantRegistrationForm = () => {
 
             {/* Email */}
             <InputField
-              label="Email ID"
+              label="Admin Email"
               name="email"
               type="email"
               value={formData.email}
@@ -484,15 +543,15 @@ const PlantRegistrationForm = () => {
             />
 
             {/* Designation */}
-            <InputField
+            {/* <InputField
               label="Designation"
               name="designation"
               value={formData.designation}
               onChange={handleChange}
               error={errors.designation}
-            />
+            /> */}
 
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Approval Level
               </label>
@@ -530,7 +589,7 @@ const PlantRegistrationForm = () => {
                   {errors.approval_level}
                 </p>
               )}
-            </div>
+            </div> */}
           </div>
 
           <div className="flex justify-start mt-8">

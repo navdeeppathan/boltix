@@ -26,12 +26,14 @@ const PlantTicketTable = () => {
 
   const user = JSON.parse(localStorage.getItem("userData"));
   const user_id = user?.id;
+  const parent_id = user?.parent_id;
+  const department = user?.department;
   const fetchTickets = async () => {
     console.log("come");
     try {
       setLoading(true);
       const response = await http.get(
-        `/tickets/parent/${user_id}?query=${query ? query : "all"}`
+        `/tickets/parent/${parent_id}/${department}?query=${query ? query : "all"}`,
       );
       if (response.data.status && Array.isArray(response.data.data)) {
         console.log(response.data);
@@ -186,12 +188,12 @@ const PlantTicketTable = () => {
   const hasManufacturer = tickets?.some(
     (ticket) =>
       ticket.manufacturer_user !== null &&
-      ticket.manufacturer_user !== undefined
+      ticket.manufacturer_user !== undefined,
   );
 
   const hasServiceProvider = tickets?.some(
     (ticket) =>
-      ticket.service_user !== null && ticket.service_user !== undefined
+      ticket.service_user !== null && ticket.service_user !== undefined,
   );
 
   return (
@@ -331,7 +333,7 @@ const PlantTicketTable = () => {
                         <td className="px-4 py-4">
                           <span
                             className={`text-sm font-medium whitespace-nowrap ${getCategoryColor(
-                              ticket.category
+                              ticket.category,
                             )}`}
                           >
                             {ticket.category || "N/A"}
@@ -354,7 +356,7 @@ const PlantTicketTable = () => {
                         <td className="px-4 py-4">
                           <span
                             className={`inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getPriorityColor(
-                              ticket.priority?.priority_name
+                              ticket.priority?.priority_name,
                             )}`}
                           >
                             {ticket.priority?.priority_name || "N/A"}
@@ -376,7 +378,7 @@ const PlantTicketTable = () => {
                               month: "short",
                               day: "numeric",
                               year: "numeric",
-                            }
+                            },
                           )}
                         </td>
                         <td className="px-4 py-4">
@@ -582,21 +584,21 @@ const PlantTicketTable = () => {
                 <div className="flex flex-wrap gap-2 mb-3">
                   <span
                     className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getPriorityColor(
-                      ticket.priority?.priority_name
+                      ticket.priority?.priority_name,
                     )}`}
                   >
                     {ticket.priority?.priority_name}
                   </span>
                   <span
                     className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                      ticket.status
+                      ticket.status,
                     )}`}
                   >
                     {ticket.status}
                   </span>
                   <span
                     className={`inline-block text-xs font-medium ${getCategoryColor(
-                      ticket.category
+                      ticket.category,
                     )}`}
                   >
                     {ticket.category}

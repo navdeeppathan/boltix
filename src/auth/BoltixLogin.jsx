@@ -35,10 +35,14 @@ const BoltixLogin = () => {
   const navigate = useNavigate();
   const handleClick = (category, role) => {
     console.log(`${category} - ${role}`);
-    if (category == "Plant" && role == "Supervisor") {
+    if (category == "Plant" && role == "Admin") {
+      navigate("/plant-company-admin-login");
+    } else if (category == "Plant" && role == "Supervisor") {
       navigate("/plant-supervisor-login");
     } else if (category == "Plant" && role == "User") {
       navigate("/plant-user-login");
+    } else if (category == "OEM" && role == "Admin") {
+      navigate("/oem-company-admin-login");
     } else if (category == "OEM" && role == "User") {
       navigate("/oem-user-login");
     } else if (category == "OEM" && role == "Supervisor") {
@@ -50,7 +54,7 @@ const BoltixLogin = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-screen mt-24 bg-gray-100 flex items-center justify-center">
         <motion.div
           variants={pageVariant}
           initial="hidden"
@@ -83,8 +87,8 @@ const BoltixLogin = () => {
               <h2 className="text-lg font-semibold text-gray-700 mb-4">
                 Plant
               </h2>
-              <div className="flex gap-4">
-                {["Supervisor", "User"].map((role, index) => (
+              <div className="grid grid-cols-1 md:grid-cols-3  gap-4">
+                {["Admin", "Supervisor", "User"].map((role, index) => (
                   <motion.button
                     key={role}
                     whileHover={{ y: -4, scale: 1.03 }}
@@ -106,8 +110,8 @@ const BoltixLogin = () => {
               animate="visible"
             >
               <h2 className="text-lg font-semibold text-gray-700 mb-4">OEM</h2>
-              <div className="flex gap-4">
-                {["Supervisor", "User"].map((role) => (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {["Admin", "Supervisor", "User"].map((role) => (
                   <motion.button
                     key={role}
                     whileHover={{ y: -4, scale: 1.03 }}

@@ -145,7 +145,7 @@ const PlantRegistrationForm = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     company_name: "",
-    role_id: 6,
+    role_id: 12,
     plant_name: "",
     location_country: "",
     contact_name: "",
@@ -564,12 +564,12 @@ const SupplierRegistrationForm = () => {
 
   const [formData, setFormData] = useState({
     company_name: "",
-    role_id: 2,
+    role_id: 12,
     business_type: "",
     head_office_address: "",
     location_country: "",
     full_name: "",
-    designation: "",
+    designation: "Admin",
     email: "",
     mobile_number: "",
     product_category: "",
@@ -796,7 +796,7 @@ const SupplierRegistrationForm = () => {
             </div>
 
             <InputFieldSupplier
-              label="Head office address"
+              label="Head Office Address"
               name="head_office_address"
               value={formData.head_office_address}
               onChange={handleChange}
@@ -805,7 +805,7 @@ const SupplierRegistrationForm = () => {
             />
 
             <InputFieldSupplier
-              label="Regional office address(if any) "
+              label="Regional Office Address(if any) "
               name="regional_off_add"
               value={formData.regional_off_add}
               onChange={handleChange}
@@ -874,13 +874,13 @@ const SupplierRegistrationForm = () => {
               error={errors.full_name}
             />
 
-            <InputFieldSupplier
+            {/* <InputFieldSupplier
               label="Designation"
               name="designation"
               value={formData.designation}
               onChange={handleChange}
               error={errors.designation}
-            />
+            /> */}
 
             <InputFieldSupplier
               label="Email ID"
@@ -915,7 +915,7 @@ const SupplierRegistrationForm = () => {
             />
 
             <InputFieldSupplier
-              label="Company products and services"
+              label="Company Products and Services"
               name="product_category"
               value={formData.product_category}
               onChange={handleChange}

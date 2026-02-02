@@ -159,9 +159,9 @@ const UserTable = () => {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[100px]">
                   Mobile No.
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[100px]">
+                {/* <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[100px]">
                   Action
-                </th>
+                </th> */}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -236,7 +236,7 @@ const UserTable = () => {
                         {ticket?.mobile_number || "N/A"}
                       </span>
                     </td>
-                    <td className="px-4 py-4">
+                    {/* <td className="px-4 py-4">
                       {ticket?.is_active == 0 ? (
                         ticket?.admin_tickets?.length == 0 ? (
                           <button
@@ -258,7 +258,7 @@ const UserTable = () => {
                           active
                         </span>
                       )}
-                    </td>
+                    </td> */}
                   </tr>
                 ))
               ) : (

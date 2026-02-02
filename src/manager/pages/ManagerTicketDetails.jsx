@@ -728,8 +728,9 @@ const AssignTicketModal = ({ ticket }) => {
 
     const fetchUsers = async () => {
       try {
+        // console.log("user:designation:-", user.id, selectedDesignation.value);
         const response = await http.post(`/users/bydesignation`, {
-          parent_id: user.id,
+          parent_id: user.parent_id,
           designation: selectedDesignation.value,
         });
         const mappedUsers = response.data.data.map((user) => ({
@@ -750,7 +751,7 @@ const AssignTicketModal = ({ ticket }) => {
   useEffect(() => {
     const fetchDesignations = async () => {
       try {
-        const res = await http.get("/designations");
+        const res = await http.get("/departments");
         const formatted = res.data.data.map((item) => ({
           value: item.name,
           label: item.name,

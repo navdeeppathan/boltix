@@ -32,6 +32,8 @@ import VerifyEmail from "./components/register/VerifyEmail";
 import AdminDashboard from "./admin/AdminDashboard";
 import AdminLoginPage from "./auth/AdminLoginPage";
 import ForgotPassword from "./auth/ForgotPassword";
+import CompanyAdminLoginPage from "./auth/CompanyAdminLoginPage";
+import CompanyAdminDashboard from "./companyadmin/CompanyAdminDashboard";
 
 const App = () => {
   return (
@@ -130,6 +132,22 @@ const App = () => {
         />
 
         <Route
+          path="/plant-company-admin-login"
+          element={
+            <PublicRoute>
+              <CompanyAdminLoginPage />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/oem-company-admin-login"
+          element={
+            <PublicRoute>
+              <CompanyAdminLoginPage />
+            </PublicRoute>
+          }
+        />
+        <Route
           path="/boltix-registeration"
           element={
             <PublicRoute>
@@ -205,6 +223,15 @@ const App = () => {
           element={
             <ProtectedRoute role="admin">
               <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/company-admin/dashboard/*"
+          element={
+            <ProtectedRoute role="companyadmin">
+              <CompanyAdminDashboard />
             </ProtectedRoute>
           }
         />

@@ -85,7 +85,7 @@ const ManagerSidebar = ({ isOpen, setIsOpen }) => {
             Manage Products
           </NavLink>
 
-          <NavLink
+          {/* <NavLink
             to="/manager/dashboard/users-list"
             className={({ isActive }) =>
               isActive ? `${linkClasses} ${activeClasses}` : linkClasses
@@ -93,7 +93,7 @@ const ManagerSidebar = ({ isOpen, setIsOpen }) => {
             onClick={() => setIsOpen(false)}
           >
             <FaUsers /> Users
-          </NavLink>
+          </NavLink> */}
 
           <NavLink
             to="/manager/dashboard/profile"

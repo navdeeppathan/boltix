@@ -85,7 +85,8 @@ const OEMUserLoginPage = () => {
         //   navigate("/technician/dashboard");
         //   localStorage.setItem("asTechnician", 1);
         // } else
-        if (roleId == 4) {
+        // if (roleId == 4) {
+        if (roleId == 1) {
           navigate("/technician/dashboard");
           localStorage.setItem("asTechnician", 1);
 
