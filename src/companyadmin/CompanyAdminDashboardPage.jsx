@@ -65,11 +65,13 @@ const CompanyAdminDashboardPage = () => {
         is_active: newStatus,
       });
 
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === user.id ? { ...u, is_active: newStatus } : u,
-        ),
-      );
+      // se((prev) =>
+      //   prev.map((u) =>
+      //     u.id === user.id ? { ...u, is_active: newStatus } : u,
+      //   ),
+      // );
+
+      fetchUsers();
 
       toast.success(res.data.message);
     } catch (error) {
@@ -143,6 +145,7 @@ const CompanyAdminDashboardPage = () => {
                   "Verified",
                   "Department",
                   "Status",
+                  "Actions",
                 ].map((head) => (
                   <th
                     key={head}
@@ -203,6 +206,20 @@ const CompanyAdminDashboardPage = () => {
                           Inactive
                         </span>
                       )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => handleToggle(user)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
+                          user.is_active ? "bg-green-500" : "bg-gray-300"
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-5 w-5 transform rounded-full bg-white transition ${
+                            user.is_active ? "translate-x-5" : "translate-x-1"
+                          }`}
+                        />
+                      </button>
                     </td>
                   </tr>
                 ))
