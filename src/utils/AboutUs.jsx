@@ -72,7 +72,7 @@ const TrustedBy = () => {
         {/* Left Text */}
         <motion.p
           variants={logoVariant}
-          className="text-[#212529] text-center sm:text-left text-sm sm:text-base md:text-lg font-bold leading-snug max-w-[400px]"
+          className="text-[#0088ffcf] text-center sm:text-left text-sm sm:text-base md:text-lg font-bold leading-snug max-w-[400px]"
         >
           Trusted by 10,000 world-class Plants, OEM’s service providers of all
           sizes.
@@ -154,18 +154,16 @@ const WhoWeAre = () => {
         >
           <motion.h3
             variants={textVariant}
-            className="text-[#212529] text-[20px] font-bold mb-3"
+            className="text-[#0088ffcf] text-[20px] font-bold mb-3"
           >
             Who We Are
           </motion.h3>
 
           <motion.h2
             variants={textVariant}
-            className="text-2xl sm:text-3xl md:text-[32px] font-bold text-gray-900 leading-snug mb-4"
+            className="text-2xl sm:text-3xl md:text-[32px] font-bold text-[#0088ffcf] leading-snug mb-4"
           >
-            Redefining industrial support with{" "}
-            <br className="hidden sm:block" />
-            real-time connections between <br className="hidden sm:block" />
+            Redefining industrial support with real-time connections between
             Plants and OEMs.
           </motion.h2>
 
@@ -300,7 +298,7 @@ const SpreadAroundWorld = () => {
         {/* Heading */}
         <motion.h2
           variants={cardVariant}
-          className="text-3xl md:text-4xl font-bold text-[#212529] mb-4"
+          className="text-3xl md:text-4xl font-bold text-[#0088ffcf] mb-4"
         >
           We Spread Around the World
         </motion.h2>

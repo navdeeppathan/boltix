@@ -58,7 +58,7 @@ const BoltixRegister = () => {
           {/* Heading */}
           <motion.h1
             variants={fadeUp}
-            className="text-2xl font-semibold text-gray-800 mb-4"
+            className="text-2xl font-semibold text-[#0088ffcf] mb-4"
           >
             Boltix – Streamline plant and OEM collaboration in real time
           </motion.h1>
@@ -76,8 +76,8 @@ const BoltixRegister = () => {
             initial="hidden"
             animate="visible"
           >
-            <h2 className="text-lg font-semibold text-gray-700 mb-6">
-              Register as a
+            <h2 className="text-lg font-semibold text-[#0088ffcf] mb-6">
+              Register
             </h2>
 
             <div className="flex flex-wrap gap-6">

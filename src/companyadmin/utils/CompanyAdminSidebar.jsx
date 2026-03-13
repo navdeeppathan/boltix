@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from "react";
 import {
-  Menu,
   X,
   LayoutDashboard,
   Folders,
-  Edit,
-  Cookie,
-  MessageSquare,
-  Settings,
-  ChevronDown,
   LogOut,
-  MessageCircle,
+  PersonStanding,
+  Users,
 } from "lucide-react";
 
 import { useNavigate, useLocation } from "react-router-dom";
@@ -32,54 +27,32 @@ const CompanyAdminSidebar = ({
       icon: LayoutDashboard,
       path: "/company-admin/dashboard/home",
     },
-    // {
-    //   id: "tickets",
-    //   label: "Tickets",
-    //   icon: LayoutDashboard,
-    //   path: "/company-admin/dashboard/tickets",
-    // },
-    // {
-    //   id: "categories",
-    //   label: "Categories",
-    //   icon: Folders,
-    //   path: "/dashboard/categories",
-    // },
-    // {
-    //   id: "edit",
-    //   label: "Edit Categories",
-    //   icon: Edit,
-    //   path: "/dashboard/edit-categories",
-    // },
-    // {
-    //   id: "cookies",
-    //   label: "All Cookies",
-    //   icon: Cookie,
-    //   path: "/dashboard/cookies",
-    // },
-    // {
-    //   id: "contacts",
-    //   label: "Contacts Queries",
-    //   icon: MessageSquare,
-    //   path: "/dashboard/contacts",
-    // },
-    // {
-    //   id: "feedbacks",
-    //   label: "All Feedbacks",
-    //   icon: MessageCircle,
-    //   path: "/dashboard/feedbacks",
-    // },
-    // {
-    //   id: "work-category",
-    //   label: "All Work Categories",
-    //   icon: MessageSquare,
-    //   path: "/dashboard/work-category",
-    // },
-    // {
-    //   id: "products",
-    //   label: "All Products",
-    //   icon: MessageSquare,
-    //   path: "/dashboard/products",
-    // },
+    {
+      id: "home",
+      label: "Users",
+      icon: Users,
+      path: "/company-admin/dashboard/home-users",
+    },
+
+    {
+      id: "activity",
+      label: "Activity Logs",
+      icon: LogOut,
+      path: "/company-admin/dashboard/activity-logs",
+    },
+    {
+      id: "tickets",
+      label: "Tickets",
+      icon: Folders,
+      path: "/company-admin/dashboard/tickets",
+    },
+
+    {
+      id: "profile",
+      label: "Profile",
+      icon: PersonStanding,
+      path: "/company-admin/dashboard/profile",
+    },
   ];
 
   return (
@@ -163,8 +136,8 @@ const CompanyAdminSidebar = ({
                       }}
                       className={`w-full cursor-pointer flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                         location.pathname === item.path
-                          ? "bg-blue-600 text-white"
-                          : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                          ? "bg-white text-black font-semibold shadow"
+                          : "flex items-center gap-3 p-2 rounded-lg hover:bg-gray-700 transition"
                       }`}
                     >
                       <Icon size={20} />
@@ -179,7 +152,7 @@ const CompanyAdminSidebar = ({
           {/* User Profile */}
           <div className="p-4 border-t border-gray-800">
             <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 cursor-pointer">
-              <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center font-semibold">
+              <div className="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center font-semibold">
                 {user.full_name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1">
@@ -187,6 +160,28 @@ const CompanyAdminSidebar = ({
                 <p className="text-xs text-gray-400">Admin</p>
               </div>
               {/* <ChevronDown size={16} className="text-gray-400" /> */}
+              <div className="relative group">
+                <button
+                  onClick={() => {
+                    localStorage.removeItem("admin");
+                    localStorage.removeItem("admintoken");
+                    localStorage.clear();
+                    navigate("/login");
+                  }}
+                  className="p-2 text-white cursor-pointer hover:text-gray-600 hover:bg-gray-100 rounded-lg"
+                >
+                  <LogOut size={20} />
+                </button>
+
+                {/* Tooltip */}
+                <span
+                  className="absolute left-1/2 -translate-x-1/2 top-10 whitespace-nowrap 
+                  bg-gray-100 text-black text-xs px-2 py-1 rounded opacity-0 
+                  group-hover:opacity-100 transition pointer-events-none"
+                >
+                  Logout
+                </span>
+              </div>
             </div>
           </div>
         </div>

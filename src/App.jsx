@@ -51,6 +51,8 @@ const App = () => {
       />
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/home" element={<LandingPage />} />
+
         {/* <Route
           path="/register"
           element={

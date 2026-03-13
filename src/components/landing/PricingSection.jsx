@@ -70,7 +70,7 @@ const PricingSection = () => {
         viewport={{ once: true }}
         className="text-center mb-12"
       >
-        <h2 className="text-2xl sm:text-3xl md:text-[48.65px] font-bold text-[#212529]">
+        <h2 className="text-2xl sm:text-3xl md:text-[48.65px] font-bold text-[#0088ffcf]">
           Simple Pricing
         </h2>
         <p className="mt-2 text-sm sm:text-base md:text-[24px] font-normal text-[#212529]">
@@ -115,7 +115,7 @@ const PricingSection = () => {
             )}
 
             {/* Title */}
-            <h3 className="text-center text-lg md:text-[24px] font-bold text-[#212529] mt-4">
+            <h3 className="text-center text-lg md:text-[24px] font-bold text-[#0088ffcf] mt-4">
               {plan.title}
             </h3>
 

@@ -95,7 +95,7 @@ const SolutionsSection = () => {
         viewport={{ once: true }}
         className="text-center mx-auto mb-12"
       >
-        <h2 className="text-2xl sm:text-3xl md:text-[48.65px] font-bold text-[#212529]">
+        <h2 className="text-2xl sm:text-3xl md:text-[48.65px] font-bold text-[#0088ffcf]">
           How We Solve Your Connection Challenges
         </h2>
         <p className="mt-2 text-sm sm:text-base md:text-[24px] font-medium text-[#212529]">

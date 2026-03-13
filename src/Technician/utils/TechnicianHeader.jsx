@@ -1,6 +1,6 @@
 // Header.jsx
 import React, { useEffect, useState } from "react";
-import { FaBars } from "react-icons/fa";
+import { FaBars, FaBell } from "react-icons/fa";
 
 import { useNavigate } from "react-router-dom";
 import http from "../../service/http";
@@ -82,7 +82,7 @@ const NotificationsButton = () => {
       onClick={() => navigate("/technician/dashboard/notifications")}
       className="relative px-3 py-2 text-[#212529] md:text-[16px] hover:text-[#0088FF] font-medium rounded-lg text-sm"
     >
-      Notifications
+      <FaBell className="text-xl" />
       {hasNotifications && (
         <span className="absolute top-1 right-1 block w-2 h-2 rounded-full bg-orange-500" />
       )}

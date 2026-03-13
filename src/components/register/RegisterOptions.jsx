@@ -276,39 +276,37 @@ const PlantRegistrationForm = () => {
       const res = await http.post("/users/register", formData);
       // console.log("Form submitted successfully:", res.data);
 
-      // if (res.data.status) {
-      //   Swal.fire({
-      //     icon: "success",
-      //     title: "Form Submitted!",
-      //     text:
-      //       res.data.message ||
-      //       "Your plant registration has been successfully submitted.",
-      //     showConfirmButton: false,
-      //     timer: 2000,
-      //   });
-      //   navigate("/login");
-      // }
       if (res.data.status) {
         Swal.fire({
           icon: "success",
-          title: "OTP Sent",
-          text: "Please verify your email",
-          timer: 1500,
+          title: "Registration Submitted Successfully!",
+          text: "Your plant registration has been submitted successfully. Our admin team will review your application. Once approved, your login credentials will be shared with you.",
           showConfirmButton: false,
+          timer: 3000,
         });
-
-        navigate("/verify-email", {
-          state: { user_id: res.data.user_id },
-        });
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Submission Failed",
-          text:
-            res.data.error || res.data.message || "An unknown error occurred.",
-          showConfirmButton: true,
-        });
+        navigate("/login");
       }
+      // if (res.data.status) {
+      //   Swal.fire({
+      //     icon: "success",
+      //     title: "OTP Sent",
+      //     text: "Please verify your email",
+      //     timer: 1500,
+      //     showConfirmButton: false,
+      //   });
+
+      //   navigate("/verify-email", {
+      //     state: { user_id: res.data.user_id },
+      //   });
+      // } else {
+      //   Swal.fire({
+      //     icon: "error",
+      //     title: "Submission Failed",
+      //     text:
+      //       res.data.error || res.data.message || "An unknown error occurred.",
+      //     showConfirmButton: true,
+      //   });
+      // }
 
       // redirect after success
     } catch (error) {
@@ -343,13 +341,13 @@ const PlantRegistrationForm = () => {
       </div>
 
       <div className="relative z-10 w-full flex flex-col items-center p-6 sm:p-10">
-        <h2 className="text-2xl sm:text-3xl md:text-[36px] font-bold text-[#212529]">
-          Industrial Plant Registration Form
+        <h2 className="text-2xl sm:text-3xl md:text-[36px] font-bold text-[#0088ffcf]">
+          Industrial Plant Registeration Form
         </h2>
         {/* <p className="mt-2 text-sm sm:text-base md:text-[24px] font-normal text-[#212529]">
           Submit a link with the list of Questions
         </p> */}
-        <p className="mt-2 text-sm sm:text-sm md:text-lg font-normal text-[#212529] text-center">
+        <p className="mt-2 text-sm sm:text-sm md:text-lg font-normal text-[#0088ffcf] text-center">
           Once registered, a link will be sent to access your profile dashboard.
         </p>
 

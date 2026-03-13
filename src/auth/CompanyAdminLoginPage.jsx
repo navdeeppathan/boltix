@@ -76,18 +76,25 @@ const CompanyAdminLoginPage = () => {
         localStorage.setItem("userData", JSON.stringify(data?.data));
 
         const roleId = data?.data?.role_id;
-        // Show success alert
-        Swal.fire({
-          icon: "success",
-          title: "Login Successful",
-          text: data.message || "You have logged in successfully!",
-          timer: 2000,
-          showConfirmButton: false,
-        });
 
         if (roleId == 12) {
-          navigate("/company-admin/dashboard");
-          localStorage.setItem("asCompantAdmin", 1);
+          // Show success alert
+          Swal.fire({
+            icon: "success",
+            title: "Login Successful",
+            text: data.message || "You have logged in successfully!",
+            timer: 2000,
+            showConfirmButton: false,
+          });
+          navigate("/company-admin/dashboard/home");
+          localStorage.setItem("asCompanyAdmin", 1);
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Login Failed",
+            text: "Your are not authorized for these role",
+          });
+          localStorage.clear();
         }
       } else {
         // Show error alert
@@ -155,11 +162,11 @@ const CompanyAdminLoginPage = () => {
         >
           {/* Left Content */}
           <motion.div variants={fadeUp} className="lg:w-1/2">
-            <h2 className="text-2xl sm:text-3xl md:text-[48.65px] font-bold text-[#212529]">
+            <h2 className="text-2xl sm:text-3xl md:text-[48.65px] font-bold text-[#0088ffcf]">
               Welcome to Boltix
             </h2>
 
-            <p className="mt-2 md:text-[24px] text-[#212529]">
+            <p className="mt-2 md:text-[24px] text-[#0088ffcf]">
               Centralized control for managing the Boltix AI collaboration
               ecosystem.
             </p>

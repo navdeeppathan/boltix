@@ -59,7 +59,7 @@ const ManageProducts = () => {
           Swal.fire(
             "Deleted!",
             res.data.message || "Product has been deleted.",
-            "success"
+            "success",
           );
           fetchProducts();
           // Optionally redirect
@@ -69,7 +69,7 @@ const ManageProducts = () => {
         Swal.fire(
           "Error!",
           err?.response?.data?.error || "Something went wrong",
-          "error"
+          "error",
         );
       } finally {
         setLoadingdelete(null);
@@ -127,9 +127,9 @@ const ManageProducts = () => {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap">
                   Price ($)
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap">
+                {/* <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap">
                   Stock
-                </th>
+                </th> */}
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap">
                   Status
                 </th>
@@ -167,7 +167,7 @@ const ManageProducts = () => {
                     {/* Image */}
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex-shrink-0">
+                        {/* <div className="flex-shrink-0">
                           {product.image ? (
                             <img
                               src={`${baseURL}/${product.image}`}
@@ -179,6 +179,12 @@ const ManageProducts = () => {
                               No Image
                             </div>
                           )}
+                        </div> */}
+                        <div className="flex-shrink-0">
+                          <ProductImageAuto
+                            images={product.images}
+                            name={product.name}
+                          />
                         </div>
                         <div>
                           <div className="text-sm font-medium text-gray-900 whitespace-nowrap">
@@ -211,9 +217,9 @@ const ManageProducts = () => {
                     </td>
 
                     {/* Stock */}
-                    <td className="px-4 py-4 text-sm text-gray-900 whitespace-nowrap">
+                    {/* <td className="px-4 py-4 text-sm text-gray-900 whitespace-nowrap">
                       {product.stock}
-                    </td>
+                    </td> */}
 
                     {/* Status */}
                     <td className="px-4 py-4">
@@ -234,7 +240,7 @@ const ManageProducts = () => {
                         <button
                           onClick={() =>
                             navigate(
-                              `/manager/dashboard/edit-products/${product.id}`
+                              `/manager/dashboard/edit-products/${product.id}`,
                             )
                           }
                           className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700"
@@ -281,4 +287,41 @@ const ManageProducts = () => {
   );
 };
 
+const ProductImageAuto = ({ images = [], name }) => {
+  const [index, setIndex] = useState(0);
+
+  // reset index if images length changes
+  useEffect(() => {
+    setIndex(0);
+  }, [images?.length]);
+
+  // auto slider
+  useEffect(() => {
+    if (!images || images.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % images.length);
+    }, 1500);
+
+    return () => clearInterval(interval);
+  }, [images?.length]); // IMPORTANT: only length
+
+  const img = images?.[index]?.image;
+
+  if (!img) {
+    return (
+      <div className="w-12 h-12 rounded-md bg-gray-200 flex items-center justify-center text-gray-500 text-xs">
+        No Image
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={`${baseURL}/${img}`}
+      alt={name}
+      className="w-10 h-10 rounded-full object-cover border transition-all duration-300"
+    />
+  );
+};
 export default ManageProducts;

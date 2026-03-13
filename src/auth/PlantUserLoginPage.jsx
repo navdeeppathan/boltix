@@ -175,10 +175,10 @@ const PlantUserLoginPage = () => {
         >
           {/* Left Content */}
           <motion.div variants={fadeUp} className="lg:w-1/2">
-            <h2 className="text-2xl sm:text-3xl md:text-[48.65px] font-bold text-[#212529]">
+            <h2 className="text-2xl sm:text-3xl md:text-[48.65px] font-bold text-[#0088ffcf]">
               Welcome to Boltix
             </h2>
-            <p className="mt-2 md:text-[24px] text-[#212529]">
+            <p className="mt-2 md:text-[24px] text-[#0088ffcf]">
               The first AI-driven collaboration hub for industrial plants and
               OEM ecosystems.
             </p>
@@ -237,10 +237,10 @@ const PlantUserLoginPage = () => {
                     </button>
                   )}
                 </div>
-                {/* 
-                <div className="text-right mt-2">
+
+                {/* <div className="text-right mt-2">
                   <Link
-                    to="/login/forgot-password"
+                    to="/forgot-password"
                     className="text-sm hover:underline"
                   >
                     Forgot password?

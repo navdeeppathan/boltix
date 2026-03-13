@@ -1,4 +1,5 @@
 import { Bell, LogOut, Menu, Search } from "lucide-react";
+import { FaUser } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 const CompanyAdminHeader = ({ title, setIsOpen, user }) => {
@@ -32,31 +33,39 @@ const CompanyAdminHeader = ({ title, setIsOpen, user }) => {
           </div> */}
 
           {/* Notifications */}
-          {/* <button className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
-            <Bell size={20} />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-          </button> */}
 
           {/* User Menu - Hidden on small mobile */}
-          <div className="hidden sm:flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-              {user?.name?.charAt(0) || "A"}
-            </div>
-          </div>
 
           {/* Logout */}
-          <button
+          {/* <button
             onClick={() => {
               localStorage.removeItem("admin");
               localStorage.removeItem("admintoken");
               localStorage.clear();
 
-              navigate("/company-admin-login");
+              navigate("/login");
             }}
             className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
           >
             <LogOut size={20} />
-          </button>
+          </button> */}
+          <div className="relative group inline-block">
+            <button
+              onClick={() => navigate("/company-admin/dashboard/profile")}
+              className="px-3 text-[#212529] cursor-pointer md:text-[16px] bg-gray-200 p-2 hover:text-[#0088FF] font-medium rounded-lg text-sm"
+            >
+              <FaUser size={20} />
+            </button>
+
+            {/* Tooltip */}
+            <span
+              className="absolute left-1/2 -translate-x-1/2 top-10 whitespace-nowrap 
+  bg-black text-white text-xs px-2 py-1 rounded-md shadow
+  opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none"
+            >
+              Profile
+            </span>
+          </div>
         </div>
       </div>
     </header>

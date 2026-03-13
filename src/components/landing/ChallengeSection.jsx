@@ -48,7 +48,7 @@ const ChallengeSection = () => {
         viewport={{ once: true }}
         className="text-center mx-auto mb-12"
       >
-        <h2 className="text-2xl sm:text-3xl md:text-[48.65px] font-bold text-[#212529]">
+        <h2 className="text-2xl sm:text-3xl md:text-[48.65px] font-bold text-[#0088ffcf]">
           The Challenge in Industry Collaboration
         </h2>
         <p className="mt-2 text-sm sm:text-base md:text-[24px] font-medium text-[#212529]">
@@ -77,7 +77,7 @@ const ChallengeSection = () => {
           className="bg-[#FFFFFF] rounded-[14px] shadow flex flex-col overflow-hidden"
         >
           <div className="p-6">
-            <h3 className="font-mulish font-bold text-[30px] leading-[36px] text-[#212529] mb-2">
+            <h3 className="font-mulish font-bold text-[30px] leading-[36px] text-[#0088ffcf] mb-2">
               Fragmented & Inefficient Communication
             </h3>
             <p className="font-mulish text-[16px] leading-[25px] text-[#212529]">
@@ -105,7 +105,7 @@ const ChallengeSection = () => {
           className="bg-[#FFFFFF] rounded-[14px] shadow flex flex-col overflow-hidden"
         >
           <div className="p-6">
-            <h3 className="font-mulish font-bold text-[30px] leading-[36px] text-[#212529] mb-2">
+            <h3 className="font-mulish font-bold text-[30px] leading-[36px] text-[#0088ffcf] mb-2">
               Data Security Risks
             </h3>
             <p className="font-mulish text-[16px] leading-[25px] text-[#212529]">
@@ -133,7 +133,7 @@ const ChallengeSection = () => {
           className="bg-[#FFFFFF] rounded-[14px] shadow flex flex-col overflow-hidden"
         >
           <div className="p-6">
-            <h3 className="font-mulish font-bold text-[30px] leading-[36px] text-[#212529] mb-2">
+            <h3 className="font-mulish font-bold text-[30px] leading-[36px] text-[#0088ffcf] mb-2">
               Difficulty in Identifying the Right OEM
             </h3>
             <p className="font-mulish text-[16px] leading-[25px] text-[#212529]">

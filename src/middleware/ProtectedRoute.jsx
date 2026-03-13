@@ -8,7 +8,7 @@ const ProtectedRoute = ({ children, role }) => {
   const asTechnician = localStorage.getItem("asTechnician");
   const asPlantSupervisor = localStorage.getItem("asPlantSupervisor");
   const asAdmin = localStorage.getItem("asAdmin");
-  const asCompantAdmin = localStorage.getItem("asCompantAdmin");
+  const asCompanyAdmin = localStorage.getItem("asCompanyAdmin");
 
   // Redirect if no user logged in
   if (
@@ -17,7 +17,7 @@ const ProtectedRoute = ({ children, role }) => {
     !asTechnician &&
     !asPlantSupervisor &&
     !asAdmin &&
-    !asCompantAdmin
+    !asCompanyAdmin
   ) {
     return <Navigate to="/" replace />;
   }
@@ -43,7 +43,7 @@ const ProtectedRoute = ({ children, role }) => {
     return <Navigate to="/" replace />;
   }
 
-  if (role === "companyadmin" && !asCompantAdmin) {
+  if (role === "companyadmin" && !asCompanyAdmin) {
     return <Navigate to="/" replace />;
   }
 

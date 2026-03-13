@@ -728,11 +728,12 @@ const SupplierRegistrationForm = () => {
 
       {/* Content */}
       <div className="relative z-10 w-full flex flex-col items-center p-6 sm:p-10">
-        <h2 className="text-2xl sm:text-3xl md:text-[36px] font-bold text-[#212529] text-center">
-          OEM/Service Provider Registration Form
+        <h2 className="text-2xl sm:text-3xl md:text-[36px] font-bold text-[#0088ffcf] text-center">
+          Manufacturer/Service Provider Registeration Form
         </h2>
-        <p className="mt-2 text-sm sm:text-sm md:text-lg font-normal text-[#212529] text-center">
-          Once registered, a link will be sent to access your profile dashboard.
+        <p className="mt-2 text-sm sm:text-sm md:text-lg font-normal text-[#0088ffcf] text-center">
+          Once registered, a link will be sent to login and access your profile
+          dashboard.
         </p>
 
         <form
@@ -740,9 +741,9 @@ const SupplierRegistrationForm = () => {
           className=" max-w-3xl w-full  backdrop-blur-sm  p-6 "
         >
           {/* Company Information Section */}
-          <h2 className="text-lg font-semibold text-[#212529] mb-4">
+          {/* <h2 className="text-lg font-semibold text-[#212529] mb-4">
             OEM/Company Information
-          </h2>
+          </h2> */}
 
           <div className="grid md:grid-cols-2 gap-4">
             <InputFieldSupplier

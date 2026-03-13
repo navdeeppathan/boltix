@@ -43,7 +43,7 @@ const BoltixLogin = () => {
       navigate("/plant-user-login");
     } else if (category == "OEM" && role == "Admin") {
       navigate("/oem-company-admin-login");
-    } else if (category == "OEM" && role == "User") {
+    } else if (category == "OEM" && role == "Engineer") {
       navigate("/oem-user-login");
     } else if (category == "OEM" && role == "Supervisor") {
       navigate("/oem-supervisor-login");
@@ -64,15 +64,26 @@ const BoltixLogin = () => {
           {/* Heading */}
           <motion.h1
             variants={fadeUp}
-            className="text-2xl font-semibold text-gray-800 mb-4"
+            className="text-2xl font-semibold text-[#0088ffcf] mb-4"
           >
-            Boltix – Streamline plant and OEM collaboration in real time
+            <span className="text-3xl ">Boltix</span> – A Real-Time Digital
+            Bridge Between Industrial Plants, Equipment Manufacturers, and
+            Service Providers
           </motion.h1>
 
-          <motion.p variants={fadeUp} className="text-gray-600 mb-12 max-w-3xl">
-            Boltix connects plant teams and OEM partners on a single platform,
-            enabling real-time visibility, faster coordination, and efficient
-            industrial operations.
+          <motion.p
+            variants={fadeUp}
+            className="text-gray-600 mb-12 text-base max-w-3xl"
+          >
+            Boltix connects Industrial Plants with Original Equipment
+            Manufacturers (OEMs) and Service Providers on a single, secure
+            digital platform.
+            <br />
+            <br />
+            It streamlines communication during plant equipment breakdowns,
+            providing real-time visibility, faster coordination, and seamless
+            collaboration — enabling efficient plant operations and
+            significantly reducing downtime.
           </motion.p>
 
           {/* Role Sections */}
@@ -84,8 +95,8 @@ const BoltixLogin = () => {
               initial="hidden"
               animate="visible"
             >
-              <h2 className="text-lg font-semibold text-gray-700 mb-4">
-                Plant
+              <h2 className="text-lg font-semibold text-[#0088ffcf] mb-4">
+                Industrial Plant Login
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3  gap-4">
                 {["Admin", "Supervisor", "User"].map((role, index) => (
@@ -109,9 +120,11 @@ const BoltixLogin = () => {
               initial="hidden"
               animate="visible"
             >
-              <h2 className="text-lg font-semibold text-gray-700 mb-4">OEM</h2>
+              <h2 className="text-lg font-semibold text-[#0088ffcf] mb-4">
+                Manufacturer/Service Provider Login
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {["Admin", "Supervisor", "User"].map((role) => (
+                {["Admin", "Supervisor", "Engineer"].map((role) => (
                   <motion.button
                     key={role}
                     whileHover={{ y: -4, scale: 1.03 }}

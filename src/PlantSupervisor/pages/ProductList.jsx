@@ -20,7 +20,7 @@ const ProductList = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await http.get(`/products/${user_id}`);
+      const response = await http.get(`/products/user/${user_id}`);
       if (response.data.status && Array.isArray(response.data.data)) {
         console.log("products:-", response.data.data);
         setProducts(response.data.data);
@@ -57,7 +57,7 @@ const ProductList = () => {
           Swal.fire(
             "Deleted!",
             res.data.message || "Product has been deleted.",
-            "success"
+            "success",
           );
           fetchProducts();
           // Optionally redirect
@@ -67,7 +67,7 @@ const ProductList = () => {
         Swal.fire(
           "Error!",
           err?.response?.data?.error || "Something went wrong",
-          "error"
+          "error",
         );
       } finally {
         setLoadingdelete(null);
@@ -176,7 +176,7 @@ const ProductList = () => {
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
                           <div className="flex-shrink-0">
-                            {product.image ? (
+                            {/* {product.image ? (
                               <img
                                 src={`${baseURL}/${product.image}`}
                                 alt={product.name}
@@ -186,7 +186,13 @@ const ProductList = () => {
                               <div className="w-12 h-12 rounded-md bg-gray-200 flex items-center justify-center text-gray-500 text-xs">
                                 No Image
                               </div>
-                            )}
+                            )} */}
+                            <div className="flex-shrink-0">
+                              <ProductImageAuto
+                                images={product.images}
+                                name={product.name}
+                              />
+                            </div>
                           </div>
                           <div>
                             <div className="text-sm font-medium text-gray-900 whitespace-nowrap">
@@ -242,7 +248,7 @@ const ProductList = () => {
                           <button
                             onClick={() =>
                               navigate(
-                                `/plant-supervisor/dashboard/edit-products/${product.id}`
+                                `/plant-supervisor/dashboard/edit-products/${product.id}`,
                               )
                             }
                             className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700"
@@ -287,6 +293,44 @@ const ProductList = () => {
         </div>
       </div>
     </>
+  );
+};
+
+const ProductImageAuto = ({ images = [], name }) => {
+  const [index, setIndex] = useState(0);
+
+  // reset index if images length changes
+  useEffect(() => {
+    setIndex(0);
+  }, [images?.length]);
+
+  // auto slider
+  useEffect(() => {
+    if (!images || images.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % images.length);
+    }, 1500);
+
+    return () => clearInterval(interval);
+  }, [images?.length]); // IMPORTANT: only length
+
+  const img = images?.[index]?.image;
+
+  if (!img) {
+    return (
+      <div className="w-12 h-12 rounded-md bg-gray-200 flex items-center justify-center text-gray-500 text-xs">
+        No Image
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={`${baseURL}/${img}`}
+      alt={name}
+      className="w-10 h-10 rounded-full object-cover border transition-all duration-300"
+    />
   );
 };
 

@@ -28,7 +28,13 @@ import {
 import Swal from "sweetalert2";
 import { Videocam, Call, Close } from "@mui/icons-material";
 import { RotatingLines } from "react-loader-spinner";
-import { AlertTriangle, Check, CheckCheck, FileText } from "lucide-react";
+import {
+  AlertTriangle,
+  BriefcaseBusinessIcon,
+  Check,
+  CheckCheck,
+  FileText,
+} from "lucide-react";
 import { toast } from "react-toastify";
 import { Editor } from "primereact/editor";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
@@ -96,39 +102,6 @@ export default function PlantTicketDetails() {
 
   const [updatingId2, setUpdatingId2] = useState(null);
   const [updatingId3, setUpdatingId3] = useState(null);
-
-  // const handleApprove = async (ticketId, newStage) => {
-  //   try {
-  //     if (newStage === 2) {
-  //       setUpdatingId3(ticketId);
-  //     } else {
-  //       setUpdatingId2(ticketId);
-  //     }
-
-  //     // Call Laravel API
-  //     await http.post(`/tickets/approve_status/${ticketId}`, {
-  //       stage: newStage, // send stage as integer
-  //     });
-
-  //     Swal.fire({
-  //       icon: "success",
-  //       title: "Success",
-  //       text: "Ticket stage updated successfully.",
-  //       timer: 1500,
-  //       showConfirmButton: false,
-  //     });
-  //     fetchTicketDetails();
-  //   } catch (err) {
-  //     console.error("Error updating stage:", err);
-  //     Swal.fire({
-  //       icon: "error",
-  //       title: "Error",
-  //       text: "Failed to update ticket stage.",
-  //     });
-  //   } finally {
-  //     setUpdatingId2(null);
-  //   }
-  // };
 
   const [showModal, setShowModal] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
@@ -206,11 +179,28 @@ export default function PlantTicketDetails() {
         <div className="flex flex-col sm:flex-row mb-4 sm:items-center sm:justify-between bg-[#F9F9F9] rounded-[10px] border border-[#F9F9F9] px-4 py-3 sm:py-2 shadow-sm gap-3 sm:gap-0">
           {/* Left side: Logo + Title */}
           <div className="flex items-center gap-3">
-            <img
-              src={ticket?.photo ? `${baseURL}/${ticket.photo}` : "/cat.png"}
+            {/* <img
+              src={ticket?.photo ? `${baseURL}/${ticket.photo}` : ""}
               alt="Ticket Logo"
               className="w-10 h-10 rounded-full object-contain"
-            />
+            /> */}
+            <Avatar
+              src={ticket?.photo ? `${baseURL}/${ticket.photo}` : undefined}
+              alt=""
+              sx={{
+                width: 40,
+                height: 40,
+                bgcolor: "#0f766e",
+                fontSize: 14,
+              }}
+            >
+              {!ticket?.photo &&
+                (ticket?.plant_name ? (
+                  ticket?.plant_name.charAt(0).toUpperCase()
+                ) : (
+                  <BriefcaseBusinessIcon fontSize="small" />
+                ))}
+            </Avatar>
             <div>
               <h3 className="text-[15px] font-semibold text-gray-900 break-words">
                 {ticket?.plant_name || "Unknown Plant"}
@@ -424,7 +414,7 @@ export default function PlantTicketDetails() {
               </div>
               <span
                 className={`text-[11px] font-medium px-2 py-[2px] rounded-full ${getPriorityColor(
-                  ticket.priority?.priority_name
+                  ticket.priority?.priority_name,
                 )}`}
               >
                 {ticket.priority?.priority_name || "N/A"}
@@ -484,9 +474,9 @@ export default function PlantTicketDetails() {
 
           {/* Issue Reported + Info Row */}
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-end gap-3">
-            {/* <div className="flex-1">
+            <div className="flex-1">
               <p className="text-[13px] font-semibold text-gray-800">
-                Issue Reported:
+                Description:
               </p>
               <p className="text-[13px] text-gray-700 leading-relaxed">
                 {(
@@ -495,12 +485,9 @@ export default function PlantTicketDetails() {
                       __html: ticket.description,
                     }}
                   />
-                ) ||
-                  `The unit is showing pressure imbalance and
-              bearing noise during operation. Requires inspection and repair
-              service`}
+                ) || ``}
               </p>
-            </div> */}
+            </div>
 
             {/* Inline Info Boxes */}
             <div className="flex flex-row gap-2 sm:ml-4 shrink-0">
@@ -528,7 +515,7 @@ export default function PlantTicketDetails() {
                 <p>
                   {ticket?.issue_time
                     ? new Date(
-                        `1970-01-01T${ticket.issue_time}Z`
+                        `1970-01-01T${ticket.issue_time}Z`,
                       ).toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
@@ -539,6 +526,10 @@ export default function PlantTicketDetails() {
               </div>
             </div>
           </div>
+        </div>
+
+        <div>
+          <TicketRemarksTab ticketId={ticket.id} />
         </div>
 
         <div className="mt-6">
@@ -638,7 +629,7 @@ const AssignedTechnicianCard = ({ ticket }) => {
       try {
         setLoading(true);
         const response = await http.get(
-          `/assigned-tickets/ticket/${ticket.id}`
+          `/assigned-tickets/ticket/${ticket.id}`,
         );
         if (response.data?.data?.length > 0) {
           setAssignedTicket(response.data.data[0]);
@@ -923,7 +914,7 @@ const AssignTicketModal = ({ ticket }) => {
       console.error("Error:", error);
       toast.error(
         error.response.data.error ||
-          "Failed to assign ticket. Please try again."
+          "Failed to assign ticket. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -957,8 +948,8 @@ const AssignTicketModal = ({ ticket }) => {
             ticket?.stage === 2
               ? "hidden"
               : ticket?.stage === 1
-              ? "bg-[#1E1E1E]"
-              : "bg-[#8C8C8C]"
+                ? "bg-[#1E1E1E]"
+                : "bg-[#8C8C8C]"
           } hover:bg-[#D6D6D6] text-white text-[13px] font-medium px-4 py-[6px] rounded-md transition-all`}
         >
           <img
@@ -1582,7 +1573,7 @@ const TicketBoard = ({ ticket, onClick }) => {
                   />
                   <span
                     className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
-                      ticket.priority?.priority_name
+                      ticket.priority?.priority_name,
                     )}`}
                   >
                     {ticket.priority?.priority_name || "N/A"}
@@ -1638,7 +1629,7 @@ const TicketBoard = ({ ticket, onClick }) => {
                   />
                   <span
                     className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
-                      ticket.complexity?.priority_name
+                      ticket.complexity?.priority_name,
                     )}`}
                   >
                     {ticket.complexity?.priority_name || "N/A"}
@@ -1753,7 +1744,7 @@ const TicketBoard = ({ ticket, onClick }) => {
                     />
                     <span
                       className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
-                        ticket.priority?.priority_name
+                        ticket.priority?.priority_name,
                       )}`}
                     >
                       {ticket.priority?.priority_name || "N/A"}
@@ -1804,7 +1795,7 @@ const TicketBoard = ({ ticket, onClick }) => {
                       />
                       <span
                         className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
-                          ticket.priority?.priority_name
+                          ticket.priority?.priority_name,
                         )}`}
                       >
                         {ticket.priority?.priority_name || "N/A"}
@@ -1856,7 +1847,7 @@ const TicketBoard = ({ ticket, onClick }) => {
                       />
                       <span
                         className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
-                          ticket.priority?.priority_name
+                          ticket.priority?.priority_name,
                         )}`}
                       >
                         {ticket.priority?.priority_name || "N/A"}
@@ -1919,7 +1910,7 @@ const TicketBoard = ({ ticket, onClick }) => {
                     />
                     <span
                       className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
-                        ticket.priority?.priority_name
+                        ticket.priority?.priority_name,
                       )}`}
                     >
                       {ticket.priority?.priority_name || "N/A"}
@@ -2118,7 +2109,7 @@ const TicketBoard = ({ ticket, onClick }) => {
                             {
                               month: "short",
                               day: "2-digit",
-                            }
+                            },
                           )}
                         </span>
                       </div>
@@ -2423,5 +2414,106 @@ const ChatModal = ({ open, onClose, ticketId, user }) => {
         </Box>
       </Box>
     </Modal>
+  );
+};
+
+const TicketRemarksTab = ({ ticketId }) => {
+  const [remarks, setRemarks] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [text, setText] = useState("");
+
+  const user = JSON.parse(localStorage.getItem("userData"));
+
+  /* ================= FETCH ================= */
+  const fetchRemarks = async () => {
+    if (!ticketId) return;
+
+    setLoading(true);
+    try {
+      const res = await http.get(`/tickets/${ticketId}/remarks`);
+      if (res.data.status) setRemarks(res.data.data);
+    } catch {
+      toast.error("Failed to load remarks");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRemarks();
+  }, [ticketId]);
+
+  /* ================= ADD ================= */
+  const addRemark = async () => {
+    if (!text.trim()) return;
+
+    try {
+      const res = await http.post("/ticket-remarks", {
+        ticket_id: ticketId,
+        user_id: user?.id,
+        description: text,
+      });
+
+      if (res.data.status) {
+        setText("");
+        fetchRemarks();
+      }
+    } catch {
+      toast.error("Failed to add remark");
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow p-5 mt-4 max-h-[400px] overflow-y-auto">
+      {/* TITLE */}
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="font-semibold text-lg">Remarks</h3>
+      </div>
+
+      {/* ADD BOX */}
+      <div className="flex gap-2 mb-4">
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Write remark..."
+          rows={2}
+          className="flex-1 border rounded-lg px-3 py-2"
+        />
+
+        <button
+          onClick={addRemark}
+          className="bg-[#0088FF] text-white px-5 rounded-lg"
+        >
+          Add
+        </button>
+      </div>
+
+      {/* LIST */}
+      {loading ? (
+        <div className="flex justify-center py-4">
+          <RotatingLines width="20" />
+        </div>
+      ) : remarks.length === 0 ? (
+        <div className="text-gray-500 text-sm">No remarks yet</div>
+      ) : (
+        <div className="space-y-3">
+          {remarks.map((r) => (
+            <div
+              key={r.id}
+              className="border border-gray-200 rounded-lg p-3 bg-gray-50"
+            >
+              <div className="flex justify-between text-sm mb-1">
+                <div className="font-medium">{r.user?.full_name || "User"}</div>
+                <div className="text-gray-500">
+                  {new Date(r.created_at).toLocaleString()}
+                </div>
+              </div>
+
+              <div className="text-gray-700 text-sm">{r.description}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };

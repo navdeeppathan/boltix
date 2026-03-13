@@ -11,6 +11,7 @@ import {
   ChevronDown,
   LogOut,
   MessageCircle,
+  LogOutIcon,
 } from "lucide-react";
 
 import { useNavigate, useLocation } from "react-router-dom";
@@ -27,12 +28,12 @@ const Sidebar = ({ isOpen, setIsOpen, activeMenu, setActiveMenu }) => {
       icon: LayoutDashboard,
       path: "/admin/dashboard/home",
     },
-    // {
-    //   id: "tickets",
-    //   label: "Tickets",
-    //   icon: LayoutDashboard,
-    //   path: "/admin/dashboard/tickets",
-    // },
+    {
+      id: "logs",
+      label: "Logs",
+      icon: LogOutIcon,
+      path: "/admin/dashboard/logs",
+    },
     // {
     //   id: "categories",
     //   label: "Categories",

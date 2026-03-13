@@ -90,6 +90,9 @@ const TicketCreation = () => {
   const [responseModeOptions, setModes] = useState([]);
   const [timeOptions, setTimeOptions] = useState([]);
 
+  const [productsRaw, setProductsRaw] = useState([]);
+  const [manufacturerFromProduct, setManufacturerFromProduct] = useState([]);
+
   useEffect(() => {
     const now = new Date();
     const currentDate = now.toISOString().split("T")[0]; // YYYY-MM-DD
@@ -103,6 +106,7 @@ const TicketCreation = () => {
   }, []);
 
   const [data, setData] = useState([]);
+  const [productOptions, setProductOptions] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -120,6 +124,7 @@ const TicketCreation = () => {
           timeRes,
           depRes,
           modeRes,
+          productRes,
         ] = await Promise.all([
           http.get("/categories"),
           http.get("/priorities"),
@@ -133,6 +138,7 @@ const TicketCreation = () => {
           http.get("/time-durations"),
           http.get("/departments"),
           http.get("/response-modes"),
+          http.get("/products/all/" + user.parent_id),
         ]);
 
         setTimeOptions(
@@ -231,6 +237,19 @@ const TicketCreation = () => {
             value: item.value,
           })),
         );
+
+        console.log("productRes:-", productRes.data?.data);
+
+        const products = productRes.data?.data || [];
+
+        setProductsRaw(products);
+
+        setProductOptions(
+          products.map((item) => ({
+            label: item.name,
+            value: item.id,
+          })),
+        );
       } catch (error) {
         console.error("Error fetching dropdown data:", error);
       }
@@ -267,6 +286,33 @@ const TicketCreation = () => {
     };
     fetchEquipments();
   }, []);
+
+  const [email, setEmail] = useState("");
+
+  useEffect(() => {
+    const fetchManufacturer = async () => {
+      try {
+        const response = await http.get(`/user/${email}/manufacturer`);
+        if (response.data?.status && Array.isArray(response.data.data)) {
+          setEquipmentData(response.data.data);
+
+          // Convert parent equipment list into dropdown options
+          const manufacturers = manuRes.data.data
+            .filter((item) => item.company?.business_type === "Manufacturer")
+            .map((item) => ({
+              label: item.company.company_name,
+              value: item.id,
+              data: item,
+            }));
+
+          setManufacturers(manufacturers);
+        }
+      } catch (error) {
+        console.error("Error fetching equipment data:", error);
+      }
+    };
+    fetchManufacturer();
+  }, [email]);
 
   // 🔹 Update child options when parent changes
   const handleParentChange = (selectedParent) => {
@@ -358,27 +404,26 @@ const TicketCreation = () => {
   //     value: product.id,
   //   })) || [];
 
-  const [productOptions, setProductOptions] = useState([]);
-  useEffect(() => {
-    if (!user?.parent_id) return;
+  // useEffect(() => {
+  //   if (!user?.parent_id) return;
 
-    const fetchProducts = async () => {
-      try {
-        const response = await http.get(`/products/${user.parent_id}`);
+  //   const fetchProducts = async () => {
+  //     try {
+  //       const response = await http.get(`/products/parent/${user.parent_id}`);
 
-        const formatted = response.data?.data.map((p) => ({
-          value: p.id,
-          label: p.name, // or p.machine_type
-        }));
+  //       const formatted = response.data?.data.map((p) => ({
+  //         value: p.id,
+  //         label: p.name, // or p.machine_type
+  //       }));
 
-        setProductOptions(formatted);
-      } catch (err) {
-        console.error("Product fetch error", err);
-      }
-    };
+  //       setProductOptions(formatted);
+  //     } catch (err) {
+  //       console.error("Product fetch error", err);
+  //     }
+  //   };
 
-    fetchProducts();
-  }, [user?.parent_id]);
+  //   fetchProducts();
+  // }, [user?.parent_id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -545,7 +590,7 @@ const TicketCreation = () => {
         }
       });
 
-      // ✅ MULTIPLE PHOTOS
+      // MULTIPLE PHOTOS
       if (Array.isArray(formData.photos)) {
         formData.photos.forEach((file) => {
           if (file instanceof File) {
@@ -620,7 +665,7 @@ const TicketCreation = () => {
       <div className="w-full  bg-[#FFFFFF]  ">
         {/* Tabs */}
 
-        <div className="w-full mb-6 bg-[#F9F9F9] rounded-xl shadow-sm overflow-hidden">
+        <div className="w-full mb-6 bg-[#e9e9e9] rounded-xl shadow-sm overflow-hidden">
           <div className="flex flex-wrap border border-[#E5E5E5] rounded-xl overflow-hidden">
             {steps.map((title, index) => {
               const isCompleted = step > index + 1;
@@ -633,8 +678,8 @@ const TicketCreation = () => {
                   className={`relative flex items-center justify-center gap-2 flex-1 py-5 px-2 border-r border-[#E5E5E5] last:border-r-0 transition-all duration-200 
               ${
                 isActive
-                  ? "bg-[#F9F9F9] text-[#207EB1] font-semibold"
-                  : "bg-[#F9F9F9] text-[#000]"
+                  ? "bg-[##e9e9e9] text-[#207EB1] font-semibold"
+                  : "bg-[##e9e9e9] text-[#000]"
               }`}
                 >
                   <div
@@ -664,14 +709,14 @@ const TicketCreation = () => {
         </div>
 
         {/* Form Section */}
-        <div className="bg-[#F9F9F9] rounded-[14px] p-8 shadow-sm">
+        <div className="bg-[#e9e9e9] rounded-[14px] p-8 shadow-sm">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* STEP CONTENT */}
             {step === 1 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Site Name / Plant Name */}
                 <div>
-                  <label className="block text-sm font-medium text-[#000] mb-1">
+                  <label className="block text-base font-medium text-[#000] mb-1">
                     Site Name /Plant Name
                   </label>
                   <input
@@ -690,7 +735,7 @@ const TicketCreation = () => {
 
                 {/* Category */}
                 <div>
-                  <label className="block text-sm font-medium text-[#000] mb-1">
+                  <label className="block text-base font-medium text-[#000] mb-1">
                     Breakdown Category
                   </label>
                   <Select
@@ -707,7 +752,7 @@ const TicketCreation = () => {
 
                 {/* Ticket Title */}
                 <div>
-                  <label className="block text-sm font-medium text-[#000] mb-1">
+                  <label className="block text-base font-medium text-[#000] mb-1">
                     Ticket Title
                   </label>
                   <input
@@ -730,7 +775,7 @@ const TicketCreation = () => {
                 {/* Department */}
 
                 <div>
-                  <label className="block text-sm font-medium text-[#000] mb-1">
+                  <label className="block text-base font-medium text-[#000] mb-1">
                     Department
                   </label>
                   <Select
@@ -754,7 +799,7 @@ const TicketCreation = () => {
 
                 {/* Priority */}
                 <div>
-                  <label className="block text-sm font-medium text-[#000] mb-1">
+                  <label className="block text-base font-medium text-[#000] mb-1">
                     Priority
                   </label>
                   <Select
@@ -778,7 +823,7 @@ const TicketCreation = () => {
 
                 {/* Date & Time */}
                 <div>
-                  <label className="block text-sm font-medium text-[#000] mb-1">
+                  <label className="block text-base font-medium text-[#000] mb-1">
                     Date & Time Issue Reported
                   </label>
                   <div className="grid grid-cols-2 gap-3">
@@ -923,28 +968,6 @@ const TicketCreation = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-[#000] mb-1">
-                      Select Manufacturer(OEM)
-                    </label>
-                    <Select
-                      options={manufacturerOptions}
-                      placeholder="Select Manufacturer"
-                      styles={customSelectStyles(errors.manufacturer)}
-                      value={formData.manufacturer}
-                      onChange={(option) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          manufacturer: option, // store only ID
-                          manufacturer_contact:
-                            option?.data?.mobile_number || "",
-                          manufacturer_email: option?.data?.email || "",
-                          product_id: null,
-                        }))
-                      }
-                      components={{ IndicatorSeparator: () => null }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#000] mb-1">
                       Select Machine Type of OEM
                     </label>
 
@@ -956,16 +979,61 @@ const TicketCreation = () => {
                           (p) => p.value === formData.product_id,
                         ) || null
                       }
-                      onChange={(option) =>
+                      onChange={(option) => {
+                        const productId = option.value;
+
+                        const product = productsRaw.find(
+                          (p) => p.id === productId,
+                        );
+
+                        // map oems -> manufacturer dropdown
+                        const oemOptions =
+                          product?.oems?.map((o) => ({
+                            label: o.name,
+                            value: o.oem_id,
+                            data: o,
+                          })) || [];
+
+                        setManufacturerFromProduct(oemOptions);
+
                         setFormData((prev) => ({
                           ...prev,
-                          product_id: option.value, // store only product ID
-                        }))
-                      }
+                          product_id: productId,
+                          manufacturer: null,
+                          manufacturer_contact: "",
+                          manufacturer_email: "",
+                        }));
+                      }}
                       components={{ IndicatorSeparator: () => null }}
                       styles={customSelectStyles(errors.product_id)}
                     />
                   </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#000] mb-1">
+                      Select Manufacturer(OEM)
+                    </label>
+                    <Select
+                      options={
+                        manufacturerFromProduct.length
+                          ? manufacturerFromProduct
+                          : manufacturerOptions
+                      }
+                      placeholder="Select Manufacturer"
+                      styles={customSelectStyles(errors.manufacturer)}
+                      value={formData.manufacturer}
+                      onChange={(option) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          manufacturer: option,
+                          manufacturer_contact: option?.data?.phone || "",
+                          manufacturer_email: option?.data?.email || "",
+                        }))
+                      }
+                      components={{ IndicatorSeparator: () => null }}
+                    />
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-[#000] mb-1">
                       Manufacturer Contact Number (OEM)
@@ -1149,7 +1217,7 @@ const TicketCreation = () => {
             )}
 
             {formData.category?.value === "Service Breakdown" && step === 2 && (
-              <div className="bg-[#F9F9F9]  rounded-2xl space-y-4">
+              <div className=" rounded-2xl space-y-4">
                 {/* Row 1 */}
 
                 <div className="grid md:grid-cols-2 gap-4">

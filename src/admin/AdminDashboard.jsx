@@ -8,6 +8,7 @@ import Sidebar from "./utils/AdminSidebar";
 import Header from "./utils/AdminHeader";
 import AdminDashboardPage from "./AdminDashboardPage";
 import AdminTicketTable from "./AdminTicketTable";
+import AdminExceptionLogsPage from "./AdminExceptionLogsPage";
 
 export default function AdminDashboard() {
   const [isOpen, setIsOpen] = useState(false);
@@ -48,6 +49,8 @@ export default function AdminDashboard() {
             <Route path="/" element={<Navigate to="home" replace />} />
             <Route path="home" element={<AdminDashboardPage />} />
             <Route path="tickets" element={<AdminTicketTable />} />
+
+            <Route path="logs" element={<AdminExceptionLogsPage />} />
 
             <Route path="*" element={<Navigate to="home" replace />} />
           </Routes>

@@ -1,234 +1,573 @@
 import React, { useEffect, useState } from "react";
+import { FileText, ChevronDown, ChevronUp } from "lucide-react";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+
 import { RotatingLines } from "react-loader-spinner";
-import http from "../service/http";
+import Swal from "sweetalert2";
+
 import { toast } from "react-toastify";
-// your axios instance
+import http from "../service/http";
 
 const AdminTicketTable = () => {
+  const [searchParams] = useSearchParams();
+  const query = searchParams.get("query");
+
+  const [expandedRow, setExpandedRow] = useState(null);
   const [tickets, setTickets] = useState([]);
+  const [viewMode, setViewMode] = useState("table"); // 'table' or 'cards'
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  const [showRejectModal, setShowRejectModal] = useState(false);
-  const [rejectReason, setRejectReason] = useState("");
-  const [selectedTicketId, setSelectedTicketId] = useState(null);
-
-  useEffect(() => {
-    fetchTickets();
-  }, []);
-
+  const user = JSON.parse(localStorage.getItem("userData"));
+  const parentId = user?.id;
   const fetchTickets = async () => {
+    console.log("come");
     try {
       setLoading(true);
-      const res = await http.get("/admin/tickets");
-      console.log("response:-", res.data);
-
-      if (res.data.status === "success") {
-        setTickets(res.data.data);
+      const response = await http.get(`/admin-users-tickets/${parentId}`);
+      if (response.data.status && Array.isArray(response.data.data)) {
+        console.log(response.data);
+        setTickets(response.data.data);
+      } else {
+        console.error("Unexpected API structure", response.data);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching tickets:", err);
     } finally {
       setLoading(false);
     }
   };
+  useEffect(() => {
+    fetchTickets();
+  }, []);
 
-  const approveTicket = async (id) => {
+  const getPriorityColor = (priority) => {
+    const priorityValue =
+      typeof priority === "object" && priority !== null
+        ? priority.priority_name
+        : priority;
+
+    switch (String(priorityValue || "").toLowerCase()) {
+      case "high":
+        return "bg-red-500 text-white";
+      case "medium":
+        return "bg-yellow-500 text-black";
+      case "low":
+        return "bg-cyan-500 text-white";
+      case "critical":
+        return "bg-red-600 text-white";
+      default:
+        return "bg-gray-500 text-white";
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case "new":
+        return "bg-cyan-500 text-white";
+      case "in progress":
+        return "bg-orange-500 text-white";
+      case "completed":
+        return "bg-green-500 text-white";
+      default:
+        return "bg-gray-500 text-white";
+    }
+  };
+
+  const getCategoryColor = (category) => {
+    return category === "Service Breakdown" ? "text-red-500" : "text-blue-500";
+  };
+
+  const location = useLocation();
+  const handleTicketClick = (id) => {
+    // Handle ticket row click (e.g., navigate to details page)
+    console.log("Ticket clicked:", id);
+
+    navigate(`/company-admin/dashboard/ticket-details/${id}`);
+  };
+
+  const [updatingId2, setUpdatingId2] = useState(null);
+
+  const [showModal, setShowModal] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalAction, setModalAction] = useState(null);
+  const [modalStage, setModalStage] = useState(null);
+  const [modalTicketId, setModalTicketId] = useState(null);
+  const [description, setDescription] = useState("");
+
+  const openActionModal = (ticketId, action, title) => {
+    setModalTicketId(ticketId);
+    setModalAction(action);
+    setModalTitle(title);
+    setDescription("");
+    setShowModal(true);
+  };
+
+  const handleConfirmAction = async () => {
+    await handleApprove(modalTicketId, modalAction, modalStage, description);
+  };
+
+  const handleApprove = async (ticketId, action, stage, description) => {
     try {
-      await http.post(`/admin/tickets/${id}/approve`);
+      setUpdatingId2(ticketId);
+      if (!description) {
+        toast.error("Please enter a description.");
+        return;
+      }
+
+      await http.post(`/tickets/approve_status/${ticketId}`, {
+        stage: action, // or you can map action → stage if needed
+        action,
+        description,
+        user_id: user.id, // assuming you have logged-in user data
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: `Ticket ${modalTitle} successfully.`,
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      setShowModal(false);
       fetchTickets();
     } catch (err) {
-      alert("Approval failed");
-    }
-  };
-
-  const openRejectModal = (id) => {
-    setSelectedTicketId(id);
-    setRejectReason("");
-    setShowRejectModal(true);
-  };
-
-  const rejectTicket = async () => {
-    if (!rejectReason.trim()) return alert("Enter reject reason");
-
-    try {
-      await http.post(`/admin/tickets/${selectedTicketId}/reject`, {
-        remarks: rejectReason,
+      console.error("Error updating stage:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to update ticket stage.",
       });
-      setShowRejectModal(false);
-      fetchTickets();
-    } catch (err) {
-      alert("Rejection failed");
+    } finally {
+      setUpdatingId2(null);
     }
   };
 
-  const statusBadge = (status) => {
-    const map = {
-      pending: "bg-yellow-100 text-yellow-700",
-      approved: "bg-green-100 text-green-700",
-      rejected: "bg-red-100 text-red-700",
-    };
-    return map[status] || "";
-  };
+  const hasManufacturer = tickets?.some(
+    (ticket) =>
+      ticket.manufacturer_user !== null &&
+      ticket.manufacturer_user !== undefined,
+  );
 
-  const handleToggle = async (user) => {
-    const newStatus = user.is_active ? 0 : 1;
-
-    try {
-      const res = await http.post(`/admin/update-is-active/${user.id}`, {
-        is_active: newStatus,
-      });
-
-      window.location.reload();
-      toast.success(res.data.message);
-    } catch (error) {
-      toast.error(
-        error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          "Failed to update status",
-      );
-    }
-  };
+  const hasServiceProvider = tickets?.some(
+    (ticket) =>
+      ticket.service_user !== null && ticket.service_user !== undefined,
+  );
 
   return (
-    <div className="w-full bg-gray-50">
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto max-h-screen scrollbar-thin">
-          <table className="w-full min-w-max">
-            <thead className="sticky top-0 bg-[#3b3553] text-white border-b">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-white whitespace-nowrap min-w-[100px]">
-                  S.No{" "}
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-white whitespace-nowrap min-w-[100px]">
-                  User
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-white whitespace-nowrap min-w-[100px]">
-                  Email
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-white whitespace-nowrap min-w-[100px]">
-                  Provider
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-white whitespace-nowrap min-w-[100px]">
-                  Remarks
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-white whitespace-nowrap min-w-[100px]">
-                  Action
-                </th>
-              </tr>
-            </thead>
+    <>
+      <div className="w-full max-w-sm sm:max-w-3xl md:max-w-4xl lg:max-w-full  bg-gray-50">
+        {/* Table View (Always visible on desktop, toggleable on mobile) */}
+        <div className={`w-full bg-white rounded-lg shadow overflow-hidden`}>
+          <div
+            className="overflow-x-auto overflow-y-auto max-h-screen relative scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
+            style={{
+              scrollbarWidth: "thin", // Firefox
+            }}
+          >
+            <style>
+              {`
+                /* Chrome, Edge, Safari */
+                ::-webkit-scrollbar {
+                  width: 3px;
+                  height: 2px;
+                }
+                ::-webkit-scrollbar-track {
+                  background: #f3f4f6; /* Tailwind gray-100 */
+                  border-radius: 10px;
+                }
+                ::-webkit-scrollbar-thumb {
+                  background-color: #9ca3af; /* Tailwind gray-400 */
+                  border-radius: 10px;
+                }
+                ::-webkit-scrollbar-thumb:hover {
+                  background-color: #6b7280; /* Tailwind gray-500 */
+                }
+              `}
+            </style>
 
-            <tbody className="divide-y">
-              {loading ? (
+            <table className="w-full min-w-max">
+              <thead className="sticky top-0 z-10 bg-gray-50 border-b-2 border-gray-200 shadow-sm">
                 <tr>
-                  <td colSpan="6" className="text-center py-6">
-                    <RotatingLines width="20" strokeColor="#000" />
-                  </td>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[50px]">
+                    No
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[200px]">
+                    OEM Supplier Name
+                  </th>
+
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[200px]">
+                    Manufacturer / Service Provider
+                  </th>
+
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[150px]">
+                    Category
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[200px]">
+                    Service / Equipment
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[280px]">
+                    Issue Description
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[100px]">
+                    Priority
+                  </th>
+
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[120px]">
+                    Created On
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[120px]">
+                    Attachments
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[120px]">
+                    Status
+                  </th>
                 </tr>
-              ) : tickets.length ? (
-                tickets.map((t, i) => (
-                  <tr key={t.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3">{i + 1}</td>
-
-                    <td className="px-4 py-3">
-                      <div className="font-medium">{t.user?.full_name}</div>
-                    </td>
-
-                    <td className="px-4 py-3 text-sm">{t.user?.email}</td>
-
-                    <td className="px-4 py-3 text-sm">
-                      {t.provider?.full_name}
-                    </td>
-
-                    <td className="px-4 py-3">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium`}
-                      >
-                        {t.remarks}
-                      </span>
-                    </td>
-
-                    <td className="px-4 py-3 flex gap-2">
-                      {/* {t.status === "pending" ? (
-                        <>
-                          <button
-                            onClick={() => approveTicket(t.id)}
-                            className="px-3 py-1 text-xs bg-green-600 text-white rounded"
-                          >
-                            Approve
-                          </button>
-
-                          <button
-                            onClick={() => openRejectModal(t.id)}
-                            className="px-3 py-1 text-xs bg-red-600 text-white rounded"
-                          >
-                            Reject
-                          </button>
-                        </>
-                      ) : (
-                        <span className="text-xs text-gray-400">No action</span>
-                      )} */}
-
-                      <button
-                        onClick={() => handleToggle(t.user)}
-                        className={`relative inline-flex cursor-pointer h-6 w-11 items-center rounded-full transition ${
-                          t?.user.is_active ? "bg-green-500" : "bg-gray-300"
-                        }`}
-                      >
-                        <span
-                          className={`inline-block h-5 w-5 transform rounded-full bg-white transition ${
-                            t?.user.is_active
-                              ? "translate-x-5"
-                              : "translate-x-1"
-                          }`}
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {loading ? (
+                  <tr>
+                    <td colSpan="9" className="text-center py-4">
+                      <div className="inline-flex items-center justify-center">
+                        <RotatingLines
+                          strokeColor="#1E1E1E"
+                          strokeWidth="5"
+                          animationDuration="0.75"
+                          width="20"
+                          visible={true}
                         />
-                      </button>
+                      </div>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="text-center py-6 text-gray-500">
-                    No tickets found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                ) : tickets.length > 0 ? (
+                  tickets
+                    .sort((a, b) => b.id - a.id) // ❌ filter removed
+                    .map((ticket, index) => (
+                      <tr
+                        key={ticket.id}
+                        onClick={() => handleTicketClick(ticket?.id)}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="px-4 py-4 text-sm text-gray-900">
+                          {index + 1}
+                        </td>
+
+                        {/* OEM */}
+                        <td className="px-4 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="flex-shrink-0">
+                              {ticket?.user?.company?.profile_pic ? (
+                                <img
+                                  src={ticket?.user?.company?.profile_pic}
+                                  alt="Ticket"
+                                  className="w-10 h-10 rounded-full object-cover border border-gray-300"
+                                />
+                              ) : (
+                                <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center">
+                                  <span className="text-white text-sm font-bold">
+                                    {ticket.plant_name?.[0] || "T"}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="text-sm font-medium text-gray-900 whitespace-nowrap">
+                              {ticket.plant_name || "N/A"}
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Manufacturer / Service */}
+                        <td className="px-4 py-2 whitespace-nowrap">
+                          {ticket.manufacturer_user?.full_name ||
+                            ticket.service_user?.full_name ||
+                            "N/A"}
+                        </td>
+
+                        {/* Category */}
+                        <td className="px-4 py-4">
+                          <span
+                            className={`text-sm font-medium whitespace-nowrap ${getCategoryColor(
+                              ticket.category,
+                            )}`}
+                          >
+                            {ticket.category || "N/A"}
+                          </span>
+                        </td>
+
+                        {/* Service */}
+                        <td className="px-4 py-4 text-sm text-gray-900">
+                          {ticket.service || ticket.equipment || "N/A"}
+                        </td>
+
+                        {/* Description */}
+                        <td className="px-4 py-4 text-sm text-gray-900">
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html:
+                                (ticket.description
+                                  ?.replace(/<[^>]+>/g, "")
+                                  ?.split(" ")
+                                  .slice(0, 10)
+                                  .join(" ") || "") + "...",
+                            }}
+                          />
+                        </td>
+
+                        {/* Priority */}
+                        <td className="px-4 py-4">
+                          <span
+                            className={`inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getPriorityColor(
+                              ticket.priority?.priority_name,
+                            )}`}
+                          >
+                            {ticket.priority?.priority_name || "N/A"}
+                          </span>
+                        </td>
+
+                        {/* Date */}
+                        <td className="px-4 py-4 text-sm text-gray-900 whitespace-nowrap">
+                          {ticket.issue_date
+                            ? new Date(ticket.issue_date).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                },
+                              )
+                            : "N/A"}
+                        </td>
+
+                        {/* Documents */}
+                        <td className="px-4 py-4">
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <FileText size={16} />
+                            <span>{ticket.documents?.length || 0}</span>
+                          </div>
+                        </td>
+
+                        {/* Action */}
+                        <td className="px-4 py-4">
+                          {ticket.stage === 1 && (
+                            <button
+                              disabled
+                              className="px-3 py-2 bg-[#E9F6E9] text-[#1E824C] h-[32px] flex items-center justify-center text-xs font-bold rounded-[8px]"
+                            >
+                              Approved
+                            </button>
+                          )}
+
+                          {ticket.stage === 2 && (
+                            <button
+                              disabled
+                              className="px-3 py-2 bg-[#FDE0DF] text-[#DC6A64] h-[32px] flex items-center justify-center text-xs font-bold rounded-[8px]"
+                            >
+                              Rejected
+                            </button>
+                          )}
+
+                          {ticket.stage === 3 && (
+                            <button
+                              disabled
+                              className="px-3 py-2 bg-[#FFF4E0] text-[#A67C00] h-[32px] flex items-center justify-center text-xs font-bold rounded-[8px]"
+                            >
+                              Returned
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                ) : (
+                  <tr>
+                    <td colSpan={8} className="text-center py-6 text-gray-500">
+                      No tickets found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Scroll indicator for mobile */}
+          <div className="lg:hidden bg-gray-100 py-2 text-center text-xs text-gray-500">
+            ← Swipe to see more columns →
+          </div>
+        </div>
+
+        {/* Card View (Only on mobile when selected) */}
+        <div
+          className={`${
+            viewMode === "table" ? "hidden" : "block lg:hidden"
+          } space-y-4`}
+        >
+          {tickets.map((ticket) => (
+            <div
+              key={ticket.id}
+              className="bg-white rounded-lg shadow-md overflow-hidden"
+            >
+              <div className="p-4">
+                {/* Header */}
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="flex-shrink-0">
+                      {ticket.supplierIcon ? (
+                        <div className="w-12 h-12 rounded-full bg-red-500 flex items-center justify-center">
+                          <span className="text-white text-xl">⚠</span>
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-black flex items-center justify-center">
+                          <span className="text-white text-sm font-bold">
+                            {ticket.logo}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-semibold text-gray-900 truncate">
+                        {ticket.supplier}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        ({ticket.location})
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-xs font-medium text-gray-500 ml-2">
+                    #{ticket.id}
+                  </span>
+                </div>
+
+                {/* Badges Row */}
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <span
+                    className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getPriorityColor(
+                      ticket.priority?.priority_name,
+                    )}`}
+                  >
+                    {ticket.priority?.priority_name}
+                  </span>
+                  <span
+                    className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                      ticket.status,
+                    )}`}
+                  >
+                    {ticket.status}
+                  </span>
+                  <span
+                    className={`inline-block text-xs font-medium ${getCategoryColor(
+                      ticket.category,
+                    )}`}
+                  >
+                    {ticket.category}
+                  </span>
+                </div>
+
+                {/* Collapsible Content */}
+                <button
+                  onClick={() =>
+                    setExpandedRow(expandedRow === ticket.id ? null : ticket.id)
+                  }
+                  className="w-full flex items-center justify-between text-sm font-medium text-gray-700 mb-2"
+                >
+                  <span>Details</span>
+                  {expandedRow === ticket.id ? (
+                    <ChevronUp size={16} />
+                  ) : (
+                    <ChevronDown size={16} />
+                  )}
+                </button>
+
+                {expandedRow === ticket.id && (
+                  <div className="space-y-2 pt-2 border-t border-gray-200">
+                    <div>
+                      <div className="text-xs font-medium text-gray-500">
+                        Service / Equipment
+                      </div>
+                      <div className="text-sm text-gray-900">
+                        {ticket.service}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs font-medium text-gray-500">
+                        Issue Description
+                      </div>
+                      <div className="text-sm text-gray-900">
+                        {ticket.issue}
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center pt-2">
+                      <div>
+                        <div className="text-xs font-medium text-gray-500">
+                          Created On
+                        </div>
+                        <div className="text-sm text-gray-900">
+                          {ticket.date}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <FileText size={16} />
+                        <span>{ticket.attachments}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Reject Modal */}
-      {showRejectModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-lg w-full max-w-md p-5">
-            <h2 className="text-lg font-semibold mb-3">Reject Ticket</h2>
+      {showModal && (
+        <div className="fixed inset-0 bg-black/20  flex justify-center items-center z-50 px-4">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl shadow-lg relative">
+            {/* Title */}
+            <h2 className="text-lg font-bold mb-3 text-gray-800 text-center sm:text-left">
+              {modalTitle} Ticket
+            </h2>
 
-            <textarea
-              rows="4"
-              className="w-full border rounded px-3 py-2"
-              placeholder="Enter rejection reason"
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
-            />
+            {/* Editor */}
+            <div className="w-full">
+              <Editor
+                style={{
+                  height: "180px",
+                  border: "1px solid #D9D4C6",
+                  // borderRadius: "6px",
+                }}
+                value={description}
+                onTextChange={(e) => setDescription(e.htmlValue)}
+              />
+            </div>
 
-            <div className="flex justify-end gap-3 mt-4">
+            {/* Actions */}
+            <div className="mt-5 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
               <button
-                onClick={() => setShowRejectModal(false)}
-                className="px-4 py-2 border rounded"
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 h-[38px] flex items-center justify-center text-gray-800 rounded-md transition"
+                onClick={() => setShowModal(false)}
               >
                 Cancel
               </button>
               <button
-                onClick={rejectTicket}
-                className="px-4 py-2 bg-red-600 text-white rounded"
+                className="px-4 py-2 bg-[#0088FF] text-white h-[38px] flex items-center justify-center rounded-md hover:bg-blue-600 transition"
+                onClick={handleConfirmAction}
+                disabled={!description || updatingId2 !== null}
               >
-                Reject
+                {updatingId2 !== null ? (
+                  <RotatingLines
+                    strokeColor="#fff"
+                    strokeWidth="5"
+                    animationDuration="0.75"
+                    width="20"
+                    visible={true}
+                  />
+                ) : (
+                  "Confirm"
+                )}
               </button>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

@@ -8,10 +8,9 @@ import {
   FaBell,
   FaUserCog,
   FaSignOutAlt,
-  FaBoxes,
   FaUsers,
 } from "react-icons/fa";
-const ManagerSidebar = ({ isOpen, setIsOpen }) => {
+const PlantSidebar = ({ isOpen, setIsOpen }) => {
   const linkClasses =
     "flex items-center gap-3 p-2 rounded-lg hover:bg-gray-700 transition";
   const activeClasses = "bg-white text-black font-semibold shadow";
@@ -37,7 +36,7 @@ const ManagerSidebar = ({ isOpen, setIsOpen }) => {
         </div>
         <nav className="flex-1 px-4 py-6 space-y-4">
           <NavLink
-            to="/manager/dashboard/home"
+            to="/plant-supervisor/dashboard/home"
             end
             className={({ isActive }) =>
               isActive ? `${linkClasses} ${activeClasses}` : linkClasses
@@ -47,25 +46,25 @@ const ManagerSidebar = ({ isOpen, setIsOpen }) => {
             <FaTachometerAlt /> Dashboard
           </NavLink>
           <NavLink
-            to="/manager/dashboard/tickets"
+            to="/plant-supervisor/dashboard/tickets"
             className={({ isActive }) =>
               isActive ? `${linkClasses} ${activeClasses}` : linkClasses
             }
             onClick={() => setIsOpen(false)}
           >
-            <FaTicketAlt /> My Tickets
+            <FaTicketAlt /> Tickets for approval
           </NavLink>
-          {/* <NavLink
-            to="/manager/dashboard/communication"
+          <NavLink
+            to="/plant-supervisor/dashboard/tickets-approved"
             className={({ isActive }) =>
               isActive ? `${linkClasses} ${activeClasses}` : linkClasses
             }
             onClick={() => setIsOpen(false)}
           >
-            <FaComments /> Communication
-          </NavLink> */}
+            <FaComments /> Approved Tickets
+          </NavLink>
           <NavLink
-            to="/manager/dashboard/notifications"
+            to="/plant-supervisor/dashboard/notifications"
             className={({ isActive }) =>
               isActive ? `${linkClasses} ${activeClasses}` : linkClasses
             }
@@ -75,18 +74,27 @@ const ManagerSidebar = ({ isOpen, setIsOpen }) => {
           </NavLink>
 
           <NavLink
-            to="/manager/dashboard/manage-products"
+            to="/plant-supervisor/dashboard/plant-products"
             className={({ isActive }) =>
               isActive ? `${linkClasses} ${activeClasses}` : linkClasses
             }
             onClick={() => setIsOpen(false)}
           >
-            <FaBoxes />
-            Manage Products
+            <FaUserCog /> Manage Products
           </NavLink>
 
+          {/* <NavLink
+            to="/plant-supervisor/dashboard/users-list"
+            className={({ isActive }) =>
+              isActive ? `${linkClasses} ${activeClasses}` : linkClasses
+            }
+            onClick={() => setIsOpen(false)}
+          >
+            <FaUsers /> Users
+          </NavLink> */}
+
           <NavLink
-            to="/manager/dashboard/profile"
+            to="/plant-supervisor/dashboard/profile"
             className={({ isActive }) =>
               isActive ? `${linkClasses} ${activeClasses}` : linkClasses
             }
@@ -114,7 +122,7 @@ const ManagerSidebar = ({ isOpen, setIsOpen }) => {
   );
 };
 
-export default ManagerSidebar;
+export default PlantSidebar;
 
 const UserCard = () => {
   const [userData, setUserData] = useState(null);

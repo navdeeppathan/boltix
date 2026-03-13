@@ -1,15 +1,20 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   FaCamera,
+  FaCheck,
+  FaClipboardList,
   FaCommentAlt,
   FaFileAlt,
   FaPhone,
+  FaRegFileImage,
+  FaTimes,
   FaUserFriends,
   FaVideo,
 } from "react-icons/fa";
 import http from "../service/http";
 import { baseURL } from "../service/api";
-import { useNavigate, useParams } from "react-router-dom";
+import Select from "react-select";
+import { useParams } from "react-router-dom";
 import {
   Box,
   Button,
@@ -23,41 +28,33 @@ import {
 import Swal from "sweetalert2";
 import { Videocam, Call, Close } from "@mui/icons-material";
 import { RotatingLines } from "react-loader-spinner";
-import { BriefcaseBusinessIcon, FileText } from "lucide-react";
+import {
+  AlertTriangle,
+  BriefcaseBusinessIcon,
+  Check,
+  CheckCheck,
+  FileText,
+} from "lucide-react";
+import { toast } from "react-toastify";
 import { Editor } from "primereact/editor";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
-import TicketHistoryPopup from "../utils/TicketHistoryPopup";
-import { toast } from "react-toastify";
+import "../utils/CustomScroll.css";
 
-export default function TicketDetails() {
+export default function AdminTicketDetails() {
   const { id } = useParams();
-  const navigate = useNavigate();
-
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
   const user = JSON.parse(localStorage.getItem("userData"));
-
-  const [showLatestApproval, setShowLatestApproval] = useState(false);
-  const [latestApproval, setLatestApproval] = useState(null);
-  const hasShownApprovalRef = useRef(false); // prevent reopening
 
   const fetchTicketDetails = async () => {
     try {
       setLoading(true);
       const response = await http.get(`/tickets/${id}`);
       if (response.data.status) {
-        const ticketData = response.data.data;
-        setTicket(ticketData);
+        setTicket(response.data.data);
         console.log("Ticket Details:", response.data.data);
-
-        // Auto-open latest approval popup (only once)
-        if (ticketData.latest_approval && !hasShownApprovalRef.current) {
-          setLatestApproval(ticketData.latest_approval);
-          setShowLatestApproval(true);
-          hasShownApprovalRef.current = true;
-        }
       }
     } catch (err) {
       console.error("Error fetching ticket details", err);
@@ -89,101 +86,13 @@ export default function TicketDetails() {
     }
   };
 
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case "new":
-        return "bg-cyan-500 text-white";
-      case "in progress":
-        return "bg-orange-500 text-white";
-      case "completed":
-        return "bg-green-500 text-white";
-      default:
-        return "bg-gray-500 text-white";
-    }
-  };
-
   const [updatingId2, setUpdatingId2] = useState(null);
 
   const [showModal, setShowModal] = useState(false);
+  const [showEditor, setShowEditor] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
-  const [modalAction, setModalAction] = useState(null);
-  const [modalStage, setModalStage] = useState(null);
-  const [modalTicketId, setModalTicketId] = useState(null);
+
   const [description, setDescription] = useState("");
-
-  const openActionModal = (ticketId, action, title) => {
-    setModalTicketId(ticketId);
-    setModalAction(action);
-    setModalTitle(title);
-    setDescription("");
-    setShowModal(true);
-  };
-
-  const handleConfirmAction = async () => {
-    await handleApprove(modalTicketId, modalAction, modalStage, description);
-  };
-
-  const handleApprove = async (ticketId, action, stage, description) => {
-    try {
-      setUpdatingId2(ticketId);
-      if (!description) {
-        toast.error("Please enter a description.");
-        return;
-      }
-
-      await http.post(`/tickets/approve_status/${ticketId}`, {
-        stage: action, // or you can map action → stage if needed
-        action,
-        description,
-        user_id: user.id, // assuming you have logged-in user data
-      });
-
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: `Ticket ${modalTitle} successfully.`,
-        timer: 1500,
-        showConfirmButton: false,
-      });
-      setShowModal(false);
-      fetchTicketDetails();
-    } catch (err) {
-      console.error("Error updating stage:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Failed to update ticket stage.",
-      });
-    } finally {
-      setUpdatingId2(null);
-    }
-  };
-
-  const handleComplete = async (ticketId, action) => {
-    try {
-      await http.post(`/tickets/update-stage/${ticketId}`, {
-        stage: action,
-        user_id: user.id, // assuming you have logged-in user data
-      });
-
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: `Ticket Action Updated successfully.`,
-        timer: 1500,
-        showConfirmButton: false,
-      });
-
-      fetchTicketDetails();
-    } catch (err) {
-      console.error("Error updating stage:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Failed to update ticket stage.",
-      });
-    }
-  };
 
   if (loading) {
     return (
@@ -202,79 +111,96 @@ export default function TicketDetails() {
   return (
     <>
       <div>
+        <div className="flex flex-col sm:flex-row mb-4 sm:items-center sm:justify-between bg-[#F9F9F9] rounded-[10px] border border-[#F9F9F9] px-4 py-3 sm:py-2 shadow-sm gap-3 sm:gap-0">
+          {/* Left side: Logo + Title */}
+          <div className="flex items-center gap-3">
+            <Avatar
+              src={ticket?.photo ? `${baseURL}/${ticket.photo}` : undefined}
+              alt=""
+              sx={{
+                width: 40,
+                height: 40,
+                bgcolor: "#0f766e",
+                fontSize: 14,
+              }}
+            >
+              {!ticket?.photo &&
+                (ticket?.plant_name ? (
+                  ticket?.plant_name.charAt(0).toUpperCase()
+                ) : (
+                  <BriefcaseBusinessIcon fontSize="small" />
+                ))}
+            </Avatar>
+            <div>
+              <h3 className="text-[15px] font-semibold text-gray-900 break-words">
+                {ticket?.plant_name || "Unknown Plant"}
+              </h3>
+              <p className="text-[12px] text-gray-500">
+                ({ticket?.department || "Department"})
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap justify-end sm:justify-start items-center gap-2">
+            {/* Stage 1: Approved */}
+            {ticket?.stage === 1 && (
+              <button
+                disabled
+                className="px-3 py-[6px] bg-[#00C8B3] text-white h-[32px] flex items-center justify-center gap-1 text-xs font-semibold rounded-[8px] w-full sm:w-auto"
+              >
+                <img
+                  src="/checkmarkwhite.png"
+                  alt=""
+                  className="w-[18px] h-[18px] object-cover"
+                />
+                Approved
+              </button>
+            )}
+
+            {ticket.stage === 3 && (
+              <button
+                disabled
+                className="px-3 py-2 bg-[#FFF4E0] text-[#A67C00] h-[32px] flex items-center justify-center text-xs font-bold rounded-[8px]"
+              >
+                Returned
+              </button>
+            )}
+
+            {ticket?.stage === 4 && (
+              <button
+                disabled
+                className="px-3 py-[6px] bg-[#00C8B3] text-white h-[32px] flex items-center justify-center gap-1 text-xs font-semibold rounded-[8px] w-full sm:w-auto"
+              >
+                <img
+                  src="/checkmarkwhite.png"
+                  alt=""
+                  className="w-[18px] h-[18px] object-cover"
+                />
+                Completed
+              </button>
+            )}
+
+            {/* Stage 2: Rejected */}
+            {ticket?.stage === 2 && (
+              <button
+                disabled
+                className="px-3 py-2 bg-[#FDE0DF] text-[#DC6A64] h-[32px] flex items-center justify-center text-xs font-bold rounded-[8px] w-full sm:w-auto"
+              >
+                Rejected
+              </button>
+            )}
+          </div>
+        </div>
+
         <div className="bg-[#F9F9F9] rounded-[10px] shadow-sm border border-[#F9F9F9] p-5 flex flex-col gap-4">
           {/* Header Section */}
           <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center gap-3">
-              {/* <img
-                src={
-                  ticket?.photo ? `${baseURL}/${ticket.photo}` : "/machine.jpg"
-                }
-                alt="Ticket Logo"
-                className="w-10 h-10 rounded-full object-contain"
-              /> */}
-              <Avatar
-                src={ticket?.photo ? `${baseURL}/${ticket.photo}` : undefined}
-                alt=""
-                sx={{
-                  width: 40,
-                  height: 40,
-                  bgcolor: "#0f766e",
-                  fontSize: 14,
-                }}
-              >
-                {!ticket?.photo &&
-                  (ticket?.plant_name ? (
-                    ticket?.plant_name.charAt(0).toUpperCase()
-                  ) : (
-                    <BriefcaseBusinessIcon fontSize="small" />
-                  ))}
-              </Avatar>
-              <div>
-                <h3 className="text-[15px] font-semibold text-gray-900">
-                  {ticket?.plant_name || "Unknown Plant"}
-                </h3>
-                <p className="text-[12px] text-gray-500">
-                  ({ticket?.department || "Department"})
-                </p>
-              </div>
-            </div>
-
             <div className="flex items-center gap-2">
-              {(ticket?.stage != 0 ||
-                ticket?.stage != 3 ||
-                ticket?.stage != 4) && (
-                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-                  <button
-                    onClick={(e) => {
-                      handleComplete(ticket.id, 4);
-                    }}
-                    className={`flex items-center justify-center px-3 py-2 h-[32px] text-xs font-bold rounded-[8px] w-full sm:w-auto transition-all ${
-                      ticket.stage === 4 ? "hidden" : ""
-                    } ${"bg-[#0088FF] hover:bg-green-700 text-white"}`}
-                  >
-                    Close
-                  </button>
+              <div className="flex items-center gap-1 bg-[#EDEDED] rounded-full px-2 py-[2px] text-gray-600 text-[11px]">
+                <div className="flex  items-center gap-1 text-[11px] font-medium px-1 py-[2px] rounded-full text-gray-600">
+                  <FileText size={16} />
+                  <span>{ticket.documents.length ? 1 : 0}</span>
                 </div>
-              )}
-
-              {ticket?.stage == 4 && (
-                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-                  <button
-                    onClick={(e) => {
-                      handleComplete(ticket.id, 1);
-                    }}
-                    className={`flex items-center justify-center px-3 py-2 h-[32px] text-xs font-bold rounded-[8px] w-full sm:w-auto transition-all ${
-                      ticket.stage != 4 ? "hidden" : ""
-                    } ${"bg-[#0088FF] hover:bg-green-700 text-white"}`}
-                  >
-                    Reopen
-                  </button>
-                </div>
-              )}
-              <div className="flex  items-center gap-1 text-[11px] font-medium px-1 py-[2px] rounded-full text-gray-600">
-                <FileText size={16} />
-                <span>{ticket.documents.length ? 1 : 0}</span>
               </div>
               <span
                 className={`text-[11px] font-medium px-2 py-[2px] rounded-full ${getPriorityColor(
@@ -287,36 +213,49 @@ export default function TicketDetails() {
           </div>
 
           {/* Service Required */}
-          <div>
+          <div className=" ">
             <p className="text-[13px] font-semibold text-gray-800">
-              Service Required:
+              Basic Information:
             </p>
             <p className="text-[13px] text-gray-700">
-              {ticket?.service || "N/A"} – {ticket?.model_number || "N/A"}
+              <span className="text-black font-medium">Ticket Number:</span>{" "}
+              {ticket?.ticket_number || "N/A"}
+            </p>
+            <p className="text-[13px] text-gray-700">
+              <span className="text-black font-medium">Ticket Title:</span>{" "}
+              {ticket?.ticket_title || "N/A"}
+            </p>
+            <p className="text-[13px] text-gray-700">
+              <span className="text-black font-medium">Category:</span>{" "}
+              {ticket?.category || "N/A"}
+            </p>
+            <p className="text-[13px] text-gray-700">
+              <span className="text-black font-medium">Priority:</span>{" "}
+              {ticket?.priority.priority_name || "N/A"}
+            </p>
+            <p className="text-[13px] text-gray-700">
+              <span className="text-black font-medium">Created By:</span>{" "}
+              {ticket?.user.company?.company_name || "N/A"} (
+              {ticket?.user.company.designation || "N/A"})
+            </p>
+            <p className="text-[13px] text-gray-700 flex items-center gap-2">
+              <span className="text-black font-medium">Status:</span>
+
+              <span
+                className={`px-2 py-[2px] rounded-full text-[11px] font-semibold
+                ${
+                  ticket?.user.isOnline == 1
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-200 text-gray-600"
+                }`}
+              >
+                {ticket?.user.isOnline == 1 ? "Active" : "Offline"}
+              </span>
             </p>
           </div>
 
           {/* Issue Reported + Info Row */}
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-            <div className="flex-1">
-              <p className="text-[13px] font-semibold text-gray-800">
-                Issue Reported:
-              </p>
-              <p className="text-[13px] text-gray-700 leading-relaxed">
-                {(
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: ticket.description,
-                    }}
-                  />
-                ) ||
-                  `The unit is showing pressure imbalance and
-              bearing noise during operation. Requires inspection and repair
-              service`}
-              </p>
-            </div>
-
-            {/* Inline Info Boxes */}
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-end gap-3">
             <div className="flex flex-row gap-2 sm:ml-4 shrink-0">
               <div className="text-[12px] text-gray-700 bg-white rounded-md border border-gray-200 p-2 w-[110px]">
                 <p className="font-bold text-gray-600">Category:</p>
@@ -355,30 +294,8 @@ export default function TicketDetails() {
           </div>
         </div>
 
-        <div>
-          <TicketRemarksTab ticketId={ticket.id} />
-        </div>
         <div className="mt-6">
-          <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between lg:justify-end gap-3 mb-2">
-            {ticket?.stage === 3 && (
-              <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-                {/* Return Button */}
-                <button
-                  onClick={(e) => {
-                    navigate(`/dashboard/edit/${ticket.id}`);
-                    // e.stopPropagation();
-                    // openActionModal(ticket.id, 3, "Return");
-                  }}
-                  className="px-3 py-2 bg-yellow-500 hover:bg-yellow-600 h-[32px] flex items-center justify-center text-xs text-white font-bold rounded-[8px] w-full sm:w-auto"
-                >
-                  Edit Ticket & Resubmit
-                </button>
-              </div>
-            )}
-            {/* <div className="flex justify-end sm:justify-end w-full sm:w-auto">
-              <TicketHistoryPopup approvals={ticket.approvals} />
-            </div> */}
-          </div>
+          {/* <TicketHistoryPopup approvals={ticket.approvals} /> */}
 
           <TicketOverview
             ticket={ticket}
@@ -386,119 +303,6 @@ export default function TicketDetails() {
           />
         </div>
       </div>
-      {showModal && (
-        <div className="fixed inset-0 bg-black/20  flex justify-center items-center z-50 px-4">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl shadow-lg relative">
-            {/* Title */}
-            <h2 className="text-lg font-bold mb-3 text-gray-800 text-center sm:text-left">
-              {modalTitle} Ticket
-            </h2>
-
-            {/* Editor */}
-            <div className="w-full">
-              <Editor
-                style={{
-                  height: "180px",
-                  border: "1px solid #D9D4C6",
-                  // borderRadius: "6px",
-                }}
-                value={description}
-                onTextChange={(e) => setDescription(e.htmlValue)}
-              />
-            </div>
-
-            {/* Actions */}
-            <div className="mt-5 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
-              <button
-                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 h-[38px] flex items-center justify-center text-gray-800 rounded-md transition"
-                onClick={() => setShowModal(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 bg-[#0088FF] text-white h-[38px] flex items-center justify-center rounded-md hover:bg-blue-600 transition"
-                onClick={handleConfirmAction}
-                disabled={!description || updatingId2 !== null}
-              >
-                {updatingId2 !== null ? (
-                  <RotatingLines
-                    strokeColor="#fff"
-                    strokeWidth="5"
-                    animationDuration="0.75"
-                    width="20"
-                    visible={true}
-                  />
-                ) : (
-                  "Confirm"
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showLatestApproval && latestApproval && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-xl w-full max-w-md shadow-lg relative p-6">
-            {/* Close Button */}
-            <button
-              onClick={() => setShowLatestApproval(false)}
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
-            >
-              ✕
-            </button>
-
-            {/* Header */}
-            <h2 className="text-lg font-bold mb-3 text-gray-800">
-              Latest Ticket Update
-            </h2>
-
-            {/* Status */}
-            <div className="mb-3">
-              <span
-                className={`inline-block px-3 py-1 rounded-full text-sm font-semibold
-            ${
-              latestApproval.action_label === "Returned"
-                ? "bg-yellow-100 text-yellow-800"
-                : latestApproval.action_label === "Approved"
-                  ? "bg-green-100 text-green-800"
-                  : "bg-gray-100 text-gray-800"
-            }
-          `}
-              >
-                {latestApproval.action_label}
-              </span>
-            </div>
-
-            {/* Description */}
-            <div className="text-sm text-gray-700 mb-4">
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: latestApproval.description || "<p>No description</p>",
-                }}
-              />
-            </div>
-
-            {/* Footer */}
-            <div className="text-xs text-gray-500 flex justify-between">
-              <span>
-                Date: {new Date(latestApproval.created_at).toLocaleString()}
-              </span>
-              <span>By: {latestApproval.user.company.company_name}</span>
-            </div>
-
-            {/* Action */}
-            <div className="mt-5 flex justify-end">
-              <button
-                onClick={() => setShowLatestApproval(false)}
-                className="px-4 py-2 bg-[#007BFF] text-white rounded-md hover:bg-[#0066DD]"
-              >
-                OK
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }
@@ -571,9 +375,7 @@ const TicketOverview = ({ ticket, fetchTicketDetails }) => {
 
   return (
     <>
-      <div
-        className={`flex flex-col md:flex-row gap-4 bg-[#FFFFFF] min-h-screen `}
-      >
+      <div className="flex flex-col md:flex-row gap-4 bg-[#FFFFFF] min-h-screen ">
         {/* Left Main Section - 80% */}
         <div className="w-full  bg-[#F9F9F9] rounded-xl shadow-sm ">
           {/* Header */}
@@ -584,80 +386,12 @@ const TicketOverview = ({ ticket, fetchTicketDetails }) => {
 
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2 md:mt-0">
-              {/* Document Icon */}
-              {/* <button className="w-9 h-9 flex items-center justify-center rounded-full bg-[#707578] text-white hover:opacity-90 transition">
-                <FaFileAlt size={16} />
-              </button> */}
-              {ticket?.stage != 0 &&
-                ticket?.stage == 1 &&
-                ticket?.assigned_tickets.length > 0 && (
-                  <UploadTicketDoc
-                    ticketId={ticket?.id}
-                    fetchTickets={fetchTicketDetails}
-                  />
-                )}
-
-              {/* Chat Icon */}
-              {ticket?.stage == 1 &&
-                ticket?.assigned_tickets.length > 0 &&
-                ticket?.response_mode?.toLowerCase() === "chat" && (
-                  <button
-                    // onClick={() => setOpen(true)}
-                    onClick={() => {
-                      setSelectedTicketId(ticket?.id);
-                      setOpenChat(true);
-                    }}
-                    className="w-9 h-9 flex items-center justify-center rounded-full bg-[#8FCAA1] text-white hover:opacity-90 transition"
-                  >
-                    <FaCommentAlt size={16} />
-                  </button>
-                )}
-
               <ChatModal
                 open={openChat}
                 onClose={(refresh) => handleCloseChat(refresh)}
                 ticketId={selectedTicketId}
                 user={user}
               />
-
-              {/* Video + Call pill */}
-              <div className="flex items-center bg-[#09A7EA] rounded-full overflow-hidden">
-                {/* {ticket?.response_mode?.toLowerCase() === "video" && (
-                  <button className="px-3 py-2 text-white flex items-center hover:bg-[#0c9dd9] transition">
-                    <FaVideo size={15} />
-                  </button>
-                )} */}
-                {
-                  // ticket?.response_mode?.toLowerCase() === "video" &&
-                  ticket?.stage == 1 && ticket?.assigned_tickets.length > 0 && (
-                    <a
-                      href={`/video-user/${user.full_name}/${ticket?.id}/${user.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3 py-2 text-white flex items-center hover:bg-[#0c9dd9] transition"
-                    >
-                      <FaVideo size={15} />
-                    </a>
-                  )
-                }
-                <div className="w-px bg-white h-5"></div>
-                {ticket?.response_mode?.toLowerCase() === "call" &&
-                  ticket?.stage == 1 &&
-                  ticket?.assigned_tickets.length > 0 && (
-                    <button className="px-3 py-2 text-white flex items-center hover:bg-[#0c9dd9] transition">
-                      <FaPhone size={15} />
-                    </button>
-                  )}
-              </div>
-
-              {ticket?.stage != 0 &&
-                ticket?.assigned_tickets.length > 0 &&
-                ticket?.stage == 1 && (
-                  <UploadTicketImage
-                    ticketId={ticket?.id}
-                    fetchTickets={fetchTicketDetails}
-                  />
-                )}
             </div>
           </div>
 
@@ -745,134 +479,12 @@ const TicketOverview = ({ ticket, fetchTicketDetails }) => {
   );
 };
 
-const UploadTicketImage = ({ ticketId, fetchTickets }) => {
-  const fileInputRef = useRef(null);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-
-  // Open file picker (camera or gallery)
-  const handleButtonClick = () => {
-    fileInputRef.current.click();
-  };
-
-  // Upload selected file
-  const handleFileChange = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    setLoading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append("ticket_id", ticketId);
-      formData.append("photo", file);
-
-      const res = await http.post("/ticket-images/store", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      if (fetchTickets) await fetchTickets();
-
-      toast.success("Image uploaded successfully");
-    } catch (error) {
-      console.error(error);
-      toast.error(error.response.data.message || "Failed to upload image");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="flex flex-col items-center gap-3">
-      <button
-        onClick={handleButtonClick}
-        disabled={loading}
-        className={`flex items-center justify-center gap-2 px-4 py-2 bg-[#0A84FF] hover:bg-[#007AFF] text-white text-[13px] sm:text-[14px] font-medium rounded-full transition-all duration-200 w-full sm:w-auto ${
-          loading ? "opacity-70 cursor-not-allowed" : ""
-        }`}
-      >
-        <FaCamera className="text-[14px]" />
-        {loading ? "Uploading..." : "Upload Photo"}
-      </button>
-
-      {/* Hidden file input */}
-      <input
-        type="file"
-        accept="image/*"
-        capture="environment" // opens camera on mobile
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        className="hidden"
-      />
-    </div>
-  );
-};
-
-const UploadTicketDoc = ({ ticketId, fetchTickets }) => {
-  const fileInputRef = useRef(null);
-  const [loading, setLoading] = useState(false);
-
-  // Trigger hidden file input
-  const handleButtonClick = () => {
-    fileInputRef.current.click();
-  };
-
-  // Handle file selection
-  const handleFileChange = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    setLoading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append("ticket_id", ticketId);
-      formData.append("upload_documents", file);
-
-      // Post to Laravel API
-      await http.post("/ticket-docs/store", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      if (fetchTickets) await fetchTickets();
-      toast.success("📄 Document uploaded successfully");
-    } catch (error) {
-      console.error(error);
-      toast.error(error.response?.data?.message || "Failed to upload document");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="flex flex-col items-center gap-3">
-      <button
-        onClick={handleButtonClick}
-        disabled={loading}
-        className={`w-9 h-9 flex items-center justify-center rounded-full bg-[#707578] text-white hover:opacity-90 transition ${
-          loading ? "opacity-70 cursor-not-allowed" : ""
-        }`}
-      >
-        <FaFileAlt size={16} />
-      </button>
-
-      {/* Hidden file input */}
-      <input
-        type="file"
-        accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.csv" // document formats
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        className="hidden"
-      />
-    </div>
-  );
-};
-
 const TicketBoard = ({ ticket, onClick }) => {
   const [showPreview, setShowPreview] = useState(false);
 
   const documentUrl = ticket?.upload_documents
     ? `${baseURL}/${ticket?.upload_documents}`
     : null;
-  const [selectedDocument, setSelectedDocument] = useState(null);
 
   const getTimeAgo = (createdAt) => {
     if (!createdAt) return "N/A";
@@ -909,6 +521,8 @@ const TicketBoard = ({ ticket, onClick }) => {
         return "bg-gray-500 text-white";
     }
   };
+
+  const [selectedDocument, setSelectedDocument] = useState(null);
 
   return (
     <div>
@@ -971,6 +585,7 @@ const TicketBoard = ({ ticket, onClick }) => {
                 />
               </div>
             </div>
+
             <div className="bg-white rounded-[10px] shadow p-2 mb-3 w-full">
               {/* Title */}
               <h4 className="font-semibold text-[13px] text-[#212529] mb-1">
@@ -1026,6 +641,7 @@ const TicketBoard = ({ ticket, onClick }) => {
                 />
               </div>
             </div>
+
             {ticket?.activities?.length > 0
               ? ticket?.activities.map((activity, index) => (
                   <div
@@ -1142,104 +758,108 @@ const TicketBoard = ({ ticket, onClick }) => {
               </div>
 
               {/* equipment info */}
-              <div className="bg-white rounded-[10px] shadow p-2 mb-3 w-full">
-                {/* Title */}
-                <h4 className="font-semibold text-[13px] text-[#212529] mb-1">
-                  Equipment Info
-                </h4>
-                <p className="text-[12px] text-gray-500 line-clamp-2">
-                  Equipment: {ticket?.equipment || "N/A"}
-                </p>
-                {/* Description */}
-                <p className="text-[12px] text-gray-500 mb-3 line-clamp-2">
-                  Model :{ticket?.model_number || "N/A"}
-                </p>
+              {ticket?.category == "Machine Breakdown" && (
+                <div className="bg-white rounded-[10px] shadow p-2 mb-3 w-full">
+                  {/* Title */}
+                  <h4 className="font-semibold text-[13px] text-[#212529] mb-1">
+                    Equipment Info
+                  </h4>
+                  <p className="text-[12px] text-gray-500 line-clamp-2">
+                    Equipment: {ticket?.equipment || "N/A"}
+                  </p>
+                  {/* Description */}
+                  <p className="text-[12px] text-gray-500 mb-3 line-clamp-2">
+                    Model :{ticket?.model_number || "N/A"}
+                  </p>
 
-                {/* Footer */}
-                <div className="flex items-center justify-between text-[12px] text-gray-500">
-                  <div className="flex items-center gap-0.5">
+                  {/* Footer */}
+                  <div className="flex items-center justify-between text-[12px] text-gray-500">
+                    <div className="flex items-center gap-0.5">
+                      <img
+                        src="/clock.png"
+                        alt=""
+                        className="w-[13px] h-[13px] object-cover"
+                      />
+                      <span>{getTimeAgo(ticket?.created_at)}</span>
+                    </div>
+
+                    {/* Priority Badge */}
+                    <div className="flex gap-0.5 items-center">
+                      <img
+                        src="/priority.png"
+                        alt=""
+                        className="w-[13px] h-[13px] object-cover"
+                      />
+                      <span
+                        className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
+                          ticket.priority?.priority_name,
+                        )}`}
+                      >
+                        {ticket.priority?.priority_name || "N/A"}
+                      </span>
+                    </div>
+
+                    {/* Profile Avatar */}
                     <img
-                      src="/clock.png"
-                      alt=""
-                      className="w-[13px] h-[13px] object-cover"
+                      src={ticket?.user?.company?.profile_pic || "/person.jpg"}
+                      alt="User"
+                      className="w-6 h-6 rounded-full object-cover"
                     />
-                    <span>{getTimeAgo(ticket?.created_at)}</span>
                   </div>
-
-                  {/* Priority Badge */}
-                  <div className="flex gap-0.5 items-center">
-                    <img
-                      src="/priority.png"
-                      alt=""
-                      className="w-[13px] h-[13px] object-cover"
-                    />
-                    <span
-                      className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
-                        ticket.priority?.priority_name,
-                      )}`}
-                    >
-                      {ticket.priority?.priority_name || "N/A"}
-                    </span>
-                  </div>
-
-                  {/* Profile Avatar */}
-                  <img
-                    src={ticket?.user?.company?.profile_pic || "/person.jpg"}
-                    alt="User"
-                    className="w-6 h-6 rounded-full object-cover"
-                  />
                 </div>
-              </div>
+              )}
 
               {/* service info */}
-              <div className="bg-white rounded-[10px] shadow p-2 mb-3 w-full">
-                {/* Title */}
-                <h4 className="font-semibold text-[13px] text-[#212529] mb-1">
-                  Service Information
-                </h4>
-                <p className="text-[12px] text-gray-500  line-clamp-2">
-                  Provider: {ticket?.service_provider || "N/A"}
-                </p>
-                {/* Description */}
-                <p className="text-[12px] text-gray-500 mb-3 line-clamp-2">
-                  Manufacturer :{ticket?.manufacturer || "N/A"}
-                </p>
+              {ticket?.category == "Service Breakdown" && (
+                <div className="bg-white rounded-[10px] shadow p-2 mb-3 w-full">
+                  {/* Title */}
+                  <h4 className="font-semibold text-[13px] text-[#212529] mb-1">
+                    Service Information
+                  </h4>
+                  <p className="text-[12px] text-gray-500  line-clamp-2">
+                    Provider: {ticket?.service_provider || "N/A"}
+                  </p>
+                  {/* Description */}
+                  <p className="text-[12px] text-gray-500 mb-3 line-clamp-2">
+                    Manufacturer :{ticket?.manufacturer || "N/A"}
+                  </p>
 
-                {/* Footer */}
-                <div className="flex items-center justify-between text-[12px] text-gray-500">
-                  <div className="flex items-center gap-0.5">
+                  {/* Footer */}
+                  <div className="flex items-center justify-between text-[12px] text-gray-500">
+                    <div className="flex items-center gap-0.5">
+                      <img
+                        src="/clock.png"
+                        alt=""
+                        className="w-[13px] h-[13px] object-cover"
+                      />
+                      <span>{getTimeAgo(ticket?.created_at)}</span>
+                    </div>
+
+                    {/* Priority Badge */}
+                    <div className="flex gap-0.5 items-center">
+                      <img
+                        src="/priority.png"
+                        alt=""
+                        className="w-[13px] h-[13px] object-cover"
+                      />
+                      <span
+                        className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
+                          ticket.priority?.priority_name,
+                        )}`}
+                      >
+                        {ticket.priority?.priority_name || "N/A"}
+                      </span>
+                    </div>
+
+                    {/* Profile Avatar */}
                     <img
-                      src="/clock.png"
-                      alt=""
-                      className="w-[13px] h-[13px] object-cover"
+                      src={ticket?.user?.company?.profile_pic || "/person.jpg"}
+                      alt="User"
+                      className="w-6 h-6 rounded-full object-cover"
                     />
-                    <span>{getTimeAgo(ticket?.created_at)}</span>
                   </div>
-
-                  {/* Priority Badge */}
-                  <div className="flex gap-0.5 items-center">
-                    <img
-                      src="/priority.png"
-                      alt=""
-                      className="w-[13px] h-[13px] object-cover"
-                    />
-                    <span
-                      className={`text-[11px] px-2 py-[2px] rounded-md font-medium capitalize ${getPriorityColor(
-                        ticket.priority?.priority_name,
-                      )}`}
-                    >
-                      {ticket.priority?.priority_name || "N/A"}
-                    </span>
-                  </div>
-
-                  {/* Profile Avatar */}
-                  <img
-                    src={ticket?.user?.company?.profile_pic || "/person.jpg"}
-                    alt="User"
-                    className="w-6 h-6 rounded-full object-cover"
-                  />
                 </div>
-              </div>
+              )}
 
               {/* support info */}
               <div className="bg-white rounded-[10px] shadow p-2 mb-3 w-full">
@@ -1791,106 +1411,5 @@ const ChatModal = ({ open, onClose, ticketId, user }) => {
         </Box>
       </Box>
     </Modal>
-  );
-};
-
-const TicketRemarksTab = ({ ticketId }) => {
-  const [remarks, setRemarks] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [text, setText] = useState("");
-
-  const user = JSON.parse(localStorage.getItem("userData"));
-
-  /* ================= FETCH ================= */
-  const fetchRemarks = async () => {
-    if (!ticketId) return;
-
-    setLoading(true);
-    try {
-      const res = await http.get(`/tickets/${ticketId}/remarks`);
-      if (res.data.status) setRemarks(res.data.data);
-    } catch {
-      toast.error("Failed to load remarks");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchRemarks();
-  }, [ticketId]);
-
-  /* ================= ADD ================= */
-  const addRemark = async () => {
-    if (!text.trim()) return;
-
-    try {
-      const res = await http.post("/ticket-remarks", {
-        ticket_id: ticketId,
-        user_id: user?.id,
-        description: text,
-      });
-
-      if (res.data.status) {
-        setText("");
-        fetchRemarks();
-      }
-    } catch {
-      toast.error("Failed to add remark");
-    }
-  };
-
-  return (
-    <div className="bg-white rounded-xl shadow p-5 mt-4 max-h-[400px] overflow-y-auto">
-      {/* TITLE */}
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="font-semibold text-lg">Remarks</h3>
-      </div>
-
-      {/* ADD BOX */}
-      <div className="flex gap-2 mb-4">
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Write remark..."
-          rows={2}
-          className="flex-1 border rounded-lg px-3 py-2"
-        />
-
-        <button
-          onClick={addRemark}
-          className="bg-[#0088FF] text-white px-5 rounded-lg"
-        >
-          Add
-        </button>
-      </div>
-
-      {/* LIST */}
-      {loading ? (
-        <div className="flex justify-center py-4">
-          <RotatingLines width="20" />
-        </div>
-      ) : remarks.length === 0 ? (
-        <div className="text-gray-500 text-sm">No remarks yet</div>
-      ) : (
-        <div className="space-y-3">
-          {remarks.map((r) => (
-            <div
-              key={r.id}
-              className="border border-gray-200 rounded-lg p-3 bg-gray-50"
-            >
-              <div className="flex justify-between text-sm mb-1">
-                <div className="font-medium">{r.user?.full_name || "User"}</div>
-                <div className="text-gray-500">
-                  {new Date(r.created_at).toLocaleString()}
-                </div>
-              </div>
-
-              <div className="text-gray-700 text-sm">{r.description}</div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
   );
 };

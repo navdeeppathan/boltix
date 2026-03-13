@@ -222,7 +222,7 @@ const ProcessPage = () => {
         >
           <motion.h1
             variants={fadeUp}
-            className="text-3xl sm:text-4xl md:text-[56px] font-bold text-[#212529]"
+            className="text-3xl sm:text-4xl md:text-[56px] font-bold text-[#0088ffcf]"
           >
             Our Process
           </motion.h1>
@@ -246,7 +246,10 @@ const ProcessPage = () => {
           viewport={{ once: true }}
           className="max-w-6xl mx-auto"
         >
-          <motion.h2 variants={fadeUp} className="md:text-[42px] font-bold">
+          <motion.h2
+            variants={fadeUp}
+            className="md:text-[42px] text-[#0088ffcf] font-bold"
+          >
             Registration Process
           </motion.h2>
 
@@ -282,7 +285,9 @@ const ProcessPage = () => {
                 <span className="text-sm font-semibold text-[#212529]/60">
                   Step {index + 1}
                 </span>
-                <h3 className="mt-2 md:text-[22px] font-bold">{title}</h3>
+                <h3 className="mt-2 md:text-[22px] text-[#0088ffcf] font-bold">
+                  {title}
+                </h3>
                 <p className="mt-3 md:text-[16px] text-[#212529]/80">{desc}</p>
               </motion.div>
             ))}
@@ -299,7 +304,10 @@ const ProcessPage = () => {
           viewport={{ once: true }}
           className="max-w-6xl mx-auto"
         >
-          <motion.h2 variants={fadeUp} className="md:text-[42px] font-bold">
+          <motion.h2
+            variants={fadeUp}
+            className="md:text-[42px] text-[#0088ffcf] font-bold"
+          >
             Login Process
           </motion.h2>
 
@@ -331,7 +339,9 @@ const ProcessPage = () => {
                 <span className="text-sm font-semibold text-[#212529]/60">
                   Step {index + 1}
                 </span>
-                <h3 className="mt-2 md:text-[22px] font-bold">{title}</h3>
+                <h3 className="mt-2 md:text-[22px] text-[#0088ffcf] font-bold">
+                  {title}
+                </h3>
                 <p className="mt-3 md:text-[16px] text-[#212529]/80">{desc}</p>
               </motion.div>
             ))}
@@ -348,7 +358,7 @@ const ProcessPage = () => {
           viewport={{ once: true }}
           className="max-w-6xl mx-auto"
         >
-          <h2 className="md:text-[42px] font-bold">
+          <h2 className="md:text-[42px] text-[#0088ffcf] font-bold">
             What Happens After Login?
           </h2>
 

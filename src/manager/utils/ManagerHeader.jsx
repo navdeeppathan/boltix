@@ -1,6 +1,6 @@
 // Header.jsx
 import React, { useEffect, useState } from "react";
-import { FaBars } from "react-icons/fa";
+import { FaBars, FaBell } from "react-icons/fa";
 
 import { useNavigate } from "react-router-dom";
 import http from "../../service/http";
@@ -39,7 +39,7 @@ const ManagerHeader = ({ setIsOpen, title }) => {
         >
           Add Product
         </button>
-        {/* <NotificationsButton /> */}
+        <NotificationsButton />
         <button
           onClick={() => navigate("/manager/dashboard/profile")}
           className=" px-3 text-[#212529] md:text-[16px]  hover:text-[#0088FF] font-medium  py-2 rounded-lg text-sm"
@@ -80,10 +80,10 @@ const NotificationsButton = () => {
       onClick={() => navigate("/manager/dashboard/notifications")}
       className="relative px-3 py-2 text-[#212529] md:text-[16px] hover:text-[#0088FF] font-medium rounded-lg text-sm"
     >
-      Notifications
-      {hasNotifications && (
+      <FaBell className="text-xl" />
+      {/* {hasNotifications && (
         <span className="absolute top-1 right-1 block w-2 h-2 rounded-full bg-orange-500" />
-      )}
+      )} */}
     </button>
   );
 };

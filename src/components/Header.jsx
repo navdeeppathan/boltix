@@ -1,6 +1,6 @@
 // Header.jsx
 import React, { useEffect, useRef, useState } from "react";
-import { FaBars } from "react-icons/fa";
+import { FaBars, FaBell } from "react-icons/fa";
 import CreateTicketModal from "../auth/CreateTicketModal";
 import { useNavigate } from "react-router-dom";
 import http from "../service/http";
@@ -151,7 +151,7 @@ const Header = ({ setIsOpen, title }) => {
 
   const isDisabled = user?.company?.progress !== 100;
   return (
-    <div className="flex justify-between items-center mb-6 p-4 shadow  bg-white sticky top-0 z-30">
+    <div className="flex justify-between items-center mb-6 p-4 shadow  bg-[#e9e9e9] sticky top-0 z-30">
       <div className="flex items-center gap-4">
         {/* Hamburger for mobile */}
         <button
@@ -232,7 +232,7 @@ const Header = ({ setIsOpen, title }) => {
               isDisabled
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-[#0088FF] hover:bg-[#0070D1]"
-            } md:w-[126px] md:h-[35px] cursor-pointer md:text-[16px] font-medium text-white px-3 py-2 rounded-lg text-sm transition`}
+            } md:w-auto md:h-[35px] cursor-pointer md:text-[16px] font-medium text-white px-3 py-2 rounded-lg text-sm transition`}
           >
             Create Ticket
           </button>
@@ -275,7 +275,8 @@ const NotificationsButton = () => {
       onClick={() => navigate("/dashboard/notifications")}
       className="relative cursor-pointer px-3 py-2 text-[#212529] md:text-[16px] hover:text-[#0088FF] font-medium rounded-lg text-sm"
     >
-      Notifications
+      <FaBell className="text-xl" />
+
       {hasNotifications && (
         <span className="absolute top-1 right-1 block w-2 h-2 rounded-full bg-orange-500" />
       )}

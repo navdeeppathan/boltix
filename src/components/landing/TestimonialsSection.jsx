@@ -61,7 +61,7 @@ const TestimonialsSection = () => {
         viewport={{ once: true }}
         className="text-center mb-12"
       >
-        <h2 className="text-2xl sm:text-3xl md:text-[48.65px] font-bold text-[#212529]">
+        <h2 className="text-2xl sm:text-3xl md:text-[48.65px] font-bold text-[#0088ffcf]">
           Trusted by Companies Worldwide
         </h2>
         <p className="mt-2 text-sm sm:text-base md:text-[24px] font-normal text-[#212529]">

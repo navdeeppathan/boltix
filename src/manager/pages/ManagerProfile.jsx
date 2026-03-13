@@ -17,6 +17,7 @@ import {
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import Swal from "sweetalert2";
 import { baseURL } from "../../service/api";
+import { toast } from "react-toastify";
 
 const style = {
   position: "absolute",
@@ -56,7 +57,7 @@ const style = {
 //               {/* Left Section */}
 //               <div className="flex items-start md:items-center gap-4">
 //                 <img
-//                   src="/soudi.png"
+//                   src="/person.jpg"
 //                   alt="Saudi Aramco Logo"
 //                   className="w-14 h-14 rounded-full object-cover"
 //                 />
@@ -355,11 +356,16 @@ export default function ManagerProfile() {
       }
     } catch (error) {
       console.error("Update failed:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Update Failed",
-        text: error.response?.data?.message || "Something went wrong!",
-      });
+      // Swal.fire({
+      //   icon: "error",
+      //   title: "Update Failed",
+      //   text: error.response?.data?.message || "Something went wrong!",
+      // });
+      toast.error(
+        error?.response?.data?.error ||
+          error?.response?.data?.message ||
+          "Something went wrong!",
+      );
     } finally {
       setLoadingUpdate(false);
     }
@@ -375,7 +381,7 @@ export default function ManagerProfile() {
           <div className="overflow-hidden">
             <div className="relative">
               <img
-                src="/plant.png"
+                src="/bgimg.png"
                 alt="Plant Banner"
                 className="w-full h-60 rounded-[10px] object-cover"
               />
@@ -387,7 +393,7 @@ export default function ManagerProfile() {
                 {/* Left Section */}
                 {/* <div className="flex items-start md:items-center gap-4">
                      <img
-                       src="/soudi.png"
+                       src="/person.jpg"
                        alt="User Logo"
                        className="w-14 h-14 rounded-full object-cover"
                      />
@@ -731,13 +737,15 @@ export default function ManagerProfile() {
 
 function CompanyProfile({ user }) {
   const [profilePic, setProfilePic] = useState(
-    user?.company?.profile_pic ? `${user?.company?.profile_pic}` : "/soudi.png"
+    user?.company?.profile_pic
+      ? `${user?.company?.profile_pic}`
+      : "/person.jpg",
   );
   useEffect(() => {
     if (user?.company?.profile_pic) {
       setProfilePic(`${user.company.profile_pic}`);
     } else {
-      setProfilePic("/soudi.png");
+      setProfilePic("/person.jpg");
     }
   }, [user]);
 
@@ -788,7 +796,7 @@ function CompanyProfile({ user }) {
     <div className="flex items-start md:items-center gap-4 relative">
       <div className="relative w-14 h-14">
         <img
-          src={profilePic || "/soudi.png"}
+          src={profilePic || "/person.jpg"}
           alt="User Logo"
           className="w-14 h-14 rounded-full object-cover"
         />

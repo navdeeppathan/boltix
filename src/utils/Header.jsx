@@ -104,15 +104,15 @@ const Header = () => {
             </a>
 
             {/* Desktop Menu */}
-            <nav className="hidden md:flex items-center gap-8 text-[#212529] md:text-[16px] font-semibold">
-              {["About", "Process", "Pricing"].map((item) => (
+            <nav className="hidden md:flex items-center gap-8  text-[#0088ffcf] md:text-[16px] font-semibold">
+              {["Home", "About", "Process", "Pricing"].map((item) => (
                 <a
                   key={item}
                   href={`/${item.toLowerCase()}`}
                   className="relative group"
                 >
                   {item}
-                  <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-[#0088FF] transition-all group-hover:w-full"></span>
+                  <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-[#212529] transition-all group-hover:w-full"></span>
                 </a>
               ))}
 
@@ -131,7 +131,7 @@ const Header = () => {
                 onClick={() => navigate("/boltix-registeration")}
                 className="bg-[#0088FF] text-white w-[145px] h-[40px] rounded"
               >
-                Let’s Start
+                Registeration
               </motion.button>
             </nav>
 

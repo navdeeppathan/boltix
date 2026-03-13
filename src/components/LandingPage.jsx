@@ -6,6 +6,7 @@ import PricingSection from "./landing/PricingSection";
 import TestimonialsSection from "./landing/TestimonialsSection";
 import Footer from "../utils/Footer";
 import Header from "../utils/Header";
+import CoupaHero from "./landing/CoupaHero";
 
 const LandingPage = () => {
   return (
@@ -13,6 +14,7 @@ const LandingPage = () => {
       <div>
         <Header />
         <HeroSection />
+        <CoupaHero />
         <ChallengeSection />
         <SolutionsSection />
         <PricingSection />
