@@ -37,7 +37,7 @@ const SolutionsSection = () => {
         </>
       ),
       description:
-        "Instant communication between plants, OEMs, suppliers, and service providers. Engineers and technicians can directly access the platform via mobile or desktop.",
+        "Instant communication between plants, Manufacturers, suppliers, and service providers. Engineers and technicians can directly access the platform via mobile or desktop.",
       icon: "/frame1.png",
     },
     {

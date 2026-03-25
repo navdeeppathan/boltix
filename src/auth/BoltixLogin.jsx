@@ -76,8 +76,8 @@ const BoltixLogin = () => {
             className="text-gray-600 mb-12 text-base max-w-3xl"
           >
             Boltix connects Industrial Plants with Original Equipment
-            Manufacturers (OEMs) and Service Providers on a single, secure
-            digital platform.
+            Manufacturers (Manufacturers) and Service Providers on a single,
+            secure digital platform.
             <br />
             <br />
             It streamlines communication during plant equipment breakdowns,

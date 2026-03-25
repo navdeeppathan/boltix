@@ -832,7 +832,7 @@ const SupplierRegistrationForm = () => {
       {/* Content */}
       <div className="relative z-10 w-full flex flex-col items-center p-6 sm:p-10">
         <h2 className="text-2xl sm:text-3xl md:text-[48px] font-bold text-[#212529] text-center">
-          OEM/Service Provider Registration Form
+          Manufacturer/Service Provider Registration Form
         </h2>
         <p className="mt-2 text-sm sm:text-base md:text-[24px] font-normal text-[#212529] text-center">
           Once registered, a link will be sent to access your profile dashboard.
@@ -844,7 +844,7 @@ const SupplierRegistrationForm = () => {
         >
           {/* Company Information Section */}
           <h2 className="text-lg font-semibold text-[#212529] mb-4">
-            OEM/Company Information
+            Manufacturer/Company Information
           </h2>
 
           <div className="grid md:grid-cols-2 gap-4">

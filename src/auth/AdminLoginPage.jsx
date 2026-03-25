@@ -149,7 +149,7 @@ const AdminLoginPage = () => {
             </p>
 
             <p className="mt-4 md:text-[18px] text-[#5D5D5D]">
-              Log in to monitor operations, manage users, oversee OEM
+              Log in to monitor operations, manage users, oversee Manufacturer
               integrations, and ensure seamless collaboration across industrial
               plants.
             </p>

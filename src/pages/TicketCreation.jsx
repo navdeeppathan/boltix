@@ -238,18 +238,18 @@ const TicketCreation = () => {
           })),
         );
 
-        console.log("productRes:-", productRes.data?.data);
+        // console.log("productRes:-", productRes.data?.data);
 
-        const products = productRes.data?.data || [];
+        // const products = productRes.data?.data || [];
 
-        setProductsRaw(products);
+        // setProductsRaw(products);
 
-        setProductOptions(
-          products.map((item) => ({
-            label: item.name,
-            value: item.id,
-          })),
-        );
+        // setProductOptions(
+        //   products.map((item) => ({
+        //     label: item.name,
+        //     value: item.id,
+        //   })),
+        // );
       } catch (error) {
         console.error("Error fetching dropdown data:", error);
       }
@@ -326,6 +326,7 @@ const TicketCreation = () => {
       const mappedChildren = selectedParent.children.map((child) => ({
         value: child.equipment_name,
         label: child.equipment_name,
+        id: child.id,
       }));
       setChildOptions(mappedChildren);
     } else {
@@ -334,11 +335,42 @@ const TicketCreation = () => {
   };
 
   // 🔹 Handle child selection
-  const handleChildChange = (selectedChild) => {
+  const handleChildChange = async (selectedChild) => {
+    const subCategoryId = selectedChild?.id || null;
+    console.log("subCategoryId:-", subCategoryId);
     setFormData((prev) => ({
       ...prev,
       sub_equipment: selectedChild,
     }));
+
+    if (!subCategoryId) {
+      setProductOptions([]);
+      return;
+    }
+
+    try {
+      const productRes = await http.get(
+        `/products/subcategory/${subCategoryId}`,
+      );
+
+      console.log("productRes:-", productRes);
+
+      const products = productRes.data?.data || [];
+
+      // store raw (for OEM mapping later)
+      setProductsRaw(products);
+
+      // set dropdown options
+      setProductOptions(
+        products.map((item) => ({
+          label: item.name,
+          value: item.id,
+        })),
+      );
+    } catch (error) {
+      console.log("Product fetch error:", error);
+      setProductOptions([]);
+    }
   };
 
   const breakdownOptions = [
@@ -1629,7 +1661,7 @@ const TicketCreation = () => {
                         Submitting...
                       </>
                     ) : (
-                      "Submit to OEM/Service provider"
+                      "Submit to Manufacturer/Service provider"
                     )}
                   </button>
                 </>

@@ -180,7 +180,7 @@ const PlantUserLoginPage = () => {
             </h2>
             <p className="mt-2 md:text-[24px] text-[#0088ffcf]">
               The first AI-driven collaboration hub for industrial plants and
-              OEM ecosystems.
+              Manufacturer ecosystems.
             </p>
             <p className="mt-4 md:text-[24px] text-[#5D5D5D]">
               Login to access your personalized dashboard and collaborate

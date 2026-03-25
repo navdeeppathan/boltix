@@ -18,6 +18,7 @@ import {
   FaCheckCircle,
   FaTimesCircle,
   FaUndoAlt,
+  FaBoxes,
 } from "react-icons/fa";
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const linkClasses =
@@ -223,6 +224,15 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             onClick={() => setIsOpen(false)}
           >
             <FaComments /> Communication
+          </NavLink>
+          <NavLink
+            to="/dashboard/manage-products"
+            className={({ isActive }) =>
+              isActive ? `${linkClasses} ${activeClasses}` : linkClasses
+            }
+            onClick={() => setIsOpen(false)}
+          >
+            <FaBoxes /> Manage Products
           </NavLink>
           <NavLink
             to="/dashboard/notifications"

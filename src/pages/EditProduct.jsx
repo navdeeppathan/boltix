@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import Select from "react-select";
-import http from "../../service/http";
+import http from "../service/http";
 import { toast } from "react-toastify";
 import { RotatingLines } from "react-loader-spinner";
 import { useNavigate, useParams } from "react-router-dom";
-import { baseURL } from "../../service/api";
+import { baseURL } from "../service/api";
 import { Trash } from "lucide-react";
 
 const EditProduct = () => {
@@ -16,26 +16,78 @@ const EditProduct = () => {
   const [activeOemIndex, setActiveOemIndex] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // const [form, setForm] = useState({
+  //   product_category_id: "",
+  //   name: "",
+  //   description: "",
+  //   price: "",
+  //   stock: "",
+  //   status: true,
+  //   images: [], // new images
+  //   existingImages: [], // existing db images
+  //   deleteImageIds: [], // ids to delete
+  //   oems: [{ name: "", email: "" }],
+  // });
+
   const [form, setForm] = useState({
     product_category_id: "",
+    product_sub_category_id: "",
     name: "",
     description: "",
+    modelNumber: "",
+    partNumber: "",
     price: "",
     stock: "",
     status: true,
-    images: [], // new images
-    existingImages: [], // existing db images
-    deleteImageIds: [], // ids to delete
-    oems: [{ name: "", email: "" }],
+    images: [],
+    existingImages: [],
+    deleteImageIds: [],
+    additionalDoc: null,
+    name_plate_text: "",
+    name_plate_image: null,
+    oems: [
+      {
+        name: "",
+        email: "",
+        phone: "",
+        oem_id: "",
+        head_office_address: "",
+      },
+    ],
   });
 
   const [preview, setPreview] = useState([]);
 
   /* ================= FETCH CATEGORIES ================= */
+  // useEffect(() => {
+  //   http.get("/product-categories").then((res) => {
+  //     if (res.data.status) setCategories(res.data.data);
+  //   });
+  // }, []);
+
+  const [subCategories, setSubCategories] = useState([]);
+  const [namePlateType, setNamePlateType] = useState("text");
+
   useEffect(() => {
-    http.get("/product-categories").then((res) => {
-      if (res.data.status) setCategories(res.data.data);
-    });
+    const fetchEquipments = async () => {
+      try {
+        const res = await http.get("/equipments");
+
+        if (res.data?.status) {
+          const options = res.data.data.map((item) => ({
+            value: item.id,
+            label: item.equipment_name,
+            children: item.children || [],
+          }));
+
+          setCategories(options);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchEquipments();
   }, []);
 
   /* ================= FETCH OEM OPTIONS ================= */
@@ -55,23 +107,64 @@ const EditProduct = () => {
         const res = await http.get(`/products/edit/${id}`);
         const product = res.data.data;
 
+        // setForm({
+        //   product_category_id: product.product_category_id || "",
+        //   name: product.name || "",
+        //   description: product.description || "",
+        //   price: product.price || "",
+        //   stock: product.stock || "",
+        //   status: product.status === 1,
+        //   images: [],
+        //   existingImages: product.images || [],
+        //   deleteImageIds: [],
+        //   oems:
+        //     Array.isArray(product.oems) && product.oems.length
+        //       ? product.oems.map((o) => ({
+        //           name: o.name || "",
+        //           email: o.email || "",
+        //         }))
+        //       : [{ name: "", email: "" }],
+        // });
+
         setForm({
           product_category_id: product.product_category_id || "",
+          product_sub_category_id: product.product_sub_category_id || "",
           name: product.name || "",
           description: product.description || "",
+          modelNumber: product.modelNumber || "",
+          partNumber: product.partNumber || "",
           price: product.price || "",
           stock: product.stock || "",
           status: product.status === 1,
           images: [],
           existingImages: product.images || [],
           deleteImageIds: [],
+          additionalDoc: null,
+
+          name_plate_type: product.name_plate_type || "text",
+
+          name_plate_text: product.name_plate_text || "",
+
+          name_plate_image: product.name_plate_image || null,
+
           oems:
-            Array.isArray(product.oems) && product.oems.length
+            product.oems?.length > 0
               ? product.oems.map((o) => ({
                   name: o.name || "",
                   email: o.email || "",
+                  phone: o.phone || "",
+                  oem_id: o.oem_id || "",
+                  head_office_address: o.address || "",
                 }))
-              : [{ name: "", email: "" }],
+              : [
+                  {
+                    name: "",
+                    email: "",
+                    phone: "",
+                    oem_id: "",
+                    head_office_address: "",
+                  },
+                ],
         });
       } catch {
         toast.error("Failed to fetch product");
@@ -101,7 +194,13 @@ const EditProduct = () => {
 
   const selectOem = (index, oem) => {
     const updated = [...form.oems];
-    updated[index] = { name: oem.full_name, email: oem.email };
+    updated[index] = {
+      name: oem.full_name,
+      email: oem.email,
+      phone: oem.mobile_number,
+      oem_id: oem.id,
+      head_office_address: oem.head_office_address,
+    };
     setForm((p) => ({ ...p, oems: updated }));
     setActiveOemIndex(null);
   };
@@ -136,6 +235,23 @@ const EditProduct = () => {
     }));
   };
 
+  useEffect(() => {
+    if (form.product_category_id && categories.length) {
+      const selectedCategory = categories.find(
+        (c) => c.value === form.product_category_id,
+      );
+
+      if (selectedCategory?.children) {
+        const subOptions = selectedCategory.children.map((sub) => ({
+          value: sub.id,
+          label: sub.equipment_name,
+        }));
+
+        setSubCategories(subOptions);
+      }
+    }
+  }, [form.product_category_id, categories]);
+
   /* ================= SUBMIT ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -143,6 +259,22 @@ const EditProduct = () => {
 
     const formData = new FormData();
     formData.append("product_category_id", form.product_category_id);
+    formData.append("product_sub_category_id", form.product_sub_category_id);
+
+    formData.append("modelNumber", form.modelNumber);
+    formData.append("partNumber", form.partNumber);
+
+    // NamePlate
+    if (namePlateType === "text") {
+      formData.append("name_plate_type", "text");
+      formData.append("name_plate_text", form.name_plate_text || "");
+    } else {
+      formData.append("name_plate_type", "image");
+      if (form.name_plate_image instanceof File) {
+        formData.append("name_plate_image", form.name_plate_image);
+      }
+    }
+
     formData.append("name", form.name);
     formData.append("description", form.description);
     formData.append("price", form.price);
@@ -158,9 +290,21 @@ const EditProduct = () => {
       formData.append("delete_image_ids[]", id),
     );
 
+    // Additional Doc
+    if (form.additionalDoc) {
+      formData.append("additionalDoc", form.additionalDoc);
+    }
+
+    // OEM FULL DATA
     form.oems.forEach((oem, i) => {
       formData.append(`oems[${i}][name]`, oem.name);
       formData.append(`oems[${i}][email]`, oem.email);
+      formData.append(`oems[${i}][phone]`, oem.phone);
+      formData.append(`oems[${i}][oem_id]`, oem.oem_id);
+      formData.append(
+        `oems[${i}][head_office_address]`,
+        oem.head_office_address,
+      );
     });
 
     try {
@@ -176,7 +320,7 @@ const EditProduct = () => {
 
       if (res.data.status) {
         toast.success("Product updated successfully");
-        navigate("/manager/dashboard/manage-products");
+        navigate("/dashboard/manage-products");
       }
     } catch {
       toast.error("Update failed");
@@ -184,6 +328,8 @@ const EditProduct = () => {
       setLoading(false);
     }
   };
+
+  console.log("subcategory:-", subCategories);
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-10">
@@ -198,23 +344,54 @@ const EditProduct = () => {
             Category
           </label>
           <Select
-            options={categories.map((c) => ({ value: c.id, label: c.name }))}
-            value={
-              form.product_category_id
-                ? categories
-                    .map((c) => ({ value: c.id, label: c.name }))
-                    .find((o) => o.value === form.product_category_id)
-                : null
-            }
-            onChange={(s) =>
-              setForm({ ...form, product_category_id: s?.value || "" })
+            options={categories}
+            value={categories.find(
+              (opt) => opt.value === form.product_category_id,
+            )}
+            components={{ IndicatorSeparator: () => null }}
+            onChange={(selected) => {
+              setForm({
+                ...form,
+                product_category_id: selected?.value || "",
+                product_sub_category_id: "",
+              });
+
+              if (selected?.children) {
+                const subOptions = selected.children.map((sub) => ({
+                  value: sub.id,
+                  label: sub.equipment_name,
+                }));
+                setSubCategories(subOptions);
+              } else {
+                setSubCategories([]);
+              }
+            }}
+          />
+        </div>
+        <div className="mt-4">
+          <label className="block text-gray-700 font-medium mb-1">
+            Sub Category
+          </label>
+          <Select
+            options={subCategories}
+            value={subCategories.find(
+              (opt) => opt.value === form.product_sub_category_id,
+            )}
+            components={{ IndicatorSeparator: () => null }}
+            onChange={(selected) =>
+              setForm({
+                ...form,
+                product_sub_category_id: selected?.value || "",
+              })
             }
           />
         </div>
 
         {/* NAME */}
         <div>
-          <label className="block text-gray-700 font-medium mb-1">Name</label>
+          <label className="block text-gray-700 font-medium mb-1">
+            Equipment Name
+          </label>
           <input
             type="text"
             name="name"
@@ -236,7 +413,7 @@ const EditProduct = () => {
             className="w-full border border-gray-300 rounded px-3 py-2"
           />
         </div>
-        <div>
+        {/* <div>
           <label className="block text-gray-700 font-medium mb-1">Price</label>
           <input
             type="number"
@@ -246,18 +423,121 @@ const EditProduct = () => {
             step="0.01"
             className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
+        </div> */}
+
+        <div>
+          <label className="block text-gray-700 font-medium mb-1">
+            Model Number
+          </label>
+          <input
+            type="text"
+            name="modelNumber"
+            value={form.modelNumber}
+            onChange={handleChange}
+            step="0.01"
+            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+        </div>
+
+        <div>
+          <label className="block text-gray-700 font-medium mb-1">
+            Part Number
+          </label>
+          <input
+            type="text"
+            name="partNumber"
+            value={form.partNumber}
+            onChange={handleChange}
+            step="0.01"
+            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+        </div>
+
+        <div className="mt-4">
+          <label className="block font-medium mb-2">Name Plate</label>
+
+          <div className="flex gap-3 mb-3">
+            <button
+              type="button"
+              onClick={() => setNamePlateType("text")}
+              className={`px-4 py-1 rounded ${
+                namePlateType === "text"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200"
+              }`}
+            >
+              Text
+            </button>
+            <button
+              type="button"
+              onClick={() => setNamePlateType("image")}
+              className={`px-4 py-1 rounded ${
+                namePlateType === "image"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200"
+              }`}
+            >
+              Image
+            </button>
+          </div>
+
+          {namePlateType === "text" ? (
+            <input
+              type="text"
+              value={form.name_plate_text}
+              placeholder="Name Plate Text"
+              onChange={(e) =>
+                setForm({ ...form, name_plate_text: e.target.value })
+              }
+              className="w-full border px-3 py-2 rounded"
+            />
+          ) : (
+            <>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    name_plate_image: e.target.files[0],
+                  })
+                }
+              />
+
+              {typeof form.name_plate_image === "string" && (
+                <img
+                  src={`${baseURL}/${form.name_plate_image}`}
+                  className="w-24 mt-2"
+                />
+              )}
+            </>
+          )}
+        </div>
+
+        <div className="mt-4">
+          <label>Additional Document</label>
+          <input
+            type="file"
+            accept="application/pdf"
+            onChange={(e) =>
+              setForm({ ...form, additionalDoc: e.target.files[0] })
+            }
+            className="w-full border border-gray-300 rounded px-3 py-2"
+          />
         </div>
 
         {/* OEM UI (same style kept) */}
         <div>
-          <label className="block text-gray-700 font-medium mb-2">OEMs</label>
+          <label className="block text-gray-700 font-medium mb-2">
+            Manufacturers
+          </label>
           <div className="space-y-3">
             {form.oems.map((oem, i) => {
               const suggestions =
                 activeOemIndex === i ? filterOems(oem.name || oem.email) : [];
 
               return (
-                <div key={i} className="relative flex gap-2">
+                <div key={i} className="relative flex flex-col gap-2">
                   <div className="flex-1 relative">
                     <input
                       value={oem.name}
@@ -266,7 +546,7 @@ const EditProduct = () => {
                         handleOemChange(i, "name", e.target.value)
                       }
                       className="w-full border px-3 py-2 rounded"
-                      placeholder="OEM Name"
+                      placeholder="Manufacturer Name"
                     />
 
                     {suggestions.length > 0 && (
@@ -295,8 +575,38 @@ const EditProduct = () => {
                       handleOemChange(i, "email", e.target.value)
                     }
                     className="flex-1 border px-3 py-2 rounded"
-                    placeholder="OEM Email"
+                    placeholder="Manufacturer Email"
                   />
+
+                  <div className="flex-1">
+                    <input
+                      type="tel"
+                      placeholder="Manufacturer Phone"
+                      value={oem.phone}
+                      onFocus={() => setActiveOemIndex(i)}
+                      onChange={(e) =>
+                        handleOemChange(i, "phone", e.target.value)
+                      }
+                      className="w-full border px-3 py-2 rounded"
+                    />
+                  </div>
+
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      placeholder="Manufacturer Address"
+                      value={oem.head_office_address}
+                      onFocus={() => setActiveOemIndex(i)}
+                      onChange={(e) =>
+                        handleOemChange(
+                          i,
+                          "head_office_address",
+                          e.target.value,
+                        )
+                      }
+                      className="w-full border px-3 py-2 rounded"
+                    />
+                  </div>
 
                   {form.oems.length > 1 && (
                     <button type="button" onClick={() => removeOem(i)}>
@@ -336,6 +646,9 @@ const EditProduct = () => {
           ))}
         </div>
 
+        <label className="block text-gray-700 font-medium mb-2">
+          Product Images (Optional)
+        </label>
         {/* NEW IMAGES */}
         <input
           type="file"

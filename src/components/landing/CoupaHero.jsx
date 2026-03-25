@@ -55,8 +55,8 @@ const sections = [
     icon: SupplyChainIcon,
     label: "BOLTIX FOR SUPPLY CHAIN",
     title:
-      "Secure plant and OEM collaboration improves asset visibility accountability decisions.",
-    desc: "BOLTIX enables secure, real-time collaboration between plants and OEM partners through a unified digital platform. With end-to-end asset tracking, performance insights, and AI-powered analytics, organizations gain complete visibility, improve accountability, and make faster, data-driven operational decisions across the supply chain.",
+      "Secure plant and Manufacturer collaboration improves asset visibility accountability decisions.",
+    desc: "BOLTIX enables secure, real-time collaboration between plants and Manufacturer partners through a unified digital platform. With end-to-end asset tracking, performance insights, and AI-powered analytics, organizations gain complete visibility, improve accountability, and make faster, data-driven operational decisions across the supply chain.",
     stat: "35%",
     statecolor: "text-blue-400",
     statText:
@@ -67,7 +67,7 @@ const sections = [
       {
         type: "E-Book",
         title:
-          "Strengthening Plant & OEM Collaboration Through Secure Digital Integration",
+          "Strengthening Plant & Manufacturer Collaboration Through Secure Digital Integration",
         accent: "blue",
       },
       {

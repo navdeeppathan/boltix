@@ -193,7 +193,7 @@ const AdminTicketTable = () => {
                     No
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[200px]">
-                    OEM Supplier Name
+                    Manufacturer Supplier Name
                   </th>
 
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[200px]">

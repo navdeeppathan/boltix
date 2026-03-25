@@ -312,7 +312,7 @@ const EditProduct = () => {
               onClick={addOem}
               className="text-blue-600  cursor-pointer text-sm font-medium"
             >
-              + Add OEM
+              + Add Manufacturer
             </button>
           </div>
         </div>

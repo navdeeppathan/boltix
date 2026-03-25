@@ -43,12 +43,12 @@ const PlantSidebar = ({ isOpen, setIsOpen, activeMenu, setActiveMenu }) => {
       icon: <FaBell />,
       path: "/plant-supervisor/dashboard/notifications",
     },
-    {
-      id: "manage-products",
-      label: "Manage Products",
-      icon: <FaProductHunt />,
-      path: "/plant-supervisor/dashboard/plant-products",
-    },
+    // {
+    //   id: "manage-products",
+    //   label: "Manage Products",
+    //   icon: <FaProductHunt />,
+    //   path: "/plant-supervisor/dashboard/plant-products",
+    // },
     {
       id: "profile",
       label: "Profile & Settings",

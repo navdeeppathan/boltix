@@ -74,8 +74,8 @@ const TrustedBy = () => {
           variants={logoVariant}
           className="text-[#0088ffcf] text-center sm:text-left text-sm sm:text-base md:text-lg font-bold leading-snug max-w-[400px]"
         >
-          Trusted by 10,000 world-class Plants, OEM’s service providers of all
-          sizes.
+          Trusted by 10,000 world-class Plants, Manufacturer’s service providers
+          of all sizes.
         </motion.p>
 
         {/* Logos */}
@@ -164,7 +164,7 @@ const WhoWeAre = () => {
             className="text-2xl sm:text-3xl md:text-[32px] font-bold text-[#0088ffcf] leading-snug mb-4"
           >
             Redefining industrial support with real-time connections between
-            Plants and OEMs.
+            Plants and Manufacturers.
           </motion.h2>
 
           <motion.p
@@ -172,7 +172,7 @@ const WhoWeAre = () => {
             className="text-[#212529] text-sm sm:text-base leading-relaxed mb-6"
           >
             Our AI-driven supply chain collaboration platform transforms the way
-            industrial plants connect with OEMs, suppliers, and service
+            industrial plants connect with Manufacturers, suppliers, and service
             providers during equipment and service breakdowns.
           </motion.p>
 
@@ -232,7 +232,7 @@ const ImageSection = () => {
 const stats = [
   { number: 25, suffix: "+", label: "Years of Experience" },
   { number: 77, suffix: "+", label: "Plants Registered" },
-  { number: 200, suffix: "+", label: "OEM’s Registered" },
+  { number: 200, suffix: "+", label: "Manufacturer’s Registered" },
   { number: 750, suffix: "+", label: "Problem Resolved" },
 ];
 
@@ -308,8 +308,8 @@ const SpreadAroundWorld = () => {
           className="text-[#212529] max-w-2xl mx-auto mb-12 text-sm md:text-base"
         >
           Our AI-driven supply chain collaboration platform transforms the way
-          industrial plants connect with OEMs, suppliers, and service providers
-          during equipment and service breakdowns.
+          industrial plants connect with Manufacturers, suppliers, and service
+          providers during equipment and service breakdowns.
         </motion.p>
 
         {/* Stats Grid */}
@@ -397,7 +397,7 @@ const RegHeroSection = () => {
           </motion.div>
 
           <motion.div variants={lineVariant}>
-            and OEMs for faster, more reliable solutions.
+            and Manufacturers for faster, more reliable solutions.
           </motion.div>
         </motion.h1>
       </motion.div>

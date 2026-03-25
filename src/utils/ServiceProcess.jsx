@@ -67,7 +67,7 @@ const HowItWorks = () => {
     {
       title: "Choose Your Role",
       description:
-        "Select whether you want to register as a Plant Operator or an OEM / Service Provider.",
+        "Select whether you want to register as a Plant Operator or an Manufacturer / Service Provider.",
     },
     {
       title: "Register & Get Verified",
@@ -85,7 +85,7 @@ const HowItWorks = () => {
     {
       title: "Select User Type",
       description:
-        "Choose your role: Plant Supervisor, Plant User, OEM Supervisor, or OEM User.",
+        "Choose your role: Plant Supervisor, Plant User, Manufacturer Supervisor, or Manufacturer User.",
     },
     {
       title: "Login & Access Dashboard",
@@ -232,7 +232,8 @@ const ProcessPage = () => {
             className="mt-4 max-w-3xl mx-auto md:text-[20px] text-[#212529]/80"
           >
             A simple, secure, and role-based process designed to help Plant
-            Operators and OEM partners get started quickly and work efficiently.
+            Operators an Manufacturer partners get started quickly and work
+            efficiently.
           </motion.p>
         </motion.div>
       </section>
@@ -269,7 +270,7 @@ const ProcessPage = () => {
               ],
               [
                 "Choose Your Role",
-                "Select whether you want to register as a Plant Operator or an OEM / Service Provider.",
+                "Select whether you want to register as a Plant Operator or an Manufacturer/ Service Provider.",
               ],
               [
                 "Get Verified",
@@ -324,7 +325,7 @@ const ProcessPage = () => {
                 "Click Login",
                 "Click the “Login” button from the website header.",
               ],
-              ["Select User Type", "Choose Plant or OEM role."],
+              ["Select User Type", "Choose Plant or Manufacturer role."],
               [
                 "Access Dashboard",
                 "Log in and access your role-specific dashboard.",

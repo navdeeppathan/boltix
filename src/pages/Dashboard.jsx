@@ -29,6 +29,9 @@ import RejectedTicketTable from "./RejectedTicketTable";
 import EditTicket from "./EditTicket";
 import ApprovedTicketTable from "./ApprovedTicketTable";
 import ChangePasswordCard from "../utils/ChangePasswordCard";
+import ProductList from "./ProductList";
+import CreateProduct from "./CreateProduct";
+import EditProduct from "./EditProduct";
 
 const UserCard = () => {
   const [userData, setUserData] = useState(null);
@@ -197,7 +200,6 @@ const Dashboard = () => {
                 <Route path="communication" element={<CommunicationPage />} />
                 <Route path="notifications" element={<NotificationsPage />} />
                 <Route path="edit/:id" element={<EditTicket />} />
-
                 <Route path="create-ticket" element={<TicketCreation />} />
                 <Route path="plant-profile" element={<PlantProfile />} />
                 <Route path="ticket-details/:id" element={<TicketDetails />} />
@@ -221,6 +223,10 @@ const Dashboard = () => {
                   path="pending-tickets"
                   element={<PendingTicketTable />}
                 />
+
+                <Route path="manage-products" element={<ProductList />} />
+                <Route path="add-products" element={<CreateProduct />} />
+                <Route path="edit-products/:id" element={<EditProduct />} />
 
                 <Route path="*" element={<Navigate to="home" replace />} />
               </Routes>

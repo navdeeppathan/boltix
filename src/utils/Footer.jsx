@@ -75,7 +75,7 @@ const Footer = () => {
           />
           <p className="text-sm md:text-[16px] mt-4 leading-relaxed">
             Our AI-driven supply chain collaboration platform transforms the way
-            industrial plants connect with OEMs, suppliers, and service
+            industrial plants connect with Manufacturers, suppliers, and service
             providers during equipment and service breakdowns.
           </p>
         </motion.div>

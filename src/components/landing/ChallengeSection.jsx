@@ -134,11 +134,11 @@ const ChallengeSection = () => {
         >
           <div className="p-6">
             <h3 className="font-mulish font-bold text-[30px] leading-[36px] text-[#0088ffcf] mb-2">
-              Difficulty in Identifying the Right OEM
+              Difficulty in Identifying the Right Manufacturer
             </h3>
             <p className="font-mulish text-[16px] leading-[25px] text-[#212529]">
-              Industrial plants struggle to locate the right OEM quickly,
-              increasing downtime and operational loss.
+              Industrial plants struggle to locate the right Manufacturer
+              quickly, increasing downtime and operational loss.
             </p>
           </div>
 

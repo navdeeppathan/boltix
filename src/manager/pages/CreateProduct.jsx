@@ -370,8 +370,8 @@ const CreateProduct = () => {
                   {/* DISCLAIMER */}
                   {(oem.name || oem.email || oem.phone) && !oem.oem_id && (
                     <p className="text-xs text-orange-600 bg-orange-50 border border-orange-200 px-2 py-1 rounded">
-                      ⚠ This OEM is not registered with the system, request them
-                      to register.
+                      ⚠ This Manufacturer is not registered with the system,
+                      request them to register.
                     </p>
                   )}
                 </div>
@@ -383,7 +383,7 @@ const CreateProduct = () => {
               onClick={addOem}
               className="text-blue-600 cursor-pointer text-sm font-medium"
             >
-              + Add OEM
+              + Add Manufacturer
             </button>
           </div>
         </div>

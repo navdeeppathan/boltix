@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Select from "react-select";
-import http from "../../service/http";
+import http from "../service/http";
 import { toast } from "react-toastify";
 import { RotatingLines } from "react-loader-spinner";
 import { useNavigate } from "react-router-dom";
@@ -10,16 +10,23 @@ const CreateProduct = () => {
   const [categories, setCategories] = useState([]);
   const user = JSON.parse(localStorage.getItem("userData"));
   const navigate = useNavigate();
+  const [namePlateType, setNamePlateType] = useState("text"); // "text" or "image"
   const [form, setForm] = useState({
     product_category_id: "",
+    product_sub_category_id: "",
     name: "",
     description: "",
+    modelNumber: "",
+    partNumber: "",
     price: "",
     stock: "",
     images: [],
+    additionalDoc: null,
     status: true,
     oems: [{ name: "", email: "", oem_id: "", phone: "" }],
   });
+
+  const [subCategories, setSubCategories] = useState([]);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [oemOptions, setOemOptions] = useState([]);
@@ -28,6 +35,7 @@ const CreateProduct = () => {
     const fetchOems = async () => {
       try {
         const res = await http.get("/oems");
+        console.log("res:-", res);
 
         if (res.data.status) {
           setOemOptions(res.data.data);
@@ -60,6 +68,7 @@ const CreateProduct = () => {
       email: oem.email,
       oem_id: oem.id,
       phone: oem.mobile_number,
+      head_office_address: oem.head_office_address,
     };
 
     setForm((prev) => ({ ...prev, oems: updated }));
@@ -75,7 +84,10 @@ const CreateProduct = () => {
   const addOem = () => {
     setForm((prev) => ({
       ...prev,
-      oems: [...prev.oems, { name: "", email: "", oem_id: "", phone: "" }],
+      oems: [
+        ...prev.oems,
+        { name: "", email: "", oem_id: "", phone: "", head_office_address: "" },
+      ],
     }));
   };
 
@@ -85,20 +97,47 @@ const CreateProduct = () => {
   };
 
   // Fetch categories
+  // useEffect(() => {
+  //   const fetchCategories = async () => {
+  //     try {
+  //       const res = await http.get("/products-categories");
+  //       console.log(res.data);
+  //       if (res.data.status) {
+  //         setCategories(res.data.data);
+  //       }
+  //     } catch (err) {
+  //       console.error("Error loading categories:", err);
+  //     }
+  //   };
+  //   fetchCategories();
+  // }, []);
+
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchEquipments = async () => {
       try {
-        const res = await http.get("/product-categories");
-        if (res.data.status) {
-          setCategories(res.data.data);
+        const response = await http.get("/equipments");
+
+        if (response.data?.status && Array.isArray(response.data.data)) {
+          const data = response.data.data;
+
+          // setEquipmentData(data);
+
+          // Category options
+          const categoryOptions = data.map((item) => ({
+            value: item.id,
+            label: item.equipment_name,
+            children: item.children || [],
+          }));
+
+          setCategories(categoryOptions);
         }
-      } catch (err) {
-        console.error("Error loading categories:", err);
+      } catch (error) {
+        console.error("Error fetching equipment data:", error);
       }
     };
-    fetchCategories();
-  }, []);
 
+    fetchEquipments();
+  }, []);
   // Handle text/number/checkbox change
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -141,22 +180,43 @@ const CreateProduct = () => {
 
     const formData = new FormData();
     formData.append("product_category_id", form.product_category_id);
+    formData.append("product_sub_category_id", form.product_sub_category_id);
+    formData.append("parent_id", user.parent_id);
     formData.append("user_id", user.id);
     formData.append("parent_id", user.parent_id);
 
     formData.append("name", form.name);
     formData.append("description", form.description);
+    formData.append("modelNumber", form.modelNumber);
+    formData.append("partNumber", form.partNumber);
     formData.append("price", form.price);
     formData.append("stock", form.stock);
     formData.append("status", form.status ? 1 : 0);
     form.images.forEach((file) => {
       formData.append("images[]", file);
     });
+
+    if (form.additionalDoc) {
+      formData.append("additionalDoc", form.additionalDoc);
+    }
+
+    // Name Plate Logic
+    if (namePlateType === "text") {
+      formData.append("name_plate_type", "text");
+      formData.append("name_plate_text", form.name_plate_text || "");
+    } else {
+      formData.append("name_plate_type", "image");
+      formData.append("name_plate_image", form.name_plate_image);
+    }
     form.oems.forEach((oem, i) => {
       formData.append(`oems[${i}][name]`, oem.name);
       formData.append(`oems[${i}][email]`, oem.email);
       formData.append(`oems[${i}][oem_id]`, oem.oem_id);
       formData.append(`oems[${i}][phone]`, oem.phone);
+      formData.append(
+        `oems[${i}][head_office_address]`,
+        oem.head_office_address,
+      );
     });
 
     try {
@@ -176,7 +236,7 @@ const CreateProduct = () => {
           oems: [{ name: "", email: "" }],
           status: true,
         });
-        navigate("/plant-supervisor/dashboard/plant-products");
+        navigate("/dashboard/manage-products");
         setPreview(null);
       } else {
         toast.error(res.data.message);
@@ -191,7 +251,7 @@ const CreateProduct = () => {
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-10">
       <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">
-        Create Product
+        Add Your Plant Existing Equipment
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -200,7 +260,7 @@ const CreateProduct = () => {
           <label className="block text-gray-700 font-medium mb-1">
             Category
           </label>
-          <Select
+          {/*<Select
             options={categories.map((cat) => ({
               value: cat.id,
               label: cat.name,
@@ -229,12 +289,68 @@ const CreateProduct = () => {
                 backgroundColor: state.isFocused ? "#e0f2fe" : "white",
               }),
             }}
+          />*/}
+          <Select
+            options={categories}
+            value={categories.find(
+              (opt) => opt.value === form.product_category_id,
+            )}
+            onChange={(selected) => {
+              setForm({
+                ...form,
+                product_category_id: selected?.value || "",
+                product_sub_category_id: "", // reset subcategory
+              });
+
+              // Set subcategories based on selected category
+              if (selected?.children) {
+                const subOptions = selected.children.map((sub) => ({
+                  value: sub.id,
+                  label: sub.equipment_name,
+                }));
+                setSubCategories(subOptions);
+              } else {
+                setSubCategories([]);
+              }
+            }}
+            placeholder="Select Category"
+          />
+        </div>
+        <div className="mt-4">
+          <label className="block text-gray-700 font-medium mb-1">
+            Sub Category
+          </label>
+
+          <Select
+            options={subCategories}
+            value={subCategories.find(
+              (opt) => opt.value === form.product_sub_category_id,
+            )}
+            onChange={(selected) =>
+              setForm({
+                ...form,
+                product_sub_category_id: selected?.value || "",
+              })
+            }
+            placeholder="Select Sub Category"
+            isDisabled={!subCategories.length}
+            components={{ IndicatorSeparator: () => null }}
+            styles={{
+              control: (base) => ({
+                ...base,
+                borderColor: "#d1d5db",
+                boxShadow: "none",
+                "&:hover": { borderColor: "#60a5fa" },
+              }),
+            }}
           />
         </div>
 
         {/* Name */}
         <div>
-          <label className="block text-gray-700 font-medium mb-1">Name</label>
+          <label className="block text-gray-700 font-medium mb-1">
+            Equipment Name
+          </label>
           <input
             type="text"
             name="name"
@@ -260,7 +376,7 @@ const CreateProduct = () => {
         </div>
 
         {/* Price & Stock */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-gray-700 font-medium mb-1">
               Price
@@ -269,6 +385,34 @@ const CreateProduct = () => {
               type="number"
               name="price"
               value={form.price}
+              onChange={handleChange}
+              step="0.01"
+              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div> */}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-gray-700 font-medium mb-1">
+              Model Number
+            </label>
+            <input
+              type="text"
+              name="modelNumber"
+              value={form.modelNumber}
+              onChange={handleChange}
+              step="0.01"
+              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-medium mb-1">
+              Part Number
+            </label>
+            <input
+              type="text"
+              name="partNumber"
+              value={form.partNumber}
               onChange={handleChange}
               step="0.01"
               className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -289,9 +433,93 @@ const CreateProduct = () => {
           </div> */}
         </div>
 
+        <div className="mt-4">
+          <label className="block text-gray-700 font-medium mb-2">
+            Name Plate (Optional)
+          </label>
+
+          {/* Toggle Buttons */}
+          <div className="flex gap-3 mb-3">
+            <button
+              type="button"
+              onClick={() => setNamePlateType("text")}
+              className={`px-4 py-1 rounded ${
+                namePlateType === "text"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200"
+              }`}
+            >
+              Text
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setNamePlateType("image")}
+              className={`px-4 py-1 rounded ${
+                namePlateType === "image"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200"
+              }`}
+            >
+              Image
+            </button>
+          </div>
+
+          {/* Conditional Field */}
+          {namePlateType === "text" ? (
+            <input
+              type="text"
+              name="name_plate_text"
+              value={form.name_plate_text || ""}
+              onChange={handleChange}
+              placeholder="Enter Name Plate Text"
+              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          ) : (
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  name_plate_image: e.target.files[0],
+                })
+              }
+              className="w-full border border-gray-300 rounded px-3 py-2"
+            />
+          )}
+        </div>
+
+        <div className="mt-4">
+          <label className="block text-gray-700 font-medium mb-1">
+            Additional Document (PDF) (optional)
+          </label>
+
+          <input
+            type="file"
+            accept="application/pdf"
+            onChange={(e) =>
+              setForm({
+                ...form,
+                additionalDoc: e.target.files[0],
+              })
+            }
+            className="w-full border border-gray-300 rounded px-3 py-2"
+          />
+
+          {/* Preview */}
+          {form.additionalDoc && (
+            <p className="text-sm text-green-600 mt-2">
+              Selected: {form.additionalDoc.name}
+            </p>
+          )}
+        </div>
+
         {/* OEMs */}
         <div>
-          <label className="block text-gray-700 font-medium mb-2">OEMs</label>
+          <label className="block text-gray-700 font-medium mb-2">
+            Manufacturers
+          </label>
 
           <div className="space-y-3">
             {form.oems.map((oem, i) => {
@@ -300,12 +528,12 @@ const CreateProduct = () => {
 
               return (
                 <div key={i} className="space-y-1">
-                  <div className="relative flex gap-2">
+                  <div className="relative flex flex-col gap-2">
                     {/* NAME */}
                     <div className="flex-1 relative">
                       <input
                         type="text"
-                        placeholder="OEM Name"
+                        placeholder="Manufacturer Name"
                         value={oem.name}
                         onFocus={() => setActiveOemIndex(i)}
                         onChange={(e) =>
@@ -336,7 +564,7 @@ const CreateProduct = () => {
                     <div className="flex-1">
                       <input
                         type="email"
-                        placeholder="OEM Email"
+                        placeholder="Manufacturer Email"
                         value={oem.email}
                         onFocus={() => setActiveOemIndex(i)}
                         onChange={(e) =>
@@ -350,11 +578,28 @@ const CreateProduct = () => {
                     <div className="flex-1">
                       <input
                         type="tel"
-                        placeholder="OEM Phone"
+                        placeholder="Manufacturer Phone"
                         value={oem.phone}
                         onFocus={() => setActiveOemIndex(i)}
                         onChange={(e) =>
                           handleOemChange(i, "phone", e.target.value)
+                        }
+                        className="w-full border px-3 py-2 rounded"
+                      />
+                    </div>
+
+                    <div className="flex-1">
+                      <input
+                        type="text"
+                        placeholder="Manufacturer Address"
+                        value={oem.head_office_address}
+                        onFocus={() => setActiveOemIndex(i)}
+                        onChange={(e) =>
+                          handleOemChange(
+                            i,
+                            "head_office_address",
+                            e.target.value,
+                          )
                         }
                         className="w-full border px-3 py-2 rounded"
                       />
@@ -368,12 +613,13 @@ const CreateProduct = () => {
                   </div>
 
                   {/* DISCLAIMER */}
-                  {(oem.name || oem.email || oem.phone) && !oem.oem_id && (
-                    <p className="text-xs text-orange-600 bg-orange-50 border border-orange-200 px-2 py-1 rounded">
-                      ⚠ This OEM is not registered with the system, request them
-                      to register.
-                    </p>
-                  )}
+                  {(oem.name || oem.email || oem.phone || oem.address) &&
+                    !oem.oem_id && (
+                      <p className="text-xs text-orange-600 bg-orange-50 border border-orange-200 px-2 py-1 rounded">
+                        ⚠ This manufacturer is not registered with the system,
+                        request them to register.
+                      </p>
+                    )}
                 </div>
               );
             })}
@@ -392,7 +638,7 @@ const CreateProduct = () => {
         {/* Product Image */}
         <div>
           <label className="block text-gray-700 font-medium mb-1">
-            Product Image
+            Product Image (optional)
           </label>
 
           <div className="flex flex-col  items-start  gap-3">

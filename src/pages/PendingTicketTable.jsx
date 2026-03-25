@@ -29,7 +29,7 @@ const PendingTicketTable = () => {
       try {
         setLoading(true);
         const response = await http.get(
-          `/tickets/user/${user_id}?query=${query}`
+          `/tickets/user/${user_id}?query=${query}`,
         );
         if (response.data.status && Array.isArray(response.data.data)) {
           setTickets(response.data.data);
@@ -242,7 +242,7 @@ const PendingTicketTable = () => {
                   No
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[200px]">
-                  OEM Supplier Name
+                  Manufacturer Supplier Name
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[150px]">
                   Category
@@ -325,7 +325,7 @@ const PendingTicketTable = () => {
                       <td className="px-4 py-4">
                         <span
                           className={`text-sm font-medium whitespace-nowrap ${getCategoryColor(
-                            ticket.category
+                            ticket.category,
                           )}`}
                         >
                           {ticket.category || "N/A"}
@@ -348,7 +348,7 @@ const PendingTicketTable = () => {
                       <td className="px-4 py-4">
                         <span
                           className={`inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getPriorityColor(
-                            ticket.priority?.priority_name
+                            ticket.priority?.priority_name,
                           )}`}
                         >
                           {ticket.priority?.priority_name || "N/A"}
@@ -370,7 +370,7 @@ const PendingTicketTable = () => {
                             month: "short",
                             day: "numeric",
                             year: "numeric",
-                          }
+                          },
                         )}
                       </td>
                       <td className="px-4 py-4">
@@ -489,21 +489,21 @@ const PendingTicketTable = () => {
               <div className="flex flex-wrap gap-2 mb-3">
                 <span
                   className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getPriorityColor(
-                    ticket.priority?.priority_name
+                    ticket.priority?.priority_name,
                   )}`}
                 >
                   {ticket.priority?.priority_name}
                 </span>
                 <span
                   className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                    ticket.status
+                    ticket.status,
                   )}`}
                 >
                   {ticket.status}
                 </span>
                 <span
                   className={`inline-block text-xs font-medium ${getCategoryColor(
-                    ticket.category
+                    ticket.category,
                   )}`}
                 >
                   {ticket.category}

@@ -25,7 +25,7 @@ const HowItWorks = () => {
     {
       title: "Register",
       description:
-        "Sign up as a Plant Operator or OEM Supplier by filling out a short registration form with your business details and contact information.",
+        "Sign up as a Plant Operator or Manufacturer Supplier by filling out a short registration form with your business details and contact information.",
     },
     {
       title: "Get Verified",

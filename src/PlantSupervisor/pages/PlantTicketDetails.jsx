@@ -2482,7 +2482,7 @@ const TicketRemarksTab = ({ ticketId }) => {
 
         <button
           onClick={addRemark}
-          className="bg-[#0088FF] text-white px-5 rounded-lg"
+          className="bg-[#0088FF] h-10 text-white px-5 rounded-lg"
         >
           Add
         </button>

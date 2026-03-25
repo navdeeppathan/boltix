@@ -43,7 +43,7 @@ const Header = ({ setIsOpen, title }) => {
         text:
           error.response.data.message ||
           error.response.data.error ||
-          "Failed to submit ticket to OEM.",
+          "Failed to submit ticket to Manufacturer.",
       });
     } finally {
       setLoadingSubmit(false);
@@ -219,9 +219,9 @@ const Header = ({ setIsOpen, title }) => {
               disableSubmitOEM
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-green-600 hover:bg-green-700"
-            } md:w-[160px] md:h-[35px] text-white font-medium rounded-lg text-sm transition`}
+            } md:w-[160px] md:h-[35px] text-white font-medium rounded-lg text-xs transition`}
           >
-            {isSubmitted ? "Already Submitted" : "Submit to OEM"}
+            {isSubmitted ? "Already Submitted" : "Submit to Manufacturer"}
           </button>
         ) : (
           /* Create Ticket Button */

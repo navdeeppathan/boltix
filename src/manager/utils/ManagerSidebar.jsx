@@ -74,7 +74,7 @@ const ManagerSidebar = ({ isOpen, setIsOpen }) => {
             <FaBell /> Notifications
           </NavLink>
 
-          <NavLink
+          {/* <NavLink
             to="/manager/dashboard/manage-products"
             className={({ isActive }) =>
               isActive ? `${linkClasses} ${activeClasses}` : linkClasses
@@ -83,7 +83,7 @@ const ManagerSidebar = ({ isOpen, setIsOpen }) => {
           >
             <FaBoxes />
             Manage Products
-          </NavLink>
+          </NavLink> */}
 
           <NavLink
             to="/manager/dashboard/profile"

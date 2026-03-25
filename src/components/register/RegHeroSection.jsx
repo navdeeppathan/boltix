@@ -58,7 +58,7 @@ const RegHeroSection = () => {
           </motion.div>
 
           <motion.div variants={lineVariant}>
-            plants and OEM ecosystems
+            plants and Manufacturer ecosystems
           </motion.div>
         </motion.h1>
       </motion.div>

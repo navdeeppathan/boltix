@@ -33,7 +33,7 @@ const HeroSection = () => {
             The first <span className="font-bold">AI-driven</span>
             <br />
             <span className="font-bold"> collaboration</span> hub for industrial{" "}
-            <br /> plants and OEM ecosystems.
+            <br /> plants and Manufacturer ecosystems.
           </h1>
         </div>
 
@@ -68,7 +68,7 @@ const HeroSection = () => {
         <div className="mt-6 sm:mt-10 md:mt-40 max-w-full sm:max-w-sm md:max-w-xs">
           <p className="text-sm sm:text-base md:text-[14px] text-white">
             Our AI-driven supply chain collaboration platform transforms the way
-            industrial plants connect with OEMs, suppliers, and service
+            industrial plants connect with Manufacturers, suppliers, and service
             providers during equipment and service breakdowns.
           </p>
 

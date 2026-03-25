@@ -30,21 +30,21 @@ const TestimonialsSection = () => {
   const testimonials = [
     {
       rating: 5,
-      text: `“We were struggling to find reliable OEM partners for our new production line. This platform made it effortless, verified suppliers, fast communication, and genuine business leads. Highly recommended!"`,
+      text: `“We were struggling to find reliable Manufacturer partners for our new production line. This platform made it effortless, verified suppliers, fast communication, and genuine business leads. Highly recommended!"`,
       author: "Lisa Chen, ",
       description: "Marketing Lead,",
       loc: "MechaFlow Systems (Singapore)",
     },
     {
       rating: 5,
-      text: `“As an OEM supplier, we’ve connected with several verified plants within a week of joining. It’s a great space to showcase our products and build long-term partnerships.”`,
+      text: `“As an Manufacturer supplier, we’ve connected with several verified plants within a week of joining. It’s a great space to showcase our products and build long-term partnerships.”`,
       author: "Sarah Malik, ",
       description: "Sales Director,",
       loc: "Prime Automation Solutions (UAE)",
     },
     {
       rating: 4,
-      text: `“This platform bridges the exact gap between plant owners and OEMs. The verification process adds a level of trust we haven’t seen elsewhere."`,
+      text: `“This platform bridges the exact gap between plant owners and Manufacturers. The verification process adds a level of trust we haven’t seen elsewhere."`,
       author: "Rohit Sharma, ",
       description: "Operations Head,",
       loc: "GreenTech Manufacturing (India)",

@@ -60,13 +60,14 @@ const BoltixRegister = () => {
             variants={fadeUp}
             className="text-2xl font-semibold text-[#0088ffcf] mb-4"
           >
-            Boltix – Streamline plant and OEM collaboration in real time
+            Boltix – Streamline plant and Manufacturer collaboration in real
+            time
           </motion.h1>
 
           <motion.p variants={fadeUp} className="text-gray-600 mb-12 max-w-3xl">
-            Boltix connects plant operators and OEM/service providers on a
-            single platform, enabling real-time visibility, faster coordination,
-            and efficient industrial operations.
+            Boltix connects plant operators and Manufacturer/service providers
+            on a single platform, enabling real-time visibility, faster
+            coordination, and efficient industrial operations.
           </motion.p>
 
           {/* Register Section */}
@@ -81,7 +82,7 @@ const BoltixRegister = () => {
             </h2>
 
             <div className="flex flex-wrap gap-6">
-              {["Plant Operator", "OEM / Service Provider"].map(
+              {["Plant Operator", "Manufacturer / Service Provider"].map(
                 (role, index) => (
                   <motion.button
                     key={role}

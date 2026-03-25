@@ -71,8 +71,8 @@ const EditTicket = () => {
     formData.category?.value === "Machine Breakdown"
       ? ["Basic Information", "Equipment Details", "Support"]
       : formData.category?.value === "Service Breakdown"
-      ? ["Basic Information", "Service Details", "Support"]
-      : ["Basic Information", "Support"];
+        ? ["Basic Information", "Service Details", "Support"]
+        : ["Basic Information", "Support"];
 
   const nextStep = () => {
     if (step < steps.length) setStep(step + 1);
@@ -143,34 +143,34 @@ const EditTicket = () => {
           timeRes.data.data.map((item) => ({
             label: item.duration_label,
             value: item.duration_label,
-          }))
+          })),
         );
         setStatusOptions(
           statusRes.data.data.map((item) => ({
             label: item.status_name,
             value: item.status_name,
-          }))
+          })),
         );
 
         setCategories(
           catRes.data.data.map((item) => ({
             label: item.category_name,
             value: item.category_name,
-          }))
+          })),
         );
 
         setPriorities(
           priRes.data.data.map((item) => ({
             label: item.priority_name,
             value: item.id,
-          }))
+          })),
         );
 
         setServices(
           servRes.data.data.map((item) => ({
             label: item.service_name,
             value: item.service_name,
-          }))
+          })),
         );
 
         // setEquipments(
@@ -185,7 +185,7 @@ const EditTicket = () => {
             label: item.company?.company_name,
             value: item.id,
             data: item,
-          }))
+          })),
         );
 
         setData(manuRes.data.data);
@@ -194,34 +194,34 @@ const EditTicket = () => {
           provRes.data.data.map((item) => ({
             label: item.provider_name,
             value: item.provider_name,
-          }))
+          })),
         );
 
         setOrders(
           orderRes.data.data.map((item) => ({
             label: item.order_name,
             value: item.order_name,
-          }))
+          })),
         );
 
         setServiceContracts(
           contractRes.data.data.map((item) => ({
             label: item.contract_name,
             value: item.contract_name,
-          }))
+          })),
         );
 
         setDepartments(
           depRes.data?.data.map((item) => ({
             label: item.name,
             value: item.name,
-          }))
+          })),
         );
         setModes(
           modeRes.data?.data.map((item) => ({
             label: item.label,
             value: item.value,
-          }))
+          })),
         );
       } catch (error) {
         console.error("Error fetching dropdown data:", error);
@@ -304,8 +304,8 @@ const EditTicket = () => {
       borderColor: hasError
         ? "#DC2626" // red for error
         : state.isFocused
-        ? "#007BFF"
-        : "#D9D4C6",
+          ? "#007BFF"
+          : "#D9D4C6",
       boxShadow: state.isFocused
         ? `0 0 0 1px ${hasError ? "#DC2626" : "#007BFF"}`
         : "none",
@@ -334,7 +334,7 @@ const EditTicket = () => {
   const [fileName, setFileName] = useState("");
 
   const selectedManufacturer = manufacturerOptions.find(
-    (m) => m.value === formData.manufacturer?.value
+    (m) => m.value === formData.manufacturer?.value,
   );
 
   const productOptions =
@@ -348,7 +348,7 @@ const EditTicket = () => {
     productOptions,
     formData.manufacturer,
     manufacturerOptions,
-    selectedManufacturer
+    selectedManufacturer,
   );
 
   const handleChange = (e) => {
@@ -468,7 +468,7 @@ const EditTicket = () => {
         // existing photo preview
         if (ticket.images?.length > 0) {
           setPhoto(
-            `${process.env.REACT_APP_API_URL}/${ticket.images[0].photo}`
+            `${process.env.REACT_APP_API_URL}/${ticket.images[0].photo}`,
           );
         }
 
@@ -721,8 +721,8 @@ const EditTicket = () => {
                   isCompleted
                     ? "bg-[#00C6A9] text-white border-[#00C6A9]" // green check
                     : isActive
-                    ? "bg-[#207EB1] text-white border-[#207EB1]" // active
-                    : "border-[#1E1E1E] text-[#1E1E1E]" // inactive
+                      ? "bg-[#207EB1] text-white border-[#207EB1]" // active
+                      : "border-[#1E1E1E] text-[#1E1E1E]" // inactive
                 }`}
                   >
                     {isCompleted ? <FaCheck size={10} /> : index + 1}
@@ -817,7 +817,7 @@ const EditTicket = () => {
                     styles={customSelectStyles(errors.department)}
                     value={
                       departments.find(
-                        (option) => option.value === formData.department
+                        (option) => option.value === formData.department,
                       ) || null
                     }
                     onChange={(option) =>
@@ -841,7 +841,7 @@ const EditTicket = () => {
                     styles={customSelectStyles(errors.priority)}
                     value={
                       priorityOptions.find(
-                        (option) => option.value === formData.priority
+                        (option) => option.value === formData.priority,
                       ) || null
                     }
                     onChange={(option) =>
@@ -1039,7 +1039,7 @@ const EditTicket = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-[#000] mb-1">
-                      Select Machine of OEM
+                      Select Machine of Manufacturer
                     </label>
 
                     <Select
@@ -1051,7 +1051,7 @@ const EditTicket = () => {
                       }
                       value={
                         productOptions.find(
-                          (p) => p.value === formData.product_id
+                          (p) => p.value === formData.product_id,
                         ) || null
                       }
                       onChange={(option) =>
@@ -1401,7 +1401,7 @@ const EditTicket = () => {
                       options={yesNoOptions}
                       placeholder="Select"
                       styles={customSelectStyles(
-                        errors.need_product_installation_support
+                        errors.need_product_installation_support,
                       )}
                       value={formData.need_product_installation_support}
                       onChange={(option) =>
@@ -1421,7 +1421,7 @@ const EditTicket = () => {
                       options={yesNoOptions}
                       placeholder="Select"
                       styles={customSelectStyles(
-                        errors.need_service_implementation_support
+                        errors.need_service_implementation_support,
                       )}
                       value={formData.need_service_implementation_support}
                       onChange={(option) =>
@@ -1595,7 +1595,7 @@ const EditTicket = () => {
                         Updating...
                       </>
                     ) : (
-                      "Submit to OEM/Service provider"
+                      "Submit to Manufacturer/Service provider"
                     )}
                   </button>
                 </>
