@@ -13,6 +13,16 @@ import {
   FaSignOutAlt,
   FaCamera,
 } from "react-icons/fa";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts";
+
 import http from "../../service/http";
 import { baseURL } from "../../service/api";
 import TicketTable from "../../pages/TicketTable";
@@ -80,7 +90,7 @@ const DashboardStatus = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await http.get(`/oem/tickets/summary/${user.id}`); // Laravel endpoint
+        const res = await http.get(`/oem/tickets/summary/${user.parent_id}`); // Laravel endpoint
         if (res.data.status) {
           const d = res.data.data;
           const user = JSON.parse(localStorage.getItem("userData")); // example
@@ -125,16 +135,16 @@ const DashboardStatus = () => {
               bg: "bg-emerald-50",
               link: "/manager/dashboard/tickets?query=completed",
             },
-            {
-              label: "Products & Categories",
-              value: d.products_categories,
-              icon: "/setting.png",
-              color: "bg-[#E11279]",
-              bg: "bg-blue-50",
-              button: isManager ? "Manage Products" : "View Products",
-              wide: true,
-              link: "/manager/dashboard/manage-products",
-            },
+            // {
+            //   label: "Products & Categories",
+            //   value: d.products_categories,
+            //   icon: "/setting.png",
+            //   color: "bg-[#E11279]",
+            //   bg: "bg-blue-50",
+            //   button: isManager ? "Manage Products" : "View Products",
+            //   wide: true,
+            //   link: "/manager/dashboard/manage-products",
+            // },
           ]);
         }
       } catch (err) {
@@ -206,7 +216,7 @@ const DashboardStatus = () => {
         </div>
 
         {/* Responsive Grid of Status Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3  gap-3 sm:gap-4">
           {stats.map((item, i) => (
             <div
               key={i}
@@ -244,7 +254,7 @@ const DashboardStatus = () => {
               </p>
 
               {/* Label */}
-              <p className="text-[10px] sm:text-xs md:text-sm lg:text-[14px] text-[#000000] font-medium leading-snug">
+              <p className="text-[10px] sm:text-xs md:text-sm lg:text-lg text-[#000000] font-medium leading-snug">
                 {item.label}
               </p>
             </div>
@@ -252,7 +262,86 @@ const DashboardStatus = () => {
         </div>
       </div>
 
-      <ManagerTicketTable />
+      {/* <ManagerTicketTable /> */}
+      <TicketChart parentId={user?.parent_id} />
+    </div>
+  );
+};
+
+const TicketChart = ({ parentId }) => {
+  const [data, setData] = useState([]);
+  const [stats, setStats] = useState({});
+  const [topMonths, setTopMonths] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await http.get(`/dashboard/dashboard-stats-oem/${parentId}`);
+      const monthly = res.data.data.monthly_tickets;
+      setTopMonths(res.data.data.top_ticket_months);
+
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+
+      const chartData = months.map((m, i) => {
+        const found = monthly.find((x) => x.month === i + 1);
+        return {
+          name: m,
+          tickets: found ? found.total : 0,
+        };
+      });
+
+      setData(chartData);
+      setStats(res.data.data);
+    };
+
+    fetchData();
+  }, []);
+
+  return (
+    <div className="bg-gray-100 rounded-xl border border-gray-200 hover:shadow p-6">
+      <h2 className="font-semibold mb-4">Ticket Dynamics Per Month</h2>
+
+      <ResponsiveContainer width="100%" height={250}>
+        <LineChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Line
+            type="monotone"
+            dataKey="tickets"
+            stroke="#000"
+            strokeWidth={3}
+            dot={{ r: 5 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+
+      {/* Bottom Stats */}
+      {/* Top Ticket Months */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 text-center">
+        {topMonths.map((m, i) => (
+          <div
+            key={i}
+            className="bg-gray-50 rounded-lg py-4 border border-gray-100"
+          >
+            <p className="text-gray-400 text-sm">{m.month}</p>
+            <p className="text-xl font-bold">{m.tickets}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

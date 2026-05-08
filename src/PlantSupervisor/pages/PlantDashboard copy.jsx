@@ -85,7 +85,7 @@ const UserCard = () => {
           setLoading(true);
           localStorage.clear();
           setTimeout(() => {
-            navigate("/");
+            navigate("/login");
           }, 2000);
         }}
         disabled={loading}

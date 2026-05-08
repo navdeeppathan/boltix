@@ -13,6 +13,7 @@ import {
   Avatar,
   IconButton,
   CircularProgress,
+  Autocomplete,
 } from "@mui/material";
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import Swal from "sweetalert2";
@@ -33,208 +34,6 @@ const style = {
   maxHeight: "90vh",
   overflowY: "auto",
 };
-// export default function ManagerProfile() {
-//   const user = JSON.parse(localStorage.getItem("userData"));
-
-//   const progress = 70;
-//   return (
-//     <div className="min-h-screen flex justify-center items-center">
-//       <div className=" w-full overflow-hidden">
-//         {/* Header Image */}
-//         <div className=" overflow-hidden">
-//           {/* Background Banner */}
-//           <div className="relative">
-//             <img
-//               src="/plant.png"
-//               alt="Plant Banner"
-//               className="w-full h-60 rounded-[10px] object-cover"
-//             />
-//           </div>
-
-//           {/* Floating Info Card */}
-//           <div className="relative -mt-10 bg-[#F9F9F9] mx-6 rounded-[10px] shadow p-6">
-//             <div className="flex flex-col md:flex-row md:items-center justify-between">
-//               {/* Left Section */}
-//               <div className="flex items-start md:items-center gap-4">
-//                 <img
-//                   src="/person.jpg"
-//                   alt="Saudi Aramco Logo"
-//                   className="w-14 h-14 rounded-full object-cover"
-//                 />
-//                 <div>
-//                   <h2
-//                     className=" font-bold text-[#212529] leading-[100%]
-//                text-[20px] sm:text-[26px] md:text-[31.5px]"
-//                   >
-//                     Saudi Aramco <br />
-//                     <span
-//                       className=" font-normal text-[#212529] leading-[100%]
-//                  text-[12px] sm:text-[15px] md:text-[17.18px]"
-//                     >
-//                       (Riyadh Plant)
-//                     </span>
-//                   </h2>
-//                 </div>
-//               </div>
-
-//               {/* Right Section - Edit Button */}
-//               <button className="mt-4 md:mt-0 bg-[#404040] text-white text-sm px-4 py-2 rounded-[6.56px] flex items-center gap-2 hover:bg-gray-700 transition">
-//                 Edit Profile
-//               </button>
-//             </div>
-
-//             {/* Progress Section */}
-//             <div className="w-full mt-6">
-//               <div className="mt-3 text-xs text-[#212529] leading-tight">
-//                 <p>
-//                   <span className="font-semibold">Plant ID:</span> PO-20394
-//                 </p>
-//                 <p>
-//                   <span className="font-semibold text-[#212529]">Status:</span>{" "}
-//                   <span className="text-[#212529] font-medium">Verified</span>
-//                 </p>
-//               </div>
-
-//               <div className="relative w-full bg-gray-100 rounded-full h-[3px] mt-2">
-//                 {/* Blue progress fill */}
-//                 <div
-//                   className="bg-blue-500 h-[3px] rounded-full relative transition-all duration-500"
-//                   style={{ width: "70%" }}
-//                 >
-//                   {/* Label bubble with pointer */}
-//                   <div className="absolute -top-6 right-0 translate-x-1/2">
-//                     <div className="relative bg-white text-[#000000] text-[10px] sm:text-[11px] font-medium px-2 py-[1px] rounded-full shadow-sm border border-gray-200 whitespace-nowrap">
-//                       70% Completed
-//                       {/* Pointer triangle */}
-//                       <div className="absolute left-1/2 -bottom-[4px] -translate-x-1/2 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[4px] border-t-white" />
-//                     </div>
-//                   </div>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="mt-4 bg-[#F9F9F9] mx-6 rounded-[10px] shadow p-6 space-y-8">
-//           {/* Plant Overview */}
-//           <div className="relative">
-//             <button className="absolute top-1 right-0 text-gray-500 hover:text-gray-700">
-//               <img
-//                 src="../../public/elements.png"
-//                 alt=""
-//                 className="w-[20px] h-[20px] object-contain"
-//               />
-//             </button>
-//             <h2 className="text-lg font-semibold text-[#212529] mb-3">
-//               Plant Overview
-//             </h2>
-//             <div className="grid sm:grid-cols-2 gap-y-2 text-[13px] text-[#212529]">
-//               <p>
-//                 <span className="font-semibold">Industry Type:</span> Oil & Gas
-//                 Refining
-//               </p>
-//               <p>
-//                 <span className="font-semibold ">Designation:</span> Maintenance
-//                 Manager
-//               </p>
-//               <p>
-//                 <span className="font-semibold">Employee Strength:</span> 250+
-//               </p>
-//               <p>
-//                 <span className="font-semibold">Contact Email:</span>{" "}
-//                 faisal.alharbi@aramco.com
-//               </p>
-//               <p>
-//                 <span className="font-semibold">Primary Contact:</span> Engr.
-//                 Faisal Al-Harbi
-//               </p>
-//               <p>
-//                 <span className="font-semibold">Phone:</span> +966-5-xxxxxxx
-//               </p>
-//             </div>
-//           </div>
-
-//           {/* Divider Line */}
-//           <hr className="border-t border-[#000000]/20" />
-
-//           {/* Plant Details / Infrastructure */}
-//           <div className="relative">
-//             <button className="absolute top-1 right-0 text-gray-500 hover:text-gray-700">
-//               <img
-//                 src="../../public/elements.png"
-//                 alt=""
-//                 className="w-[20px] h-[20px] object-contain"
-//               />
-//             </button>
-//             <h2 className="text-lg font-semibold text-[#212529] mb-3">
-//               Plant Details / Infrastructure
-//             </h2>
-//             <div className="grid sm:grid-cols-2 gap-y-2 text-[13px] text-[#212529]">
-//               <p>
-//                 <span className="font-semibold">Location:</span> Riyadh
-//                 Industrial Area, Saudi Arabia
-//               </p>
-//               <p>
-//                 <span className="font-semibold">Total Units:</span> 5 Production
-//                 Lines
-//               </p>
-//               <p>
-//                 <span className="font-semibold">Main Machinery:</span>{" "}
-//                 Centrifugal Pumps, Heat Exchangers, Valves
-//               </p>
-//               <p>
-//                 <span className="font-semibold">Maintenance Frequency:</span>{" "}
-//                 Quarterly
-//               </p>
-//               <p>
-//                 <span className="font-semibold">Preferred OEM Services:</span>{" "}
-//                 Pump Overhaul, Control Automation
-//               </p>
-//             </div>
-//           </div>
-
-//           {/* Divider Line */}
-//           <hr className="border-t border-[#000000]/20" />
-
-//           {/* Plant Details / Infrastructure 2 */}
-//           <div className="relative">
-//             <button className="absolute top-1 right-0 text-gray-500 hover:text-gray-700">
-//               <img
-//                 src="../../public/elements.png"
-//                 alt=""
-//                 className="w-[20px] h-[20px] object-contain"
-//               />
-//             </button>
-//             <h2 className="text-lg font-semibold text-[#212529] mb-3">
-//               Plant Details / Infrastructure
-//             </h2>
-//             <div className="grid sm:grid-cols-2 gap-y-2 text-[13px] text-[#212529]">
-//               <p>
-//                 <span className="font-semibold">Number of Sites:</span> 12
-//               </p>
-//               <p>
-//                 <span className="font-semibold">Users in Each Site:</span> 120
-//               </p>
-//               <p>
-//                 <span className="font-semibold">Reporting Approvers:</span> 34
-//               </p>
-//               <p>
-//                 <span className="font-semibold">Machinery in Each Site:</span>{" "}
-//                 17
-//               </p>
-//               <p>
-//                 <span className="font-semibold">
-//                   Manufacturers Providing Services:
-//                 </span>{" "}
-//                 34
-//               </p>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
 
 export default function ManagerProfile() {
   const userdata = JSON.parse(localStorage.getItem("userData"));
@@ -260,6 +59,51 @@ export default function ManagerProfile() {
   useEffect(() => {
     fetchUser();
   }, [userdata?.id]);
+
+  const [departments, setDepartments] = useState([]);
+
+  const fetchDepartments = async () => {
+    try {
+      const depRes = await http.get("/departments");
+
+      setDepartments(
+        depRes.data?.data.map((item) => ({
+          label: item.name,
+          value: item.name, // 👈 ID goes in value
+        })),
+      );
+    } catch (error) {
+      console.error("Error fetching departments", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
+
+  const [countries, setCountries] = useState([]);
+  const [loadingCountries, setLoadingCountries] = useState(true);
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const res = await http.get("/countries");
+
+        const options = res.data?.data.map((c) => ({
+          value: c.name,
+          label: c.name,
+        }));
+
+        setCountries(options);
+      } catch (error) {
+        console.error("Error fetching countries:", error);
+      } finally {
+        setLoadingCountries(false);
+      }
+    };
+
+    fetchCountries();
+  }, []);
+
   const [formData, setFormData] = useState({
     full_name: "",
     mobile_number: "",
@@ -276,6 +120,9 @@ export default function ManagerProfile() {
     pref_oem_service: "",
     manufacturer_service: "",
     reporting_approver: "",
+    plant_name: "",
+    department: "",
+    city: "",
     progress: 100,
   });
   const [open, setOpen] = useState(false);
@@ -298,6 +145,9 @@ export default function ManagerProfile() {
         pref_oem_service: user.company?.pref_oem_service || "",
         manufacturer_service: user.company?.manufacturer_service || "",
         reporting_approver: user.company?.reporting_approver || "",
+        plant_name: user.company?.plant_name || "",
+        department: user.department || "",
+        city: user.company?.city || "",
         progress: 100,
       });
     }
@@ -390,22 +240,6 @@ export default function ManagerProfile() {
             {/* Floating Info Card */}
             <div className="relative -mt-10 bg-[#F9F9F9] mx-6 rounded-[10px] shadow p-6">
               <div className="flex flex-col md:flex-row md:items-center justify-between">
-                {/* Left Section */}
-                {/* <div className="flex items-start md:items-center gap-4">
-                     <img
-                       src="/person.jpg"
-                       alt="User Logo"
-                       className="w-14 h-14 rounded-full object-cover"
-                     />
-                     <div>
-                       <h2 className="font-bold text-[#212529] leading-[100%] text-[20px] sm:text-[26px] md:text-[31.5px]">
-                         {user?.company?.company_name || "N/A"} <br />
-                         <span className="font-normal text-[#212529] leading-[100%] text-[12px] sm:text-[15px] md:text-[17.18px]">
-                           ({user?.company?.designation || "Plant"})
-                         </span>
-                       </h2>
-                     </div>
-                   </div> */}
                 <CompanyProfile user={user} />
 
                 {/* Right Section - Edit Button */}
@@ -465,6 +299,10 @@ export default function ManagerProfile() {
               </h2>
               <div className="grid sm:grid-cols-2 gap-y-2 text-[13px] text-[#212529]">
                 <p>
+                  <span className="font-semibold">Company Name:</span>{" "}
+                  {user?.company?.company_name || "N/A"}
+                </p>
+                <p>
                   <span className="font-semibold">Industry Type:</span>{" "}
                   {user?.company?.business_type || "N/A"}
                 </p>
@@ -473,8 +311,8 @@ export default function ManagerProfile() {
                   {user?.company?.designation || "N/A"}
                 </p>
                 <p>
-                  <span className="font-semibold">Employee Strength:</span>{" "}
-                  {user?.company?.no_of_clients || "N/A"}
+                  <span className="font-semibold">Department:</span>{" "}
+                  {user?.department || "N/A"}
                 </p>
                 <p>
                   <span className="font-semibold">Contact Email:</span>{" "}
@@ -508,24 +346,16 @@ export default function ManagerProfile() {
               </h2>
               <div className="grid sm:grid-cols-2 gap-y-2 text-[13px] text-[#212529]">
                 <p>
-                  <span className="font-semibold">Location:</span>{" "}
+                  <span className="font-semibold">Plant Name:</span>{" "}
+                  {user?.company?.plant_name || "N/A"}
+                </p>
+                <p>
+                  <span className="font-semibold">Location Country:</span>{" "}
                   {user?.company?.location_country || "N/A"}
                 </p>
                 <p>
-                  <span className="font-semibold">Total Units:</span>{" "}
-                  {user?.company?.no_of_employee || "N/A"}
-                </p>
-                <p>
-                  <span className="font-semibold">Main Machinery:</span>{" "}
-                  {user?.company?.product_category || "N/A"}
-                </p>
-                <p>
-                  <span className="font-semibold">Maintenance Frequency:</span>{" "}
-                  {user?.company?.maintainance_freq || "N/A"}
-                </p>
-                <p>
-                  <span className="font-semibold">Preferred OEM Services:</span>{" "}
-                  {user?.company?.pref_oem_services || "N/A"}
+                  <span className="font-semibold">City:</span>{" "}
+                  {user?.company?.city || "N/A"}
                 </p>
               </div>
             </div>
@@ -549,24 +379,6 @@ export default function ManagerProfile() {
                 <p>
                   <span className="font-semibold">Number of Sites:</span>{" "}
                   {user?.company?.no_of_offices || "N/A"}
-                </p>
-                <p>
-                  <span className="font-semibold">Users in Each Site:</span>{" "}
-                  {user?.company?.no_of_clients || "N/A"}
-                </p>
-                <p>
-                  <span className="font-semibold">Reporting Approvers:</span>{" "}
-                  {user?.company?.reporting_approver || "N/A"}
-                </p>
-                <p>
-                  <span className="font-semibold">Machinery in Each Site:</span>{" "}
-                  {user?.company?.no_of_machinery || "N/A"}
-                </p>
-                <p>
-                  <span className="font-semibold">
-                    Manufacturers Providing Services:
-                  </span>{" "}
-                  {user?.company?.manufacturer_service || "N/A"}
                 </p>
               </div>
             </div>
@@ -642,65 +454,73 @@ export default function ManagerProfile() {
               fullWidth
             />
             <TextField
-              label="Location Country"
-              name="location_country"
-              value={formData.location_country}
+              label="Plant Name"
+              name="plant_name"
+              value={formData.plant_name}
+              onChange={handleChange}
+              fullWidth
+            />
+            <Autocomplete
+              options={departments}
+              value={
+                departments.find((d) => d.value === formData.department) || null
+              }
+              onChange={(event, newValue) => {
+                setFormData((prev) => ({
+                  ...prev,
+                  department: newValue ? newValue.value : "",
+                }));
+              }}
+              getOptionLabel={(option) => option.label || ""}
+              renderInput={(params) => (
+                <TextField {...params} label="Department" fullWidth />
+              )}
+            />
+
+            <Autocomplete
+              options={countries}
+              loading={loadingCountries}
+              value={
+                countries.find((c) => c.value === formData.location_country) ||
+                null
+              }
+              onChange={(event, newValue) => {
+                setFormData((prev) => ({
+                  ...prev,
+                  location_country: newValue ? newValue.value : "",
+                }));
+              }}
+              getOptionLabel={(option) => option.label || ""}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Location Country"
+                  fullWidth
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {loadingCountries ? (
+                          <CircularProgress color="inherit" size={20} />
+                        ) : null}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
+            />
+            <TextField
+              label="City"
+              name="city"
+              value={formData.city}
               onChange={handleChange}
               fullWidth
             />
             <TextField
-              label="No of Offices"
+              label="No of Sites"
               name="no_of_offices"
               value={formData.no_of_offices}
-              onChange={handleChange}
-              fullWidth
-            />
-            <TextField
-              label="No of Clients"
-              name="no_of_clients"
-              value={formData.no_of_clients}
-              onChange={handleChange}
-              fullWidth
-            />
-            <TextField
-              label="No of Machinery"
-              name="no_of_machinery"
-              value={formData.no_of_machinery}
-              onChange={handleChange}
-              fullWidth
-            />
-            <TextField
-              label="Product Category"
-              name="product_category"
-              value={formData.product_category}
-              onChange={handleChange}
-              fullWidth
-            />
-            <TextField
-              label="Maintenance Frequency"
-              name="maintainance_freq"
-              value={formData.maintainance_freq}
-              onChange={handleChange}
-              fullWidth
-            />
-            <TextField
-              label="Preferred OEM Service"
-              name="pref_oem_service"
-              value={formData.pref_oem_service}
-              onChange={handleChange}
-              fullWidth
-            />
-            <TextField
-              label="Manufacturers Providing Service"
-              name="manufacturer_service"
-              value={formData.manufacturer_service}
-              onChange={handleChange}
-              fullWidth
-            />
-            <TextField
-              label="Reporting Approver"
-              name="reporting_approver"
-              value={formData.reporting_approver}
               onChange={handleChange}
               fullWidth
             />
@@ -830,7 +650,7 @@ function CompanyProfile({ user }) {
         <h2 className="font-bold text-[#212529] leading-[100%] text-[20px] sm:text-[26px] md:text-[31.5px]">
           {user?.company?.company_name || "N/A"} <br />
           <span className="font-normal text-[#212529] leading-[100%] text-[12px] sm:text-[15px] md:text-[17.18px]">
-            ({user?.company?.designation || "Plant"})
+            ({user?.company?.designation.toUpperCase() || "Plant"})
           </span>
         </h2>
       </div>

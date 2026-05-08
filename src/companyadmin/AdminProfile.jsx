@@ -13,8 +13,30 @@ const AdminProfile = () => {
     email: "",
     phone: "",
     company: "",
-    designation: "",
+    designation: "Admin",
+    department: "",
   });
+
+  const [departments, setDepartments] = useState([]);
+
+  const fetchDepartments = async () => {
+    try {
+      const depRes = await http.get("/departments");
+
+      setDepartments(
+        depRes.data?.data.map((item) => ({
+          label: item.name,
+          value: item.name, // 👈 ID goes in value
+        })),
+      );
+    } catch (error) {
+      console.error("Error fetching departments", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
 
   const [passwordModal, setPasswordModal] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -32,6 +54,7 @@ const AdminProfile = () => {
           phone: data.mobile_number,
           company: data.company.company_name,
           designation: data.company.designation,
+          department: data.department,
         });
       } catch (error) {
         console.error(error);
@@ -48,7 +71,7 @@ const AdminProfile = () => {
         email: form.email,
         mobile_number: form.phone,
         company_name: form.company,
-        designation: form.designation,
+        department: form.department,
       };
 
       const res = await http.put(`/users/update-profile/${user.id}`, payload);
@@ -170,8 +193,36 @@ const AdminProfile = () => {
               name="designation"
               value={form.designation}
               onChange={handleChange}
-              disabled={!isEditing}
+              disabled={true}
             />
+
+            <div>
+              <label className="text-sm text-gray-500">Department</label>
+
+              <div
+                className={`flex items-center border rounded-lg px-3 py-2 mt-1 gap-2 ${
+                  !isEditing ? "bg-gray-100 cursor-not-allowed" : ""
+                }`}
+              >
+                <User size={16} />
+
+                <select
+                  name="department"
+                  value={form.department}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className="w-full outline-none bg-transparent"
+                >
+                  <option value="">Select Department</option>
+
+                  {departments.map((department) => (
+                    <option key={department.value} value={department.value}>
+                      {department.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
             {/* Change Password */}
             <div className="flex items-center gap-3 p-4 border rounded-lg">

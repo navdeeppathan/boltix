@@ -185,6 +185,55 @@ export default function TicketDetails() {
     }
   };
 
+  const [confirmingApproval, setConfirmingApproval] = useState(false);
+
+  const handleConfirmLatestApproval = async () => {
+    try {
+      setConfirmingApproval(true);
+
+      await http.post(`/tickets/update-isConfirm/${ticket.id}`, {
+        isConfirm: 1,
+      });
+
+      setShowLatestApproval(false);
+
+      fetchTicketDetails();
+    } catch (error) {
+      console.error("Error updating confirmation:", error);
+
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to confirm latest update.",
+      });
+    } finally {
+      setConfirmingApproval(false);
+    }
+  };
+
+  const stageConfig = {
+    0: {
+      label: "Pending",
+      className: "bg-yellow-100 text-yellow-800",
+    },
+    1: {
+      label: "Open",
+      className: "bg-green-100 text-green-800",
+    },
+    2: {
+      label: "Rejected",
+      className: "bg-red-100 text-red-800",
+    },
+    3: {
+      label: "Returned",
+      className: "bg-orange-100 text-orange-800",
+    },
+    4: {
+      label: "Closed",
+      className: "bg-gray-200 text-gray-800",
+    },
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -240,7 +289,17 @@ export default function TicketDetails() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span
+                  className={`px-3 py-2 rounded-full text-[11px] md:text-sm font-semibold ${
+                    stageConfig[ticket?.stage]?.className ||
+                    "bg-gray-100 text-gray-700"
+                  }`}
+                >
+                  {stageConfig[ticket?.stage]?.label || "Unknown"}
+                </span>
+              </div>
               {(ticket?.stage != 0 ||
                 ticket?.stage != 3 ||
                 ticket?.stage != 4) && (
@@ -437,7 +496,7 @@ export default function TicketDetails() {
         </div>
       )}
 
-      {showLatestApproval && latestApproval && (
+      {!ticket?.isConfirm == 1 && showLatestApproval && latestApproval && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-xl w-full max-w-md shadow-lg relative p-6">
             {/* Close Button */}
@@ -490,10 +549,21 @@ export default function TicketDetails() {
             {/* Action */}
             <div className="mt-5 flex justify-end">
               <button
-                onClick={() => setShowLatestApproval(false)}
-                className="px-4 py-2 bg-[#007BFF] text-white rounded-md hover:bg-[#0066DD]"
+                onClick={handleConfirmLatestApproval}
+                disabled={confirmingApproval}
+                className="px-4 py-2 h-10 bg-[#007BFF] text-white rounded-md hover:bg-[#0066DD] disabled:opacity-50"
               >
-                OK
+                {confirmingApproval ? (
+                  <RotatingLines
+                    strokeColor="#fff"
+                    strokeWidth="5"
+                    animationDuration="0.75"
+                    width="18"
+                    visible={true}
+                  />
+                ) : (
+                  "OK"
+                )}
               </button>
             </div>
           </div>
@@ -583,7 +653,7 @@ const TicketOverview = ({ ticket, fetchTicketDetails }) => {
             </h2>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2 md:mt-0">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-2 md:mt-0">
               {/* Document Icon */}
               {/* <button className="w-9 h-9 flex items-center justify-center rounded-full bg-[#707578] text-white hover:opacity-90 transition">
                 <FaFileAlt size={16} />
@@ -658,6 +728,39 @@ const TicketOverview = ({ ticket, fetchTicketDetails }) => {
                     fetchTickets={fetchTicketDetails}
                   />
                 )}
+              <div className="flex items-center gap-2">
+                <p className="text-[12px] text-gray-500">Manufacturer:</p>
+
+                <div className="flex items-center gap-1">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span
+                      className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                        ticket?.manufacturer_user?.isOnline
+                          ? "bg-green-400"
+                          : "bg-gray-400"
+                      }`}
+                    />
+
+                    <span
+                      className={`relative inline-flex rounded-full h-2.5 w-2.5 ${
+                        ticket?.manufacturer_user?.isOnline
+                          ? "bg-green-500"
+                          : "bg-gray-500"
+                      }`}
+                    />
+                  </span>
+
+                  <span
+                    className={`text-[11px] font-semibold ${
+                      ticket?.manufacturer_user?.isOnline
+                        ? "text-green-600"
+                        : "text-gray-500"
+                    }`}
+                  >
+                    {ticket?.manufacturer_user?.isOnline ? "Online" : "Offline"}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 

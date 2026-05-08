@@ -342,7 +342,7 @@ const PlantRegistrationForm = () => {
 
       <div className="relative z-10 w-full flex flex-col items-center p-6 sm:p-10">
         <h2 className="text-2xl sm:text-3xl md:text-[36px] font-bold text-[#0088ffcf]">
-          Industrial Plant Registeration Form
+          Industrial Plant Registration Form
         </h2>
         {/* <p className="mt-2 text-sm sm:text-base md:text-[24px] font-normal text-[#212529]">
           Submit a link with the list of Questions

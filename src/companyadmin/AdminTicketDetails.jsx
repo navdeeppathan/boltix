@@ -526,7 +526,7 @@ const TicketBoard = ({ ticket, onClick }) => {
 
   return (
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* New Column */}
         <div className="md:border-r md:min-h-screen md:border-[#CECECE]/40 px-4">
           <h3 className="font-bold text-[#282D37] md:text-xs mb-2 mt-2">New</h3>
@@ -992,14 +992,12 @@ const TicketBoard = ({ ticket, onClick }) => {
         </div>
 
         {/* Calling Column */}
-        <div className="border-[#CECECE]/40 border-r pr-4 pl-4 md:pl-0">
+        {/* <div className="border-[#CECECE]/40 border-r pr-4 pl-4 md:pl-0">
           <h3 className="font-bold text-[#282D37] md:text-xs mb-2 mt-2">
-            {/* {ticket?.response_mode?.toLowerCase() === "chat" && "Chat"}
-            {ticket?.response_mode?.toLowerCase() === "video" && "Video Call"}
-            {!ticket?.response_mode && "Calling"} */}
+            
             Communication
           </h3>
-          {/* <div className="bg-white rounded-xl shadow p-6 h-20"></div> */}
+          
           <div className="h-[100vh] overflow-y-auto custom-scroll">
             {ticket?.chats?.map((chat) => (
               <div
@@ -1007,7 +1005,7 @@ const TicketBoard = ({ ticket, onClick }) => {
                 className="bg-white rounded-[10px] shadow p-2 mb-3 w-full"
                 onClick={onClick}
               >
-                {/* Title */}
+                
                 <h4 className="font-semibold flex items-center gap-1 text-[13px] text-[#212529] mb-1">
                   <img
                     src="/chaticon.png"
@@ -1020,7 +1018,7 @@ const TicketBoard = ({ ticket, onClick }) => {
                   <p className="text-gray-700">{chat?.message}</p>
                 </p>
 
-                {/* Footer */}
+                
                 <div className="flex items-center justify-between text-[12px] text-gray-500">
                   <div className="flex items-center gap-1 text-gray-600 text-sm">
                     <img
@@ -1036,7 +1034,7 @@ const TicketBoard = ({ ticket, onClick }) => {
                     </span>
                   </div>
 
-                  {/* Profile Avatar */}
+                 
                   <img
                     src={
                       chat?.sender_user?.company?.profile_pic || "/person.jpg"
@@ -1048,28 +1046,14 @@ const TicketBoard = ({ ticket, onClick }) => {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* Pictures Column */}
         <div className="pr-4 pl-4 md:pl-0 mb-2">
           <h3 className="font-bold text-[#282D37] md:text-xs mb-2 mt-2">
             Pictures
           </h3>
-          {/* <div
-                    onDragOver={handleDragOver}
-                    onDrop={handleDrop}
-                    className="min-h-[200px] bg-white rounded-xl shadow p-4 flex items-center justify-center"
-                  >
-                    {pictureTicket && pictureTicket.photo ? (
-                      <img
-                        src={`${baseURL}/${pictureTicket.photo}`}
-                        alt="dropped"
-                        className="w-20 h-20 object-cover rounded"
-                      />
-                    ) : (
-                      <p className="text-gray-400 text-xs">Drag photos here</p>
-                    )}
-                  </div> */}
+
           <div className="h-[100vh] overflow-y-auto custom-scroll">
             {ticket.images && ticket.images.length > 0 ? (
               ticket.images.map((img, i) => (

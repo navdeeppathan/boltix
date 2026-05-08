@@ -1078,7 +1078,7 @@ const TicketOverview = ({ ticket, fetchTicketDetails }) => {
             </h2>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2 md:mt-0">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-2 md:mt-0">
               {/* Document Icon */}
               {/* <button className="w-9 h-9 flex items-center justify-center rounded-full bg-[#707578] text-white hover:opacity-90 transition">
                 <FaFileAlt size={16} />
@@ -1157,6 +1157,35 @@ const TicketOverview = ({ ticket, fetchTicketDetails }) => {
                     fetchTickets={fetchTicketDetails}
                   />
                 )}
+              <div className="flex items-center gap-2">
+                <p className="text-[12px] text-gray-500">User:</p>
+
+                <div className="flex items-center gap-1">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span
+                      className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                        ticket?.user?.isOnline ? "bg-green-400" : "bg-gray-400"
+                      }`}
+                    />
+
+                    <span
+                      className={`relative inline-flex rounded-full h-2.5 w-2.5 ${
+                        ticket?.user?.isOnline ? "bg-green-500" : "bg-gray-500"
+                      }`}
+                    />
+                  </span>
+
+                  <span
+                    className={`text-[11px] font-semibold ${
+                      ticket?.user?.isOnline
+                        ? "text-green-600"
+                        : "text-gray-500"
+                    }`}
+                  >
+                    {ticket?.user?.isOnline ? "Online" : "Offline"}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -2242,7 +2271,7 @@ const ChatModal = ({ open, onClose, ticketId, user }) => {
             }}
             onClick={onClose}
           >
-            Add Card
+            Close Chat
           </Button>
         </Box>
       </Box>

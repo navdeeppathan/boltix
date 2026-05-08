@@ -729,7 +729,7 @@ const SupplierRegistrationForm = () => {
       {/* Content */}
       <div className="relative z-10 w-full flex flex-col items-center p-6 sm:p-10">
         <h2 className="text-2xl sm:text-3xl md:text-[36px] font-bold text-[#0088ffcf] text-center">
-          Manufacturer/Service Provider Registeration Form
+          Manufacturer/Service Provider Registration Form
         </h2>
         <p className="mt-2 text-sm sm:text-sm md:text-lg font-normal text-[#0088ffcf] text-center">
           Once registered, a link will be sent to login and access your profile

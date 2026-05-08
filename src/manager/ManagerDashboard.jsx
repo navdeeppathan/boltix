@@ -90,7 +90,7 @@ const UserCard = () => {
           setLoading(true);
           localStorage.clear();
           setTimeout(() => {
-            navigate("/");
+            navigate("/login");
           }, 2000);
         }}
         disabled={loading}
@@ -177,7 +177,9 @@ const ManagerDashboard = () => {
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Left: Main Content (80%) */}
-            <div className="w-full lg:w-[75%]">
+            <div
+              className={`w-full ${location.pathname.includes("profile") && "lg:w-[75%]"}`}
+            >
               <Routes>
                 <Route path="/" element={<Navigate to="home" replace />} />
                 <Route path="home" element={<ManagerDashboardPage />} />
@@ -214,11 +216,15 @@ const ManagerDashboard = () => {
             </div>
 
             {/* Right: User Info & Messages (20%) */}
-            <div className="w-full lg:w-[25%] space-y-6">
-              <UserCard />
+            {location.pathname.includes("profile") && (
+              <div className="w-full lg:w-[25%] space-y-6">
+                {/* <UserCard /> */}
 
-              {location.pathname.includes("profile") && <ChangePasswordCard />}
-            </div>
+                {location.pathname.includes("profile") && (
+                  <ChangePasswordCard />
+                )}
+              </div>
+            )}
           </div>
         </main>
       </div>

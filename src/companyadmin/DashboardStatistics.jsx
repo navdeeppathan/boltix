@@ -35,6 +35,7 @@ const DashboardStatistics = () => {
   return (
     <div className="space-y-4">
       <DashboardStats />
+      <UsersChart parentId={user_id} />
       <TicketChart parentId={user_id} />
     </div>
   );
@@ -176,6 +177,95 @@ const TicketChart = ({ parentId }) => {
           >
             <p className="text-gray-400 text-sm">{m.month}</p>
             <p className="text-xl font-bold">{m.tickets}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const UsersChart = ({ parentId }) => {
+  const [data, setData] = useState([]);
+  const [topMonths, setTopMonths] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await http.get(`/users-chart-stats/${parentId}`);
+
+        const monthly = res.data.data.monthly_users || [];
+
+        const top = res.data.data.top_user_months || [];
+
+        setTopMonths(top);
+
+        const months = [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+        ];
+
+        const chartData = months.map((m, i) => {
+          const found = monthly.find((x) => x.month === i + 1);
+
+          return {
+            name: m,
+            users: found ? found.total : 0,
+          };
+        });
+
+        setData(chartData);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, [parentId]);
+
+  return (
+    <div className="bg-gray-100 rounded-xl border border-gray-200 hover:shadow p-6">
+      <h2 className="font-semibold mb-4">Users Dynamics Per Month</h2>
+
+      <ResponsiveContainer width="100%" height={250}>
+        <LineChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" />
+
+          <XAxis dataKey="name" />
+
+          <YAxis />
+
+          <Tooltip />
+
+          <Line
+            type="monotone"
+            dataKey="users"
+            stroke="#000"
+            strokeWidth={3}
+            dot={{ r: 5 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+
+      {/* Top User Months */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 text-center">
+        {topMonths.map((m, i) => (
+          <div
+            key={i}
+            className="bg-gray-50 rounded-lg py-4 border border-gray-100"
+          >
+            <p className="text-gray-400 text-sm">{m.month}</p>
+
+            <p className="text-xl font-bold">{m.users}</p>
           </div>
         ))}
       </div>

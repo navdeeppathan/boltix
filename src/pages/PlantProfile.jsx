@@ -54,6 +54,27 @@ export default function PlantProfile() {
     }
   };
 
+  const [departments, setDepartments] = useState([]);
+
+  const fetchDepartments = async () => {
+    try {
+      const depRes = await http.get("/departments");
+
+      setDepartments(
+        depRes.data?.data.map((item) => ({
+          label: item.name,
+          value: item.name, // 👈 ID goes in value
+        })),
+      );
+    } catch (error) {
+      console.error("Error fetching departments", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
+
   const [countries, setCountries] = useState([]);
   const [loadingCountries, setLoadingCountries] = useState(true);
 
@@ -95,6 +116,9 @@ export default function PlantProfile() {
     pref_oem_service: "",
     manufacturer_service: "",
     reporting_approver: "",
+    plant_name: "",
+    department: "",
+    city: "",
     progress: 100,
   });
   const [open, setOpen] = useState(false);
@@ -117,6 +141,9 @@ export default function PlantProfile() {
         pref_oem_service: user.company?.pref_oem_service || "",
         manufacturer_service: user.company?.manufacturer_service || "",
         reporting_approver: user.company?.reporting_approver || "",
+        plant_name: user.company?.plant_name || "",
+        department: user.department || "",
+        city: user.company?.city || "",
         progress: 100,
       });
     }
@@ -287,25 +314,48 @@ export default function PlantProfile() {
               </h2>
               <div className="grid sm:grid-cols-2 gap-y-2 text-[13px] text-[#212529]">
                 <p>
+                  <span className="font-semibold">Plant Name:</span>{" "}
+                  {user?.company?.plant_name || "N/A"}
+                </p>
+                <p>
+                  <span className="font-semibold">Location Country:</span>{" "}
+                  {user?.company?.location_country || "N/A"}
+                </p>
+                <p>
+                  <span className="font-semibold">City:</span>{" "}
+                  {user?.company?.city || "N/A"}
+                </p>
+                <p>
+                  <span className="font-semibold">Company Name:</span>{" "}
+                  {user?.company?.company_name || "N/A"}
+                </p>
+                <p>
                   <span className="font-semibold">Industry Type:</span>{" "}
                   {user?.company?.business_type || "N/A"}
                 </p>
                 <p>
                   <span className="font-semibold">Designation:</span>{" "}
-                  {user?.company?.designation || "N/A"}
+                  {user?.company?.designation
+                    ? user.company.designation.charAt(0).toUpperCase() +
+                      user.company.designation.slice(1).toLowerCase()
+                    : ""}
                 </p>
                 <p>
+                  <span className="font-semibold">Department:</span>{" "}
+                  {user?.department || "N/A"}
+                </p>
+                {/* <p>
                   <span className="font-semibold">Employee Strength:</span>{" "}
                   {user?.company?.no_of_clients || "N/A"}
-                </p>
+                </p> */}
                 {/* <p>
                   <span className="font-semibold">Contact Email:</span>{" "}
                   {user?.email || "N/A"}
                 </p> */}
-                <p>
+                {/* <p>
                   <span className="font-semibold">Primary Contact:</span>{" "}
                   {user?.full_name || "N/A"}
-                </p>
+                </p> */}
                 {/* <p>
                   <span className="font-semibold">Phone:</span>{" "}
                   {user?.mobile_number || "N/A"}
@@ -314,10 +364,10 @@ export default function PlantProfile() {
             </div>
 
             {/* Divider Line */}
-            <hr className="border-t border-[#000000]/20" />
+            {/* <hr className="border-t border-[#000000]/20" /> */}
 
             {/* Plant Details / Infrastructure */}
-            <div className="relative">
+            {/* <div className="relative">
               <button className="absolute top-1 right-0 text-gray-500 hover:text-gray-700">
                 <img
                   src="/elements.png"
@@ -350,7 +400,7 @@ export default function PlantProfile() {
                   {user?.company?.pref_oem_services || "N/A"}
                 </p>
               </div>
-            </div>
+            </div> */}
 
             {/* Divider Line */}
             <hr className="border-t border-[#000000]/20" />
@@ -372,7 +422,7 @@ export default function PlantProfile() {
                   <span className="font-semibold">Number of Sites:</span>{" "}
                   {user?.company?.no_of_offices || "N/A"}
                 </p>
-                <p>
+                {/* <p>
                   <span className="font-semibold">Users in Each Site:</span>{" "}
                   {user?.company?.no_of_clients || "N/A"}
                 </p>
@@ -389,7 +439,7 @@ export default function PlantProfile() {
                     Manufacturers Providing Services:
                   </span>{" "}
                   {user?.company?.manufacturer_service || "N/A"}
-                </p>
+                </p> */}
               </div>
             </div>
           </div>
@@ -459,8 +509,10 @@ export default function PlantProfile() {
                 value={formData.designation}
                 onChange={handleChange}
                 fullWidth
+                disabled
                 required
               />
+
               <TextField
                 label="Industry Type"
                 name="business_type"
@@ -469,6 +521,31 @@ export default function PlantProfile() {
                 fullWidth
                 required
               />
+              <TextField
+                label="Plant Name"
+                name="plant_name"
+                value={formData.plant_name}
+                onChange={handleChange}
+                fullWidth
+              />
+              <Autocomplete
+                options={departments}
+                value={
+                  departments.find((d) => d.value === formData.department) ||
+                  null
+                }
+                onChange={(event, newValue) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    department: newValue ? newValue.value : "",
+                  }));
+                }}
+                getOptionLabel={(option) => option.label || ""}
+                renderInput={(params) => (
+                  <TextField {...params} label="Department" fullWidth />
+                )}
+              />
+
               {/* <TextField
                 label="Location Country"
                 name="location_country"
@@ -502,14 +579,22 @@ export default function PlantProfile() {
               />
 
               <TextField
-                label="No of Offices"
+                label="City"
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                fullWidth
+              />
+
+              <TextField
+                label="No of Sites"
                 name="no_of_offices"
                 value={formData.no_of_offices}
                 onChange={handleChange}
                 fullWidth
                 required
               />
-              <TextField
+              {/* <TextField
                 label="No of Clients"
                 name="no_of_clients"
                 value={formData.no_of_clients}
@@ -564,7 +649,7 @@ export default function PlantProfile() {
                 onChange={handleChange}
                 fullWidth
                 required
-              />
+              /> */}
             </Box>
 
             {/* Actions */}
@@ -697,7 +782,7 @@ function CompanyProfile({ user }) {
         <h2 className="font-bold text-[#212529] leading-[100%] text-[20px] sm:text-[26px] md:text-[31.5px]">
           {user?.company?.company_name || "N/A"} <br />
           <span className="font-normal text-[#212529] leading-[100%] text-[12px] sm:text-[15px] md:text-[17.18px]">
-            ({user?.company?.designation || "Plant"})
+            ({user?.company?.designation.toUpperCase() || "Plant"})
           </span>
         </h2>
       </div>

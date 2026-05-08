@@ -107,21 +107,21 @@ const CompanyAdminLoginPage = () => {
     } catch (error) {
       console.error("Login error:", error);
       // EMAIL NOT VERIFIED
-      if (error.response?.status === 403) {
-        const user = error.response?.data?.data;
+      // if (error.response?.status === 403) {
+      //   const user = error.response?.data?.data;
 
-        Swal.fire({
-          icon: "warning",
-          title: "Email Not Verified",
-          text: error.response.data.message,
-        });
+      //   Swal.fire({
+      //     icon: "warning",
+      //     title: "Email Not Verified",
+      //     text: error.response.data.message,
+      //   });
 
-        navigate("/verify-email", {
-          state: { user_id: user?.id },
-        });
+      //   navigate("/verify-email", {
+      //     state: { user_id: user?.id },
+      //   });
 
-        return;
-      }
+      //   return;
+      // }
       Swal.fire({
         icon: "error",
         title: "Error",

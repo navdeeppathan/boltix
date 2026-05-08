@@ -143,6 +143,41 @@ const PlantSidebar = ({ isOpen, setIsOpen, activeMenu, setActiveMenu }) => {
               })}
             </ul>
           </nav>
+          {/* User Profile */}
+          <div className="p-4 border-t border-gray-800">
+            <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 cursor-pointer">
+              <div className="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center font-semibold">
+                {user.full_name.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium">{user.full_name}</p>
+                <p className="text-xs text-gray-400">
+                  {user.role?.display_name}
+                </p>
+              </div>
+              {/* <ChevronDown size={16} className="text-gray-400" /> */}
+              <div className="relative group">
+                <button
+                  onClick={() => {
+                    localStorage.clear();
+                    navigate("/login");
+                  }}
+                  className="p-2 text-white cursor-pointer hover:text-gray-600 hover:bg-gray-100 rounded-lg"
+                >
+                  <LogOut size={20} />
+                </button>
+
+                {/* Tooltip */}
+                <span
+                  className="absolute left-1/2 -translate-x-1/2 top-10 whitespace-nowrap 
+                            bg-gray-100 text-black text-xs px-2 py-1 rounded opacity-0 
+                            group-hover:opacity-100 transition pointer-events-none"
+                >
+                  Logout
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </aside>
     </>

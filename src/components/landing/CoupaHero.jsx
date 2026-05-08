@@ -28,12 +28,12 @@ const sections = [
     icon: FinanceIcon,
     label: "BOLTIX",
     title:
-      "AI driven diagnostics predict failures early, reducing downtime maintenance costs.",
-    desc: "BOLTIX leverages advanced AI-powered diagnostics and real-time equipment monitoring to detect potential failures before they occur. By analyzing machine data continuously, it helps businesses minimize unplanned downtime, optimize maintenance schedules, and significantly reduce operational costs.",
+      "AI-driven diagnostics predict failures early, reducing downtime and maintenance costs.",
+    desc: "BOLTIX leverages advanced AI-powered diagnostics and real-time equipment monitoring to identify potential failures before they occur. By analyzing machine data continuously, it helps businesses minimize unplanned downtime, optimize maintenance schedules, and significantly reduce operational costs.",
     stat: "60%",
     statecolor: "text-green-400",
     statText: "reduction in unplanned downtime with predictive AI monitoring",
-    image: "/img1.jpg",
+    images: ["/img1.jpg", "/img2.jpg", "/img3.jpg"],
 
     cards: [
       {
@@ -55,13 +55,13 @@ const sections = [
     icon: SupplyChainIcon,
     label: "BOLTIX FOR SUPPLY CHAIN",
     title:
-      "Secure plant and Manufacturer collaboration improves asset visibility accountability decisions.",
-    desc: "BOLTIX enables secure, real-time collaboration between plants and Manufacturer partners through a unified digital platform. With end-to-end asset tracking, performance insights, and AI-powered analytics, organizations gain complete visibility, improve accountability, and make faster, data-driven operational decisions across the supply chain.",
+      "Secure plant and manufacturer collaboration improves asset visibility, accountability, and decision-making.",
+    desc: "BOLTIX enables secure, real-time collaboration between plants and manufacturer partners through a unified digital platform. With end-to-end asset tracking, performance insights, and AI-powered analytics, organizations gain complete visibility, improve accountability, and make faster, data-driven operational decisions across the supply chain.",
     stat: "35%",
     statecolor: "text-blue-400",
     statText:
       "improvement in asset visibility and cross-partner decision accuracy",
-    image: "/img2.jpg",
+    images: ["/img1.jpg", "/img2.jpg", "/img3.jpg"],
 
     cards: [
       {
@@ -84,13 +84,12 @@ const sections = [
     icon: SupplyChainIcon,
     label: "BOLTIX AI",
     title:
-      "Centralized data platform accelerates troubleshooting standardizes workflows across enterprises globally.",
-    desc: "BOLTIX AI delivers a unified, centralized data platform that connects global operations, assets, and teams in real time. By standardizing workflows and leveraging advanced analytics, organizations can accelerate troubleshooting, eliminate data silos, and drive consistent performance improvements across enterprise locations worldwide.",
+      "Centralized data platforms accelerate troubleshooting and standardize workflows across global enterprises.",
+    desc: "BOLTIX AI delivers a unified, centralized data platform that connects global operations, assets, and teams in real time. By standardizing workflows and leveraging advanced analytics, organizations can accelerate troubleshooting, eliminate data silos, and drive consistent performance improvements across global enterprise locations.",
     stat: "70%",
     statecolor: "text-blue-700",
     statText: "faster root-cause analysis and standardized global workflows",
-    image: "/img3.jpg",
-
+    images: ["/img1.jpg", "/img2.jpg", "/img3.jpg"],
     cards: [
       {
         type: "Blog",
@@ -111,6 +110,7 @@ const sections = [
 
 export default function ScrollHero() {
   const [active, setActive] = useState(0);
+  const [currentImage, setCurrentImage] = useState(0);
   const refs = useRef([]);
 
   useEffect(() => {
@@ -130,6 +130,17 @@ export default function ScrollHero() {
 
     return () => observer.disconnect();
   }, []);
+
+  // AUTO IMAGE SLIDE
+  useEffect(() => {
+    const images = sections[active].images;
+
+    const interval = setInterval(() => {
+      setCurrentImage((prev) => (prev + 1) % images.length);
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, [active]);
 
   return (
     <section className="relative max-w-7xl mx-auto px-6">
@@ -182,11 +193,54 @@ export default function ScrollHero() {
             <div className="absolute w-72 h-72 bg-slate-900 rounded-full right-20 bottom-0" />
 
             {/* Image */}
-            <img
+            {/* <img
               src={sections[active].image}
               alt=""
               className="relative z-10 rounded-xl shadow-2xl transition-all duration-500"
+            /> */}
+            {/* AUTO SLIDER IMAGE */}
+            <img
+              key={sections[active].images[currentImage]}
+              src={sections[active].images[currentImage]}
+              alt=""
+              className="
+                relative z-10 rounded-xl shadow-2xl
+                transition-all duration-700
+                animate-fadeIn
+                w-full max-w-[550px] object-cover
+              "
             />
+
+            {/* Dots */}
+            <div className="absolute bottom-4 flex gap-2 z-20">
+              {sections[active].images.map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    idx === currentImage ? "w-8 bg-white" : "w-2 bg-white/50"
+                  }`}
+                />
+              ))}
+            </div>
+
+            <style>
+              {`
+              @keyframes fadeIn {
+                from {
+                  opacity: 0;
+                  transform: scale(0.96);
+                }
+                to {
+                  opacity: 1;
+                  transform: scale(1);
+                }
+              }
+
+              .animate-fadeIn {
+                animation: fadeIn 0.7s ease;
+              }
+              `}
+            </style>
           </div>
         </div>
       </div>

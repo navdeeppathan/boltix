@@ -30,6 +30,8 @@ const UserRegistrationForm = () => {
     email: "",
     designation: "",
     department: null,
+    location_country: "",
+    city: "",
   });
 
   const [departments, setDepartments] = useState([]);
@@ -295,6 +297,35 @@ const UserRegistrationForm = () => {
                 ))}
               </select>
             </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Country</label>
+
+              <select
+                name="location_country"
+                value={formData.location_country}
+                onChange={handleChange}
+                required
+                className="w-full border border-[#D9D4C6] rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">
+                  {loadingCountries ? "Loading countries..." : "Select Country"}
+                </option>
+
+                {countries.map((country) => (
+                  <option key={country.value} value={country.value}>
+                    {country.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <InputField
+              label="City"
+              name="city"
+              type="text"
+              value={formData.city}
+              onChange={handleChange}
+              error={errors.city}
+            />
           </div>
 
           <div className="flex justify-start mt-8">

@@ -39,7 +39,7 @@ const BoltixRegister = () => {
 
     if (role === "Plant Operator") {
       navigate("/plant-operator-registration");
-    } else if (role === "OEM / Service Provider") {
+    } else if (role === "Manufacturer / Service Provider") {
       navigate("/oem-service-provider-registration");
     }
   };

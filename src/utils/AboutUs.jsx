@@ -74,30 +74,35 @@ const TrustedBy = () => {
           variants={logoVariant}
           className="text-[#0088ffcf] text-center sm:text-left text-sm sm:text-base md:text-lg font-bold leading-snug max-w-[400px]"
         >
-          Trusted by 10,000 world-class Plants, Manufacturer’s service providers
-          of all sizes.
+          Trusted by 10,000 world-class plants, manufacturers, and service
+          providers of all sizes.
         </motion.p>
 
         {/* Logos */}
-        <motion.div
-          variants={containerVariant}
-          className="flex flex-wrap justify-center sm:justify-end items-center gap-8 sm:gap-10"
-        >
-          {companies.map((company) => (
-            <motion.img
-              key={company.id}
-              src={company.src}
-              alt={company.alt}
-              variants={logoVariant}
-              whileHover={{
-                y: -6,
-                scale: 1.05,
-                filter: "grayscale(0%)",
-              }}
-              className="h-8 sm:h-10 md:h-12 object-contain grayscale transition duration-300 cursor-pointer"
-            />
-          ))}
-        </motion.div>
+        <div className="flex flex-col items-start gap-6">
+          <h3 className="text-lg font-semibold text-slate-700 whitespace-nowrap">
+            For example :
+          </h3>
+          <motion.div
+            variants={containerVariant}
+            className="flex flex-wrap justify-center sm:justify-end items-center gap-8 sm:gap-10"
+          >
+            {companies.map((company) => (
+              <motion.img
+                key={company.id}
+                src={company.src}
+                alt={company.alt}
+                variants={logoVariant}
+                whileHover={{
+                  y: -6,
+                  scale: 1.05,
+                  filter: "grayscale(0%)",
+                }}
+                className="h-8 sm:h-10 md:h-12 object-contain grayscale transition duration-300 cursor-pointer"
+              />
+            ))}
+          </motion.div>
+        </div>
       </div>
     </motion.section>
   );
@@ -164,7 +169,7 @@ const WhoWeAre = () => {
             className="text-2xl sm:text-3xl md:text-[32px] font-bold text-[#0088ffcf] leading-snug mb-4"
           >
             Redefining industrial support with real-time connections between
-            Plants and Manufacturers.
+            plants and manufacturers.
           </motion.h2>
 
           <motion.p
@@ -172,8 +177,8 @@ const WhoWeAre = () => {
             className="text-[#212529] text-sm sm:text-base leading-relaxed mb-6"
           >
             Our AI-driven supply chain collaboration platform transforms the way
-            industrial plants connect with Manufacturers, suppliers, and service
-            providers during equipment and service breakdowns.
+            industrial plants connect with manufacturers, suppliers, and service
+            providers during equipment failures and service breakdowns.
           </motion.p>
 
           <motion.div variants={textVariant}>
@@ -185,8 +190,8 @@ const WhoWeAre = () => {
               {[
                 "Real-time troubleshooting between plant engineers and maintenance teams",
                 "Secure document & information sharing",
-                "Integrated chat, audio/video conferencing for instant support",
-                "AI-powered predictive analysis to prevent failures and optimize downtime",
+                "Integrated chat and audio/video conferencing for instant support",
+                "AI-powered predictive analytics to prevent failures and minimize downtime",
               ].map((item, index) => (
                 <motion.li
                   key={index}
@@ -393,11 +398,11 @@ const RegHeroSection = () => {
           </motion.div>
 
           <motion.div variants={lineVariant}>
-            Building a smarter bridge between Plants
+            Building a smarter bridge between plants
           </motion.div>
 
           <motion.div variants={lineVariant}>
-            and Manufacturers for faster, more reliable solutions.
+            and manufacturers for faster, more reliable solutions.
           </motion.div>
         </motion.h1>
       </motion.div>

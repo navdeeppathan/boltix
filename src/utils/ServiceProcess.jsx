@@ -231,8 +231,8 @@ const ProcessPage = () => {
             variants={fadeUp}
             className="mt-4 max-w-3xl mx-auto md:text-[20px] text-[#212529]/80"
           >
-            A simple, secure, and role-based process designed to help Plant
-            Operators an Manufacturer partners get started quickly and work
+            A simple, secure, and role-based process designed to help plant
+            operators and manufacturer partners get started quickly and work
             efficiently.
           </motion.p>
         </motion.div>
@@ -270,11 +270,11 @@ const ProcessPage = () => {
               ],
               [
                 "Choose Your Role",
-                "Select whether you want to register as a Plant Operator or an Manufacturer/ Service Provider.",
+                "Select whether you want to register as a plant operator or a manufacturer/service provider.",
               ],
               [
-                "Get Verified",
-                "Submit your details for verification. Once approved, you’ll receive login credentials via email.",
+                "Add Your Details",
+                "Once registered, you will receive a link to access your profile dashboard.",
               ],
             ].map(([title, desc], index) => (
               <motion.div
@@ -316,7 +316,8 @@ const ProcessPage = () => {
             variants={fadeUp}
             className="mt-3 max-w-3xl md:text-[18px] text-[#212529]/80"
           >
-            Secure login with role-based access to ensure the right permissions.
+            Secure login with role-based access to ensure the appropriate
+            permissions.
           </motion.p>
 
           <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -325,10 +326,13 @@ const ProcessPage = () => {
                 "Click Login",
                 "Click the “Login” button from the website header.",
               ],
-              ["Select User Type", "Choose Plant or Manufacturer role."],
+              [
+                "Select User Type",
+                "Choose your role from the industrial plant or manufacturer/service provider login options, such as Admin, Supervisor, User, or Engineer.",
+              ],
               [
                 "Access Dashboard",
-                "Log in and access your role-specific dashboard.",
+                "Log in securely and access your role-specific dashboard and tools.",
               ],
             ].map(([title, desc], index) => (
               <motion.div
@@ -367,7 +371,7 @@ const ProcessPage = () => {
             {[
               "Access role-specific dashboards and tools",
               "Manage users, operations, and data securely",
-              "Collaborate with verified partners",
+              "Collaborate securely with verified partners",
               "Track updates and activities in real time",
             ].map((item, i) => (
               <motion.li key={i} variants={fadeUp}>
@@ -395,7 +399,7 @@ const ProcessPage = () => {
             {[
               "Quick and simple onboarding",
               "Secure role-based access",
-              "Verified and trusted users",
+              "Verified and trusted user access",
               "Scalable for growing organizations",
             ].map((item, index) => (
               <motion.div

@@ -168,7 +168,7 @@ const TechnicianTicketTable = () => {
 
   return (
     <>
-      <div className="w-full max-w-sm sm:max-w-3xl md:max-w-4xl lg:max-w-5xl  bg-gray-50">
+      <div className="w-full max-w-sm sm:max-w-3xl md:max-w-full  bg-gray-50">
         {/* Table View (Always visible on desktop, toggleable on mobile) */}
         <div className={`w-full bg-white rounded-lg shadow overflow-hidden`}>
           <div
@@ -210,15 +210,16 @@ const TechnicianTicketTable = () => {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[150px]">
                     Category
                   </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[100px]">
+                    Priority
+                  </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[200px]">
                     Service / Equipment
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[280px]">
                     Issue Description
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[100px]">
-                    Priority
-                  </th>
+
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[120px]">
                     Created On
                   </th>
@@ -255,7 +256,9 @@ const TechnicianTicketTable = () => {
                           className="px-4 py-2 text-xs sm:text-sm font-semibold text-gray-700"
                         >
                           Company:{" "}
-                          <span className="font-bold">{group.companyName}</span>{" "}
+                          <span className="font-bold">
+                            {group.companyName}
+                          </span>{" "}
                         </td>
                       </tr>
 
@@ -297,10 +300,19 @@ const TechnicianTicketTable = () => {
                           <td className="px-4 py-4">
                             <span
                               className={`text-sm font-medium whitespace-nowrap ${getCategoryColor(
-                                ticket.category
+                                ticket.category,
                               )}`}
                             >
                               {ticket.category || "N/A"}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4">
+                            <span
+                              className={`inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getPriorityColor(
+                                ticket.priority?.priority_name,
+                              )}`}
+                            >
+                              {ticket.priority?.priority_name || "N/A"}
                             </span>
                           </td>
                           <td className="px-4 py-4 text-sm text-gray-900">
@@ -317,15 +329,7 @@ const TechnicianTicketTable = () => {
                               }}
                             />
                           </td>
-                          <td className="px-4 py-4">
-                            <span
-                              className={`inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getPriorityColor(
-                                ticket.priority?.priority_name
-                              )}`}
-                            >
-                              {ticket.priority?.priority_name || "N/A"}
-                            </span>
-                          </td>
+
                           <td className="px-4 py-4 text-sm text-gray-900 whitespace-nowrap">
                             {ticket.issue_date
                               ? new Date(ticket.issue_date).toLocaleDateString(
@@ -334,7 +338,7 @@ const TechnicianTicketTable = () => {
                                     month: "short",
                                     day: "numeric",
                                     year: "numeric",
-                                  }
+                                  },
                                 )
                               : "N/A"}
                           </td>
@@ -482,21 +486,21 @@ const TechnicianTicketTable = () => {
                 <div className="flex flex-wrap gap-2 mb-3">
                   <span
                     className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getPriorityColor(
-                      ticket.priority?.priority_name
+                      ticket.priority?.priority_name,
                     )}`}
                   >
                     {ticket.priority?.priority_name}
                   </span>
                   <span
                     className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                      ticket.status
+                      ticket.status,
                     )}`}
                   >
                     {ticket.status}
                   </span>
                   <span
                     className={`inline-block text-xs font-medium ${getCategoryColor(
-                      ticket.category
+                      ticket.category,
                     )}`}
                   >
                     {ticket.category}

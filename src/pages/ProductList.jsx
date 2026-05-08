@@ -87,7 +87,7 @@ const ProductList = () => {
           Add Product
         </button>
       </div>
-      <div className="w-full max-w-sm sm:max-w-3xl md:max-w-4xl lg:max-w-5xl  bg-gray-50">
+      <div className="w-full max-w-sm sm:max-w-3xl md:max-w-full  bg-gray-50">
         {/* Table View (Always visible on desktop, toggleable on mobile) */}
         <div className={`w-full bg-white rounded-lg shadow overflow-hidden`}>
           <div

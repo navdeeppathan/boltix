@@ -1,6 +1,6 @@
 // Sidebar.jsx
 import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   FaTachometerAlt,
   FaTicketAlt,
@@ -11,7 +11,10 @@ import {
   FaBoxes,
   FaUsers,
 } from "react-icons/fa";
+import { LogOut } from "lucide-react";
 const ManagerSidebar = ({ isOpen, setIsOpen }) => {
+  const user = JSON.parse(localStorage.getItem("userData"));
+  const navigate = useNavigate();
   const linkClasses =
     "flex items-center gap-3 p-2 rounded-lg hover:bg-gray-700 transition";
   const activeClasses = "bg-white text-black font-semibold shadow";
@@ -95,6 +98,39 @@ const ManagerSidebar = ({ isOpen, setIsOpen }) => {
             <FaUserCog /> Profile & Settings
           </NavLink>
         </nav>
+        {/* User Profile */}
+        <div className="p-4 border-t border-gray-800">
+          <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 cursor-pointer">
+            <div className="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center font-semibold">
+              {user.full_name.charAt(0).toUpperCase()}
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium">{user.full_name}</p>
+              <p className="text-xs text-gray-400">Supervisor</p>
+            </div>
+            {/* <ChevronDown size={16} className="text-gray-400" /> */}
+            <div className="relative group">
+              <button
+                onClick={() => {
+                  localStorage.clear();
+                  navigate("/login");
+                }}
+                className="p-2 text-white cursor-pointer hover:text-gray-600 hover:bg-gray-100 rounded-lg"
+              >
+                <LogOut size={20} />
+              </button>
+
+              {/* Tooltip */}
+              <span
+                className="absolute left-1/2 -translate-x-1/2 top-10 whitespace-nowrap 
+                                    bg-gray-100 text-black text-xs px-2 py-1 rounded opacity-0 
+                                    group-hover:opacity-100 transition pointer-events-none"
+              >
+                Logout
+              </span>
+            </div>
+          </div>
+        </div>
         {/* <div className="p-4 border-t border-gray-700">
           <div className="flex flex-col items-center text-center">
             <img
@@ -159,7 +195,8 @@ const UserCard = () => {
       <button
         onClick={() => {
           localStorage.clear();
-          window.location.reload();
+          // window.location.reload();
+          window.location.href = "/login";
         }}
         className="mt-10 px-4 py-2 bg-[#D9D9D9]/20 rounded-[30px] flex items-center text-[16px] font-semibold justify-center gap-2 text-[#212529] hover:bg-gray-200 transition text-sm"
       >

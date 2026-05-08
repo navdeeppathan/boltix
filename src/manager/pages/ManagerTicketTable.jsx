@@ -895,15 +895,16 @@ const ManagerTicketTable = () => {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[150px]">
                     Category
                   </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[100px]">
+                    Priority
+                  </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[200px]">
                     Service / Equipment
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[280px]">
                     Issue Description
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[100px]">
-                    Priority
-                  </th>
+
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[120px]">
                     Created On
                   </th>
@@ -990,6 +991,15 @@ const ManagerTicketTable = () => {
                               {ticket.category || "N/A"}
                             </span>
                           </td>
+                          <td className="px-4 py-4">
+                            <span
+                              className={`inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getPriorityColor(
+                                ticket.priority?.priority_name,
+                              )}`}
+                            >
+                              {ticket.priority?.priority_name || "N/A"}
+                            </span>
+                          </td>
                           <td className="px-4 py-4 text-sm text-gray-900">
                             {ticket.service || ticket.equipment || "N/A"}
                           </td>
@@ -1004,15 +1014,7 @@ const ManagerTicketTable = () => {
                               }}
                             />
                           </td>
-                          <td className="px-4 py-4">
-                            <span
-                              className={`inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getPriorityColor(
-                                ticket.priority?.priority_name,
-                              )}`}
-                            >
-                              {ticket.priority?.priority_name || "N/A"}
-                            </span>
-                          </td>
+
                           <td className="px-4 py-4 text-sm text-gray-900 whitespace-nowrap">
                             {ticket.issue_date
                               ? new Date(ticket.issue_date).toLocaleDateString(

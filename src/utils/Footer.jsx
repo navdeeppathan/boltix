@@ -75,8 +75,8 @@ const Footer = () => {
           />
           <p className="text-sm md:text-[16px] mt-4 leading-relaxed">
             Our AI-driven supply chain collaboration platform transforms the way
-            industrial plants connect with Manufacturers, suppliers, and service
-            providers during equipment and service breakdowns.
+            industrial plants connect with manufacturers, suppliers, and service
+            providers during equipment failures and service breakdowns.
           </p>
         </motion.div>
 
@@ -86,23 +86,18 @@ const Footer = () => {
             Quick Links
           </h3>
           <ul className="list-disc list-inside space-y-2 text-sm md:text-[16px]">
-            {["ABOUT", "PROCESS", "PRICING", "CONTACT", "TERMS"].map(
-              (link, i) => (
-                <motion.li
-                  key={i}
-                  initial={{ opacity: 0, x: -10 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                >
-                  <a
-                    href={`/${link.toLowerCase()}`}
-                    className="hover:underline"
-                  >
-                    {link}
-                  </a>
-                </motion.li>
-              ),
-            )}
+            {["ABOUT", "PROCESS", "CONTACT", "TERMS"].map((link, i) => (
+              <motion.li
+                key={i}
+                initial={{ opacity: 0, x: -10 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.1 }}
+              >
+                <a href={`/${link.toLowerCase()}`} className="hover:underline">
+                  {link}
+                </a>
+              </motion.li>
+            ))}
           </ul>
         </motion.div>
 

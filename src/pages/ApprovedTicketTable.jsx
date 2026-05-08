@@ -108,7 +108,7 @@ const ApprovedTicketTable = () => {
   );
 
   return (
-    <div className="w-full max-w-sm sm:max-w-3xl md:max-w-4xl lg:max-w-5xl  bg-gray-50">
+    <div className="w-full max-w-sm sm:max-w-3xl md:max-w-full  bg-gray-50">
       {/* Table View (Always visible on desktop, toggleable on mobile) */}
       <div className={`w-full bg-white rounded-lg shadow overflow-hidden`}>
         <div
@@ -153,14 +153,14 @@ const ApprovedTicketTable = () => {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[150px]">
                   Category
                 </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[100px]">
+                  Priority
+                </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[200px]">
                   Service / Equipment
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[280px]">
                   Issue Description
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[100px]">
-                  Priority
                 </th>
 
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 whitespace-nowrap min-w-[120px]">
@@ -239,6 +239,15 @@ const ApprovedTicketTable = () => {
                           {ticket.category || "N/A"}
                         </span>
                       </td>
+                      <td className="px-4 py-4">
+                        <span
+                          className={`inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getPriorityColor(
+                            ticket.priority?.priority_name,
+                          )}`}
+                        >
+                          {ticket.priority?.priority_name || "N/A"}
+                        </span>
+                      </td>
                       <td className="px-4 py-4 text-sm text-gray-900">
                         {ticket.service || ticket.equipment || "N/A"}
                       </td>
@@ -253,15 +262,7 @@ const ApprovedTicketTable = () => {
                           }}
                         />
                       </td>
-                      <td className="px-4 py-4">
-                        <span
-                          className={`inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getPriorityColor(
-                            ticket.priority?.priority_name,
-                          )}`}
-                        >
-                          {ticket.priority?.priority_name || "N/A"}
-                        </span>
-                      </td>
+
                       {/* <td className="px-4 py-4">
                       <span
                         className={`inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getStatusColor(
